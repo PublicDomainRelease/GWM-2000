@@ -1,0 +1,1580 @@
+                                  MODFLOW-2000
+      U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE GROUND-WATER FLOW MODEL
+                VERSION MF2K_GWM 1.0.0 022005,FROM MF2K V1.13.00
+
+
+ This model run produced both GLOBAL and LIST files.  This is the LIST file.
+
+
+ REWOUND supply.lst
+ FILE TYPE:LIST   UNIT   10
+
+ REWOUND ..\data\supply.dis
+ FILE TYPE:DIS   UNIT   11
+
+ REWOUND ..\data\supply.ba6
+ FILE TYPE:BAS6   UNIT   12
+
+ REWOUND ..\data\supply.bc6
+ FILE TYPE:BCF6   UNIT   13
+
+ REWOUND ..\data\supply.rch
+ FILE TYPE:RCH   UNIT   15
+
+ REWOUND ..\data\supply.str
+ FILE TYPE:STR   UNIT   16
+
+ REWOUND ..\data\supply.oc
+ FILE TYPE:OC   UNIT   17
+
+ REWOUND ..\data\supply.gwm
+ FILE TYPE:GWM   UNIT   19
+ 
+ #MODOFC transient water supply sample problem                                   
+ #                                                                               
+ THE FREE FORMAT OPTION HAS BEEN SELECTED
+    1 LAYERS        25 ROWS        30 COLUMNS
+   12 STRESS PERIOD(S) IN SIMULATION
+
+ BAS6 -- BASIC PACKAGE, VERSION 6, 1/11/2000 INPUT READ FROM UNIT   12
+          5 ELEMENTS IN IR ARRAY ARE USED BY BAS
+
+ BCF6 -- BLOCK-CENTERED FLOW PACKAGE, VERSION 6, 1/11/2000
+         INPUT READ FROM UNIT 13
+ TRANSIENT SIMULATION
+ HEAD AT CELLS THAT CONVERT TO DRY=   0.0000    
+ WETTING CAPABILITY IS NOT ACTIVE
+      LAYER  LAYER-TYPE CODE     INTERBLOCK T
+      --------------------------------------------
+         1            0          0 -- HARMONIC    
+        751 ELEMENTS IN RX ARRAY ARE USED BY BCF
+
+ RCH6 -- RECHARGE PACKAGE, VERSION 6, 1/11/2000 INPUT READ FROM UNIT   15
+ No named parameters
+ OPTION 1 -- RECHARGE TO TOP LAYER
+        750 ELEMENTS IN RX ARRAY ARE USED BY RCH
+        750 ELEMENTS IN IR ARRAY ARE USED BY RCH
+
+ STRM -- STREAM PACKAGE, VERSION 6, 6/98 INPUT READ FROM UNIT   16
+ No named parameters
+ MAXIMUM OF     40 ACTIVE STREAM NODES AT ONE TIME
+ NUMBER OF STREAM SEGMENTS IS      3
+ NUMBER OF STREAM TRIBUTARIES IS      2
+ STREAM STAGES WILL BE CALCULATED USING A CONSTANT OF **********
+        443 ELEMENTS IN RX ARRAY ARE USED FOR STREAMS
+        212 ELEMENTS IN IR ARRAY ARE USED FOR STREAMS
+
+       1944  ELEMENTS OF RX ARRAY USED OUT OF       1944
+        967  ELEMENTS OF IR ARRAY USED OUT OF        967
+1
+ #MODOFC transient water supply sample problem                                   
+ #                                                                               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER   1
+ READING ON UNIT   12 WITH FORMAT: (20I4)              
+
+ AQUIFER HEAD WILL BE SET TO  0.0000     AT ALL NO-FLOW NODES (IBOUND=0).
+
+
+
+                       INITIAL HEAD FOR LAYER   1
+ READING ON UNIT   12 WITH FORMAT: (10F13.0)           
+
+ OUTPUT CONTROL IS SPECIFIED EVERY TIME STEP
+ HEAD PRINT FORMAT CODE IS  19    DRAWDOWN PRINT FORMAT CODE IS   0
+ HEADS WILL BE SAVED ON UNIT   10    DRAWDOWNS WILL BE SAVED ON UNIT   10
+
+ COLUMN TO ROW ANISOTROPY =   1.00000    
+
+     PRIMARY STORAGE COEF =  5.000000E-02 FOR LAYER   1
+
+     TRANSMIS. ALONG ROWS =   5000.00     FOR LAYER   1
+1
+                            STRESS PERIOD NO.    1, LENGTH =   92.00000    
+                            -----------------------------------------------
+
+                              NUMBER OF TIME STEPS =     1
+
+                               MULTIPLIER FOR DELT =     1.500
+
+                            INITIAL TIME STEP SIZE =   92.00000    
+
+                 RECHARGE =  5.000000E-04
+
+    LAYER   ROW    COL    SEGMENT   REACH   STREAMFLOW      STREAM    STREAMBED     STREAMBED BOT  STREAMBED TOP
+                           NUMBER   NUMBER                   STAGE   CONDUCTANCE      ELEVATION      ELEVATION
+   --------------------------------------------------------------------------------------------------------------
+       1     13      1        1        1        0.1000E+06   51.50     0.2000E+05        47.50        48.50    
+       1     13      2        1        2         0.000       51.00     0.2000E+05        47.00        48.00    
+       1     14      3        1        3         0.000       20.50     0.2000E+05        46.50        47.50    
+       1     15      4        1        4         0.000       20.00     0.2000E+05        46.00        47.00    
+       1     16      5        1        5         0.000       49.50     0.2000E+05        45.50        46.50    
+       1     16      6        1        6         0.000       49.00     0.2000E+05        45.00        46.00    
+       1     16      7        1        7         0.000       48.50     0.2000E+05        44.50        45.50    
+       1     16      8        1        8         0.000       48.00     0.2000E+05        44.00        45.00    
+       1     16      9        1        9         0.000       47.50     0.2000E+05        43.50        44.50    
+       1     16     10        1       10         0.000       47.00     0.2000E+05        40.00        44.00    
+       1     16     11        1       11         0.000       46.50     0.2000E+05        42.50        43.50    
+       1     16     12        1       12         0.000       46.00     0.2000E+05        42.00        40.00    
+       1     15     13        1       13         0.000       45.50     0.2000E+05        41.50        42.50    
+       1     14     14        1       14         0.000       45.00     0.2000E+05        41.00        42.00    
+       1     13     15        1       15         0.000       44.50     0.2000E+05        40.50        41.50    
+       1     12     16        1       16         0.000       44.00     0.2000E+05        40.00        41.00    
+       1     12     17        1       17         0.000       43.50     0.2000E+05        39.50        40.50    
+       1     12     18        1       18         0.000       40.00     0.2000E+05        39.00        40.00    
+       1     12     19        1       19         0.000       42.50     0.2000E+05        38.50        39.50    
+       1     13     20        1       20         0.000       42.00     0.2000E+05        38.00        39.00    
+       1     14     21        1       21         0.000       41.50     0.2000E+05        37.50        38.50    
+       1     14     22        1       22         0.000       41.00     0.2000E+05        37.00        38.00    
+       1      9     30        2        1        0.5000E+05   30.00     0.2000E+05        39.25        40.25    
+       1      9     29        2        2         0.000       30.00     0.2000E+05        39.00        40.00    
+       1      9     28        2        3         0.000       30.00     0.2000E+05        38.75        39.75    
+       1      9     27        2        4         0.000       30.00     0.2000E+05        38.50        39.50    
+       1     10     26        2        5         0.000       30.00     0.2000E+05        38.25        39.25    
+       1     11     25        2        6         0.000       30.00     0.2000E+05        38.00        39.00    
+       1     12     24        2        7         0.000       30.00     0.2000E+05        37.75        38.75    
+       1     13     23        2        8         0.000       30.00     0.2000E+05        37.50        38.50    
+       1     14     22        2        9         0.000       41.00     0.2000E+05        37.00        38.00    
+       1     14     22        3        1        -1.000       41.00     0.2000E+05        37.00        38.00    
+       1     15     23        3        2         0.000       40.00     0.2000E+05        36.00        37.00    
+       1     15     24        3        3         0.000       39.00     0.2000E+05        35.00        36.00    
+       1     15     25        3        4         0.000       38.00     0.2000E+05        34.00        35.00    
+       1     15     26        3        5         0.000       37.00     0.2000E+05        33.00        34.00    
+       1     16     27        3        6         0.000       36.00     0.2000E+05        32.00        33.00    
+       1     17     28        3        7         0.000       35.00     0.2000E+05        31.00        32.00    
+       1     18     29        3        8         0.000       34.00     0.2000E+05        30.00        31.00    
+       1     18     30        3        9         0.000       30.00     0.2000E+05        29.00        30.00    
+
+     40 STREAM REACHES
+
+    LAYER   ROW    COL    SEGMENT   REACH        STREAM             STREAM          ROUGH
+                           NUMBER   NUMBER        WIDTH              SLOPE          COEF.
+   --------------------------------------------------------------------------------------------------------------
+       1     13      1        1        1          20.00           0.2500E-02      0.5000E-01
+       1     13      2        1        2          20.00           0.2500E-02      0.5000E-01
+       1     14      3        1        3          20.00           0.2500E-02      0.5000E-01
+       1     15      4        1        4          20.00           0.2500E-02      0.5000E-01
+       1     16      5        1        5          20.00           0.2500E-02      0.5000E-01
+       1     16      6        1        6          20.00           0.2500E-02      0.5000E-01
+       1     16      7        1        7          20.00           0.2500E-02      0.5000E-01
+       1     16      8        1        8          20.00           0.2500E-02      0.5000E-01
+       1     16      9        1        9          20.00           0.2500E-02      0.5000E-01
+       1     16     10        1       10          20.00           0.2500E-02      0.5000E-01
+       1     16     11        1       11          20.00           0.2500E-02      0.5000E-01
+       1     16     12        1       12          20.00           0.2500E-02      0.5000E-01
+       1     15     13        1       13          20.00           0.2500E-02      0.5000E-01
+       1     14     14        1       14          20.00           0.2500E-02      0.5000E-01
+       1     13     15        1       15          20.00           0.2500E-02      0.5000E-01
+       1     12     16        1       16          20.00           0.2500E-02      0.5000E-01
+       1     12     17        1       17          20.00           0.2500E-02      0.5000E-01
+       1     12     18        1       18          20.00           0.2500E-02      0.5000E-01
+       1     12     19        1       19          20.00           0.2500E-02      0.5000E-01
+       1     13     20        1       20          20.00           0.2500E-02      0.5000E-01
+       1     14     21        1       21          20.00           0.2500E-02      0.5000E-01
+       1     14     22        1       22          20.00           0.2500E-02      0.5000E-01
+       1      9     30        2        1          20.00           0.1000E-02      0.5000E-01
+       1      9     29        2        2          20.00           0.1000E-02      0.5000E-01
+       1      9     28        2        3          20.00           0.1000E-02      0.5000E-01
+       1      9     27        2        4          20.00           0.1000E-02      0.5000E-01
+       1     10     26        2        5          20.00           0.1000E-02      0.5000E-01
+       1     11     25        2        6          20.00           0.1000E-02      0.5000E-01
+       1     12     24        2        7          20.00           0.1000E-02      0.5000E-01
+       1     13     23        2        8          20.00           0.1000E-02      0.5000E-01
+       1     14     22        2        9          20.00           0.1000E-02      0.5000E-01
+       1     14     22        3        1          20.00           0.2500E-02      0.5000E-01
+       1     15     23        3        2          20.00           0.2500E-02      0.5000E-01
+       1     15     24        3        3          20.00           0.2500E-02      0.5000E-01
+       1     15     25        3        4          20.00           0.2500E-02      0.5000E-01
+       1     15     26        3        5          20.00           0.2500E-02      0.5000E-01
+       1     16     27        3        6          20.00           0.2500E-02      0.5000E-01
+       1     17     28        3        7          20.00           0.2500E-02      0.5000E-01
+       1     18     29        3        8          20.00           0.2500E-02      0.5000E-01
+       1     18     30        3        9          20.00           0.2500E-02      0.5000E-01
+
+                              MAXIMUM NUMBER OF TRIBUTARY STREAMS IS      2
+
+                     STREAM SEGMENT               TRIBUTARY STREAM SEGMENT NUMBERS
+                        1                        0    0
+                        2                        0    0
+                        3                        1    2
+ 
+ SOLVING FOR HEAD 
+
+
+    10 CALLS TO PCG ROUTINE FOR TIME STEP   1 IN STRESS PERIOD    1
+    42 TOTAL ITERATIONS
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
+ CELL-BY-CELL FLOW TERM FLAG = 1
+
+ OUTPUT FLAGS FOR ALL LAYERS ARE THE SAME:
+   HEAD    DRAWDOWN  HEAD  DRAWDOWN
+ PRINTOUT  PRINTOUT  SAVE    SAVE
+ ----------------------------------
+     0         0       0       0
+
+            LAYER      ROW     COLUMN     STREAM    REACH      FLOW INTO    FLOW INTO      FLOW OUT OF     HEAD IN
+                                           NUMBER   NUMBER    STREAM REACH    AQUIFER      STREAM REACH     STREAM
+
+
+               1        13         1         1         1        0.100E+06     -.311E+05       0.131E+06        48.66
+               1        13         2         1         2        0.131E+06     -.416E+05       0.173E+06        48.18
+               1        14         3         1         3        0.173E+06     -.372E+05       0.210E+06        47.71
+               1        15         4         1         4        0.210E+06     -.362E+05       0.246E+06        47.23
+               1        16         5         1         5        0.246E+06     -.371E+05       0.283E+06        46.76
+               1        16         6         1         6        0.283E+06     -.324E+05       0.316E+06        46.28
+               1        16         7         1         7        0.316E+06     -.321E+05       0.348E+06        45.79
+               1        16         8         1         8        0.348E+06     -.321E+05       0.380E+06        45.31
+               1        16         9         1         9        0.380E+06     -.317E+05       0.411E+06        44.83
+               1        16        10         1        10        0.411E+06     -.304E+05       0.442E+06        44.34
+               1        16        11         1        11        0.442E+06     -.258E+05       0.468E+06        43.85
+               1        16        12         1        12        0.468E+06     -.609E+05       0.528E+06        40.37
+               1        15        13         1        13        0.528E+06     -.310E+05       0.560E+06        42.89
+               1        14        14         1        14        0.560E+06     -.344E+05       0.594E+06        42.41
+               1        13        15         1        15        0.594E+06     -.379E+05       0.632E+06        41.92
+               1        12        16         1        16        0.632E+06     -.456E+05       0.677E+06        41.44
+               1        12        17         1        17        0.677E+06     -.353E+05       0.713E+06        40.96
+               1        12        18         1        18        0.713E+06     -.340E+05       0.747E+06        40.47
+               1        12        19         1        19        0.747E+06     -.392E+05       0.786E+06        39.98
+               1        13        20         1        20        0.786E+06     -.287E+05       0.815E+06        39.50
+               1        14        21         1        21        0.815E+06     -.220E+05       0.837E+06        39.01
+               1        14        22         1        22        0.837E+06     -.854E+04       0.845E+06        38.51
+               1         9        30         2         1        0.500E+05     -.295E+05       0.795E+05        40.39
+               1         9        29         2         2        0.795E+05     -.319E+05       0.111E+06        40.18
+               1         9        28         2         3        0.111E+06     -.362E+05       0.148E+06        39.97
+               1         9        27         2         4        0.148E+06     -.508E+05       0.198E+06        39.76
+               1        10        26         2         5        0.198E+06     -.371E+05       0.235E+06        39.55
+               1        11        25         2         6        0.235E+06     -.287E+05       0.264E+06        39.33
+               1        12        24         2         7        0.264E+06     -.217E+05       0.286E+06        39.09
+               1        13        23         2         8        0.286E+06     -.154E+05       0.301E+06        38.86
+               1        14        22         2         9        0.301E+06     -.114E+05       0.313E+06        38.37
+               1        14        22         3         1        0.116E+07     -.635E+04       0.116E+07        38.62
+               1        15        23         3         2        0.116E+07     -.227E+05       0.119E+07        37.63
+               1        15        24         3         3        0.119E+07     -.206E+05       0.121E+07        36.63
+               1        15        25         3         4        0.121E+07     -.212E+05       0.123E+07        35.64
+               1        15        26         3         5        0.123E+07     -.253E+05       0.125E+07        34.65
+               1        16        27         3         6        0.125E+07     -.331E+05       0.129E+07        33.66
+               1        17        28         3         7        0.129E+07     -.404E+05       0.133E+07        32.67
+               1        18        29         3         8        0.133E+07     -.511E+05       0.138E+07        31.68
+               1        18        30         3         9        0.138E+07     -.479E+05       0.143E+07        30.70
+1
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP  1 IN STRESS PERIOD   1
+  ------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =    19158183.9070               STORAGE =      208241.1294
+       CONSTANT HEAD =   101930547.9544         CONSTANT HEAD =     1107940.7386
+            RECHARGE =     1269600.0000              RECHARGE =       13800.0000
+      STREAM LEAKAGE =           0.0000        STREAM LEAKAGE =           0.0000
+        MANAGED FLOW =           0.0000          MANAGED FLOW =           0.0000
+
+            TOTAL IN =   122358331.8614              TOTAL IN =     1329981.8681
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            RECHARGE =           0.0000              RECHARGE =           0.0000
+      STREAM LEAKAGE =   117437919.6778        STREAM LEAKAGE =     1276499.1269
+        MANAGED FLOW =     4920463.2227          MANAGED FLOW =       53483.2959
+
+           TOTAL OUT =   122358382.9004             TOTAL OUT =     1329982.4228
+
+            IN - OUT =         -51.0390              IN - OUT =          -0.5548
+
+ PERCENT DISCREPANCY =           0.00     PERCENT DISCREPANCY =           0.00
+
+
+
+
+
+
+          TIME SUMMARY AT END OF TIME STEP   1 IN STRESS PERIOD    1
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 7.94880E+06 1.32480E+05  2208.0      92.000     0.25188    
+ STRESS PERIOD TIME 7.94880E+06 1.32480E+05  2208.0      92.000     0.25188    
+         TOTAL TIME 7.94880E+06 1.32480E+05  2208.0      92.000     0.25188    
+1
+1
+                            STRESS PERIOD NO.    2, LENGTH =   91.00000    
+                            -----------------------------------------------
+
+                              NUMBER OF TIME STEPS =     1
+
+                               MULTIPLIER FOR DELT =     1.500
+
+                            INITIAL TIME STEP SIZE =   91.00000    
+
+                 RECHARGE =  2.000000E-03
+
+REUSING STREAM NODES FROM LAST STRESS PERIOD
+ 
+ SOLVING FOR HEAD 
+
+
+     8 CALLS TO PCG ROUTINE FOR TIME STEP   1 IN STRESS PERIOD    2
+    30 TOTAL ITERATIONS
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
+ CELL-BY-CELL FLOW TERM FLAG = 1
+
+ OUTPUT FLAGS FOR ALL LAYERS ARE THE SAME:
+   HEAD    DRAWDOWN  HEAD  DRAWDOWN
+ PRINTOUT  PRINTOUT  SAVE    SAVE
+ ----------------------------------
+     0         0       0       0
+
+            LAYER      ROW     COLUMN     STREAM    REACH      FLOW INTO    FLOW INTO      FLOW OUT OF     HEAD IN
+                                           NUMBER   NUMBER    STREAM REACH    AQUIFER      STREAM REACH     STREAM
+
+
+               1        13         1         1         1        0.100E+06     -.280E+05       0.128E+06        48.65
+               1        13         2         1         2        0.128E+06     -.379E+05       0.166E+06        48.18
+               1        14         3         1         3        0.166E+06     -.334E+05       0.199E+06        47.70
+               1        15         4         1         4        0.199E+06     -.326E+05       0.232E+06        47.23
+               1        16         5         1         5        0.232E+06     -.340E+05       0.266E+06        46.75
+               1        16         6         1         6        0.266E+06     -.297E+05       0.296E+06        46.26
+               1        16         7         1         7        0.296E+06     -.294E+05       0.325E+06        45.78
+               1        16         8         1         8        0.325E+06     -.293E+05       0.354E+06        45.30
+               1        16         9         1         9        0.354E+06     -.289E+05       0.383E+06        44.81
+               1        16        10         1        10        0.383E+06     -.277E+05       0.411E+06        44.33
+               1        16        11         1        11        0.411E+06     -.233E+05       0.434E+06        43.84
+               1        16        12         1        12        0.434E+06     -.584E+05       0.493E+06        40.36
+               1        15        13         1        13        0.493E+06     -.285E+05       0.521E+06        42.88
+               1        14        14         1        14        0.521E+06     -.320E+05       0.553E+06        42.39
+               1        13        15         1        15        0.553E+06     -.353E+05       0.588E+06        41.91
+               1        12        16         1        16        0.588E+06     -.427E+05       0.631E+06        41.42
+               1        12        17         1        17        0.631E+06     -.332E+05       0.664E+06        40.94
+               1        12        18         1        18        0.664E+06     -.318E+05       0.696E+06        40.45
+               1        12        19         1        19        0.696E+06     -.365E+05       0.733E+06        39.96
+               1        13        20         1        20        0.733E+06     -.264E+05       0.759E+06        39.48
+               1        14        21         1        21        0.759E+06     -.200E+05       0.779E+06        38.99
+               1        14        22         1        22        0.779E+06     -.684E+04       0.786E+06        38.49
+               1         9        30         2         1        0.500E+05     -.263E+05       0.763E+05        40.39
+               1         9        29         2         2        0.763E+05     -.288E+05       0.105E+06        40.18
+               1         9        28         2         3        0.105E+06     -.330E+05       0.138E+06        39.96
+               1         9        27         2         4        0.138E+06     -.471E+05       0.185E+06        39.75
+               1        10        26         2         5        0.185E+06     -.323E+05       0.218E+06        39.54
+               1        11        25         2         6        0.218E+06     -.224E+05       0.240E+06        39.31
+               1        12        24         2         7        0.240E+06     -.143E+05       0.254E+06        39.07
+               1        13        23         2         8        0.254E+06     -.944E+04       0.264E+06        38.83
+               1        14        22         2         9        0.264E+06     -.985E+04       0.274E+06        38.34
+               1        14        22         3         1        0.106E+07     -.487E+04       0.106E+07        38.59
+               1        15        23         3         2        0.106E+07     -.186E+05       0.108E+07        37.59
+               1        15        24         3         3        0.108E+07     -.132E+05       0.110E+07        36.60
+               1        15        25         3         4        0.110E+07     -.761E+04       0.110E+07        35.60
+               1        15        26         3         5        0.110E+07     -.159E+05       0.112E+07        34.61
+               1        16        27         3         6        0.112E+07     -.277E+05       0.115E+07        33.61
+               1        17        28         3         7        0.115E+07     -.362E+05       0.118E+07        32.62
+               1        18        29         3         8        0.118E+07     -.479E+05       0.123E+07        31.64
+               1        18        30         3         9        0.123E+07     -.451E+05       0.128E+07        30.65
+1
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP  1 IN STRESS PERIOD   2
+  ------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =    19805248.1609               STORAGE =        7110.5962
+       CONSTANT HEAD =   206035590.1058         CONSTANT HEAD =     1144011.4522
+            RECHARGE =     6292800.0000              RECHARGE =       55200.0000
+      STREAM LEAKAGE =           0.0000        STREAM LEAKAGE =           0.0000
+        MANAGED FLOW =           0.0000          MANAGED FLOW =           0.0000
+
+            TOTAL IN =   232133638.2668              TOTAL IN =     1206322.0484
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =        8830.4922               STORAGE =          97.0384
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            RECHARGE =           0.0000              RECHARGE =           0.0000
+      STREAM LEAKAGE =   219924449.5390        STREAM LEAKAGE =     1126225.6029
+        MANAGED FLOW =    12200463.1338          MANAGED FLOW =       79999.9990
+
+           TOTAL OUT =   232133743.1651             TOTAL OUT =     1206322.6403
+
+            IN - OUT =        -104.8983              IN - OUT =          -0.5919
+
+ PERCENT DISCREPANCY =           0.00     PERCENT DISCREPANCY =           0.00
+
+
+
+
+
+
+          TIME SUMMARY AT END OF TIME STEP   1 IN STRESS PERIOD    2
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 7.86240E+06 1.31040E+05  2184.0      91.000     0.24914    
+ STRESS PERIOD TIME 7.86240E+06 1.31040E+05  2184.0      91.000     0.24914    
+         TOTAL TIME 1.58112E+07 2.63520E+05  4392.0      183.00     0.50103    
+1
+1
+                            STRESS PERIOD NO.    3, LENGTH =   91.00000    
+                            -----------------------------------------------
+
+                              NUMBER OF TIME STEPS =     1
+
+                               MULTIPLIER FOR DELT =     1.500
+
+                            INITIAL TIME STEP SIZE =   91.00000    
+
+                 RECHARGE =   0.00000    
+
+REUSING STREAM NODES FROM LAST STRESS PERIOD
+ 
+ SOLVING FOR HEAD 
+
+
+     6 CALLS TO PCG ROUTINE FOR TIME STEP   1 IN STRESS PERIOD    3
+    24 TOTAL ITERATIONS
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
+ CELL-BY-CELL FLOW TERM FLAG = 1
+
+ OUTPUT FLAGS FOR ALL LAYERS ARE THE SAME:
+   HEAD    DRAWDOWN  HEAD  DRAWDOWN
+ PRINTOUT  PRINTOUT  SAVE    SAVE
+ ----------------------------------
+     0         0       0       0
+
+            LAYER      ROW     COLUMN     STREAM    REACH      FLOW INTO    FLOW INTO      FLOW OUT OF     HEAD IN
+                                           NUMBER   NUMBER    STREAM REACH    AQUIFER      STREAM REACH     STREAM
+
+
+               1        13         1         1         1        0.100E+06     -.269E+05       0.127E+06        48.65
+               1        13         2         1         2        0.127E+06     -.367E+05       0.164E+06        48.18
+               1        14         3         1         3        0.164E+06     -.322E+05       0.196E+06        47.70
+               1        15         4         1         4        0.196E+06     -.314E+05       0.227E+06        47.22
+               1        16         5         1         5        0.227E+06     -.330E+05       0.260E+06        46.74
+               1        16         6         1         6        0.260E+06     -.288E+05       0.289E+06        46.26
+               1        16         7         1         7        0.289E+06     -.285E+05       0.318E+06        45.78
+               1        16         8         1         8        0.318E+06     -.285E+05       0.346E+06        45.29
+               1        16         9         1         9        0.346E+06     -.281E+05       0.374E+06        44.81
+               1        16        10         1        10        0.374E+06     -.269E+05       0.401E+06        44.32
+               1        16        11         1        11        0.401E+06     -.224E+05       0.423E+06        43.83
+               1        16        12         1        12        0.423E+06     -.575E+05       0.481E+06        40.35
+               1        15        13         1        13        0.481E+06     -.274E+05       0.508E+06        42.87
+               1        14        14         1        14        0.508E+06     -.309E+05       0.539E+06        42.39
+               1        13        15         1        15        0.539E+06     -.343E+05       0.573E+06        41.90
+               1        12        16         1        16        0.573E+06     -.417E+05       0.615E+06        41.42
+               1        12        17         1        17        0.615E+06     -.324E+05       0.647E+06        40.93
+               1        12        18         1        18        0.647E+06     -.311E+05       0.679E+06        40.44
+               1        12        19         1        19        0.679E+06     -.357E+05       0.714E+06        39.96
+               1        13        20         1        20        0.714E+06     -.258E+05       0.740E+06        39.47
+               1        14        21         1        21        0.740E+06     -.197E+05       0.760E+06        38.98
+               1        14        22         1        22        0.760E+06     -.739E+04       0.767E+06        38.48
+               1         9        30         2         1        0.500E+05     -.262E+05       0.762E+05        40.39
+               1         9        29         2         2        0.762E+05     -.286E+05       0.105E+06        40.18
+               1         9        28         2         3        0.105E+06     -.329E+05       0.138E+06        39.96
+               1         9        27         2         4        0.138E+06     -.469E+05       0.185E+06        39.75
+               1        10        26         2         5        0.185E+06     -.328E+05       0.217E+06        39.54
+               1        11        25         2         6        0.217E+06     -.244E+05       0.242E+06        39.31
+               1        12        24         2         7        0.242E+06     -.178E+05       0.260E+06        39.08
+               1        13        23         2         8        0.260E+06     -.124E+05       0.272E+06        38.84
+               1        14        22         2         9        0.272E+06     -.101E+05       0.282E+06        38.35
+               1        14        22         3         1        0.105E+07     -.535E+04       0.105E+07        38.59
+               1        15        23         3         2        0.105E+07     -.201E+05       0.107E+07        37.59
+               1        15        24         3         3        0.107E+07     -.180E+05       0.109E+07        36.60
+               1        15        25         3         4        0.109E+07     -.184E+05       0.111E+07        35.60
+               1        15        26         3         5        0.111E+07     -.217E+05       0.113E+07        34.61
+               1        16        27         3         6        0.113E+07     -.290E+05       0.116E+07        33.62
+               1        17        28         3         7        0.116E+07     -.363E+05       0.120E+07        32.63
+               1        18        29         3         8        0.120E+07     -.476E+05       0.125E+07        31.64
+               1        18        30         3         9        0.125E+07     -.448E+05       0.129E+07        30.65
+1
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP  1 IN STRESS PERIOD   3
+  ------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =    20045797.6920               STORAGE =        2643.4014
+       CONSTANT HEAD =   312365456.4310         CONSTANT HEAD =     1168460.0695
+            RECHARGE =     6292800.0000              RECHARGE =           0.0000
+      STREAM LEAKAGE =           0.0000        STREAM LEAKAGE =           0.0000
+        MANAGED FLOW =           0.0000          MANAGED FLOW =           0.0000
+
+            TOTAL IN =   338704054.1230              TOTAL IN =     1171103.4709
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =       46578.5865               STORAGE =         414.8142
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            RECHARGE =           0.0000              RECHARGE =           0.0000
+      STREAM LEAKAGE =   323692297.7723        STREAM LEAKAGE =     1140306.0245
+        MANAGED FLOW =    14965548.6992          MANAGED FLOW =       30385.5557
+
+           TOTAL OUT =   338704425.0580             TOTAL OUT =     1171106.3944
+
+            IN - OUT =        -370.9350              IN - OUT =          -2.9235
+
+ PERCENT DISCREPANCY =           0.00     PERCENT DISCREPANCY =           0.00
+
+
+
+
+
+
+          TIME SUMMARY AT END OF TIME STEP   1 IN STRESS PERIOD    3
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 7.86240E+06 1.31040E+05  2184.0      91.000     0.24914    
+ STRESS PERIOD TIME 7.86240E+06 1.31040E+05  2184.0      91.000     0.24914    
+         TOTAL TIME 2.36736E+07 3.94560E+05  6576.0      274.00     0.75017    
+1
+1
+                            STRESS PERIOD NO.    4, LENGTH =   91.00000    
+                            -----------------------------------------------
+
+                              NUMBER OF TIME STEPS =     1
+
+                               MULTIPLIER FOR DELT =     1.500
+
+                            INITIAL TIME STEP SIZE =   91.00000    
+
+                 RECHARGE =  1.000000E-03
+
+REUSING STREAM NODES FROM LAST STRESS PERIOD
+ 
+ SOLVING FOR HEAD 
+
+
+     6 CALLS TO PCG ROUTINE FOR TIME STEP   1 IN STRESS PERIOD    4
+    22 TOTAL ITERATIONS
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
+ CELL-BY-CELL FLOW TERM FLAG = 1
+
+ OUTPUT FLAGS FOR ALL LAYERS ARE THE SAME:
+   HEAD    DRAWDOWN  HEAD  DRAWDOWN
+ PRINTOUT  PRINTOUT  SAVE    SAVE
+ ----------------------------------
+     0         0       0       0
+
+            LAYER      ROW     COLUMN     STREAM    REACH      FLOW INTO    FLOW INTO      FLOW OUT OF     HEAD IN
+                                           NUMBER   NUMBER    STREAM REACH    AQUIFER      STREAM REACH     STREAM
+
+
+               1        13         1         1         1        0.100E+06     -.273E+05       0.127E+06        48.65
+               1        13         2         1         2        0.127E+06     -.371E+05       0.164E+06        48.18
+               1        14         3         1         3        0.164E+06     -.326E+05       0.197E+06        47.70
+               1        15         4         1         4        0.197E+06     -.319E+05       0.229E+06        47.22
+               1        16         5         1         5        0.229E+06     -.334E+05       0.262E+06        46.74
+               1        16         6         1         6        0.262E+06     -.291E+05       0.291E+06        46.26
+               1        16         7         1         7        0.291E+06     -.288E+05       0.320E+06        45.78
+               1        16         8         1         8        0.320E+06     -.288E+05       0.349E+06        45.29
+               1        16         9         1         9        0.349E+06     -.284E+05       0.378E+06        44.81
+               1        16        10         1        10        0.378E+06     -.272E+05       0.405E+06        44.32
+               1        16        11         1        11        0.405E+06     -.228E+05       0.428E+06        43.84
+               1        16        12         1        12        0.428E+06     -.579E+05       0.485E+06        40.35
+               1        15        13         1        13        0.485E+06     -.279E+05       0.513E+06        42.87
+               1        14        14         1        14        0.513E+06     -.314E+05       0.545E+06        42.39
+               1        13        15         1        15        0.545E+06     -.347E+05       0.579E+06        41.90
+               1        12        16         1        16        0.579E+06     -.421E+05       0.621E+06        41.42
+               1        12        17         1        17        0.621E+06     -.327E+05       0.654E+06        40.93
+               1        12        18         1        18        0.654E+06     -.314E+05       0.686E+06        40.45
+               1        12        19         1        19        0.686E+06     -.361E+05       0.722E+06        39.96
+               1        13        20         1        20        0.722E+06     -.261E+05       0.748E+06        39.47
+               1        14        21         1        21        0.748E+06     -.200E+05       0.768E+06        38.98
+               1        14        22         1        22        0.768E+06     -.739E+04       0.775E+06        38.49
+               1         9        30         2         1        0.500E+05     -.264E+05       0.764E+05        40.39
+               1         9        29         2         2        0.764E+05     -.288E+05       0.105E+06        40.18
+               1         9        28         2         3        0.105E+06     -.331E+05       0.138E+06        39.96
+               1         9        27         2         4        0.138E+06     -.471E+05       0.185E+06        39.75
+               1        10        26         2         5        0.185E+06     -.330E+05       0.218E+06        39.54
+               1        11        25         2         6        0.218E+06     -.243E+05       0.243E+06        39.31
+               1        12        24         2         7        0.243E+06     -.175E+05       0.260E+06        39.08
+               1        13        23         2         8        0.260E+06     -.121E+05       0.272E+06        38.84
+               1        14        22         2         9        0.272E+06     -.102E+05       0.282E+06        38.35
+               1        14        22         3         1        0.106E+07     -.534E+04       0.106E+07        38.59
+               1        15        23         3         2        0.106E+07     -.200E+05       0.108E+07        37.59
+               1        15        24         3         3        0.108E+07     -.174E+05       0.110E+07        36.60
+               1        15        25         3         4        0.110E+07     -.168E+05       0.112E+07        35.60
+               1        15        26         3         5        0.112E+07     -.209E+05       0.114E+07        34.61
+               1        16        27         3         6        0.114E+07     -.290E+05       0.117E+07        33.62
+               1        17        28         3         7        0.117E+07     -.365E+05       0.120E+07        32.63
+               1        18        29         3         8        0.120E+07     -.478E+05       0.125E+07        31.64
+               1        18        30         3         9        0.125E+07     -.450E+05       0.130E+07        30.66
+1
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP  1 IN STRESS PERIOD   4
+  ------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =    20049713.9028               STORAGE =          43.0353
+       CONSTANT HEAD =   417764588.7537         CONSTANT HEAD =     1158232.2233
+            RECHARGE =     8804400.0000              RECHARGE =       27600.0000
+      STREAM LEAKAGE =           0.0000        STREAM LEAKAGE =           0.0000
+        MANAGED FLOW =           0.0000          MANAGED FLOW =           0.0000
+
+            TOTAL IN =   446618702.6565              TOTAL IN =     1185875.2586
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =      145707.7429               STORAGE =        1089.3314
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            RECHARGE =           0.0000              RECHARGE =           0.0000
+      STREAM LEAKAGE =   428023153.2469        STREAM LEAKAGE =     1146492.9173
+        MANAGED FLOW =    18450056.9814          MANAGED FLOW =       38291.2998
+
+           TOTAL OUT =   446618917.9712             TOTAL OUT =     1185873.5485
+
+            IN - OUT =        -215.3147              IN - OUT =           1.7101
+
+ PERCENT DISCREPANCY =           0.00     PERCENT DISCREPANCY =           0.00
+
+
+
+
+
+
+          TIME SUMMARY AT END OF TIME STEP   1 IN STRESS PERIOD    4
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 7.86240E+06 1.31040E+05  2184.0      91.000     0.24914    
+ STRESS PERIOD TIME 7.86240E+06 1.31040E+05  2184.0      91.000     0.24914    
+         TOTAL TIME 3.15360E+07 5.25600E+05  8760.0      365.00     0.99932    
+1
+1
+                            STRESS PERIOD NO.    5, LENGTH =   92.00000    
+                            -----------------------------------------------
+
+                              NUMBER OF TIME STEPS =     1
+
+                               MULTIPLIER FOR DELT =     1.500
+
+                            INITIAL TIME STEP SIZE =   92.00000    
+
+                 RECHARGE =  5.000000E-04
+
+REUSING STREAM NODES FROM LAST STRESS PERIOD
+ 
+ SOLVING FOR HEAD 
+
+
+     6 CALLS TO PCG ROUTINE FOR TIME STEP   1 IN STRESS PERIOD    5
+    23 TOTAL ITERATIONS
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
+ CELL-BY-CELL FLOW TERM FLAG = 1
+
+ OUTPUT FLAGS FOR ALL LAYERS ARE THE SAME:
+   HEAD    DRAWDOWN  HEAD  DRAWDOWN
+ PRINTOUT  PRINTOUT  SAVE    SAVE
+ ----------------------------------
+     0         0       0       0
+
+            LAYER      ROW     COLUMN     STREAM    REACH      FLOW INTO    FLOW INTO      FLOW OUT OF     HEAD IN
+                                           NUMBER   NUMBER    STREAM REACH    AQUIFER      STREAM REACH     STREAM
+
+
+               1        13         1         1         1        0.100E+06     -.271E+05       0.127E+06        48.65
+               1        13         2         1         2        0.127E+06     -.369E+05       0.164E+06        48.18
+               1        14         3         1         3        0.164E+06     -.324E+05       0.196E+06        47.70
+               1        15         4         1         4        0.196E+06     -.316E+05       0.228E+06        47.22
+               1        16         5         1         5        0.228E+06     -.331E+05       0.261E+06        46.74
+               1        16         6         1         6        0.261E+06     -.289E+05       0.290E+06        46.26
+               1        16         7         1         7        0.290E+06     -.286E+05       0.319E+06        45.78
+               1        16         8         1         8        0.319E+06     -.285E+05       0.347E+06        45.29
+               1        16         9         1         9        0.347E+06     -.281E+05       0.375E+06        44.81
+               1        16        10         1        10        0.375E+06     -.268E+05       0.402E+06        44.32
+               1        16        11         1        11        0.402E+06     -.221E+05       0.424E+06        43.83
+               1        16        12         1        12        0.424E+06     -.566E+05       0.481E+06        40.35
+               1        15        13         1        13        0.481E+06     -.261E+05       0.507E+06        42.87
+               1        14        14         1        14        0.507E+06     -.293E+05       0.536E+06        42.38
+               1        13        15         1        15        0.536E+06     -.328E+05       0.569E+06        41.90
+               1        12        16         1        16        0.569E+06     -.409E+05       0.610E+06        41.41
+               1        12        17         1        17        0.610E+06     -.314E+05       0.641E+06        40.93
+               1        12        18         1        18        0.641E+06     -.302E+05       0.671E+06        40.44
+               1        12        19         1        19        0.671E+06     -.351E+05       0.706E+06        39.95
+               1        13        20         1        20        0.706E+06     -.247E+05       0.731E+06        39.47
+               1        14        21         1        21        0.731E+06     -.186E+05       0.750E+06        38.97
+               1        14        22         1        22        0.750E+06     -.722E+04       0.757E+06        38.48
+               1         9        30         2         1        0.500E+05     -.263E+05       0.763E+05        40.39
+               1         9        29         2         2        0.763E+05     -.288E+05       0.105E+06        40.18
+               1         9        28         2         3        0.105E+06     -.330E+05       0.138E+06        39.96
+               1         9        27         2         4        0.138E+06     -.471E+05       0.185E+06        39.75
+               1        10        26         2         5        0.185E+06     -.330E+05       0.218E+06        39.54
+               1        11        25         2         6        0.218E+06     -.246E+05       0.243E+06        39.31
+               1        12        24         2         7        0.243E+06     -.179E+05       0.261E+06        39.08
+               1        13        23         2         8        0.261E+06     -.124E+05       0.273E+06        38.84
+               1        14        22         2         9        0.273E+06     -.987E+04       0.283E+06        38.35
+               1        14        22         3         1        0.104E+07     -.516E+04       0.104E+07        38.58
+               1        15        23         3         2        0.104E+07     -.196E+05       0.106E+07        37.59
+               1        15        24         3         3        0.106E+07     -.179E+05       0.108E+07        36.59
+               1        15        25         3         4        0.108E+07     -.183E+05       0.110E+07        35.60
+               1        15        26         3         5        0.110E+07     -.218E+05       0.112E+07        34.61
+               1        16        27         3         6        0.112E+07     -.290E+05       0.115E+07        33.61
+               1        17        28         3         7        0.115E+07     -.364E+05       0.119E+07        32.62
+               1        18        29         3         8        0.119E+07     -.476E+05       0.124E+07        31.64
+               1        18        30         3         9        0.124E+07     -.449E+05       0.128E+07        30.65
+1
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP  1 IN STRESS PERIOD   5
+  ------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =    20211538.3911               STORAGE =        1758.9618
+       CONSTANT HEAD =   525236657.9383         CONSTANT HEAD =     1168174.6651
+            RECHARGE =    10074000.0000              RECHARGE =       13800.0000
+      STREAM LEAKAGE =           0.0000        STREAM LEAKAGE =           0.0000
+        MANAGED FLOW =           0.0000          MANAGED FLOW =           0.0000
+
+            TOTAL IN =   555522196.3294              TOTAL IN =     1183733.6269
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =      150627.9928               STORAGE =          53.4810
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            RECHARGE =           0.0000              RECHARGE =           0.0000
+      STREAM LEAKAGE =   532001442.1369        STREAM LEAKAGE =     1130198.7923
+        MANAGED FLOW =    23370520.2044          MANAGED FLOW =       53483.2959
+
+           TOTAL OUT =   555522590.3341             TOTAL OUT =     1183735.5692
+
+            IN - OUT =        -394.0047              IN - OUT =          -1.9423
+
+ PERCENT DISCREPANCY =           0.00     PERCENT DISCREPANCY =           0.00
+
+
+
+
+
+
+          TIME SUMMARY AT END OF TIME STEP   1 IN STRESS PERIOD    5
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 7.94880E+06 1.32480E+05  2208.0      92.000     0.25188    
+ STRESS PERIOD TIME 7.94880E+06 1.32480E+05  2208.0      92.000     0.25188    
+         TOTAL TIME 3.94848E+07 6.58080E+05  10968.      457.00      1.2512    
+1
+1
+                            STRESS PERIOD NO.    6, LENGTH =   91.00000    
+                            -----------------------------------------------
+
+                              NUMBER OF TIME STEPS =     1
+
+                               MULTIPLIER FOR DELT =     1.500
+
+                            INITIAL TIME STEP SIZE =   91.00000    
+
+                 RECHARGE =  2.000000E-03
+
+REUSING STREAM NODES FROM LAST STRESS PERIOD
+ 
+ SOLVING FOR HEAD 
+
+
+     6 CALLS TO PCG ROUTINE FOR TIME STEP   1 IN STRESS PERIOD    6
+    24 TOTAL ITERATIONS
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
+ CELL-BY-CELL FLOW TERM FLAG = 1
+
+ OUTPUT FLAGS FOR ALL LAYERS ARE THE SAME:
+   HEAD    DRAWDOWN  HEAD  DRAWDOWN
+ PRINTOUT  PRINTOUT  SAVE    SAVE
+ ----------------------------------
+     0         0       0       0
+
+            LAYER      ROW     COLUMN     STREAM    REACH      FLOW INTO    FLOW INTO      FLOW OUT OF     HEAD IN
+                                           NUMBER   NUMBER    STREAM REACH    AQUIFER      STREAM REACH     STREAM
+
+
+               1        13         1         1         1        0.100E+06     -.278E+05       0.128E+06        48.65
+               1        13         2         1         2        0.128E+06     -.377E+05       0.165E+06        48.18
+               1        14         3         1         3        0.165E+06     -.332E+05       0.199E+06        47.70
+               1        15         4         1         4        0.199E+06     -.324E+05       0.231E+06        47.23
+               1        16         5         1         5        0.231E+06     -.338E+05       0.265E+06        46.75
+               1        16         6         1         6        0.265E+06     -.295E+05       0.294E+06        46.26
+               1        16         7         1         7        0.294E+06     -.292E+05       0.324E+06        45.78
+               1        16         8         1         8        0.324E+06     -.292E+05       0.353E+06        45.30
+               1        16         9         1         9        0.353E+06     -.288E+05       0.382E+06        44.81
+               1        16        10         1        10        0.382E+06     -.276E+05       0.409E+06        44.33
+               1        16        11         1        11        0.409E+06     -.231E+05       0.432E+06        43.84
+               1        16        12         1        12        0.432E+06     -.582E+05       0.490E+06        40.36
+               1        15        13         1        13        0.490E+06     -.283E+05       0.519E+06        42.88
+               1        14        14         1        14        0.519E+06     -.318E+05       0.550E+06        42.39
+               1        13        15         1        15        0.550E+06     -.351E+05       0.586E+06        41.90
+               1        12        16         1        16        0.586E+06     -.425E+05       0.628E+06        41.42
+               1        12        17         1        17        0.628E+06     -.330E+05       0.661E+06        40.94
+               1        12        18         1        18        0.661E+06     -.317E+05       0.693E+06        40.45
+               1        12        19         1        19        0.693E+06     -.363E+05       0.729E+06        39.96
+               1        13        20         1        20        0.729E+06     -.262E+05       0.755E+06        39.47
+               1        14        21         1        21        0.755E+06     -.199E+05       0.775E+06        38.98
+               1        14        22         1        22        0.775E+06     -.681E+04       0.782E+06        38.49
+               1         9        30         2         1        0.500E+05     -.263E+05       0.763E+05        40.39
+               1         9        29         2         2        0.763E+05     -.287E+05       0.105E+06        40.18
+               1         9        28         2         3        0.105E+06     -.329E+05       0.138E+06        39.96
+               1         9        27         2         4        0.138E+06     -.470E+05       0.185E+06        39.75
+               1        10        26         2         5        0.185E+06     -.322E+05       0.217E+06        39.54
+               1        11        25         2         6        0.217E+06     -.223E+05       0.239E+06        39.31
+               1        12        24         2         7        0.239E+06     -.142E+05       0.254E+06        39.07
+               1        13        23         2         8        0.254E+06     -.935E+04       0.263E+06        38.83
+               1        14        22         2         9        0.263E+06     -.980E+04       0.273E+06        38.34
+               1        14        22         3         1        0.105E+07     -.484E+04       0.106E+07        38.59
+               1        15        23         3         2        0.106E+07     -.185E+05       0.108E+07        37.59
+               1        15        24         3         3        0.108E+07     -.131E+05       0.109E+07        36.60
+               1        15        25         3         4        0.109E+07     -.753E+04       0.110E+07        35.60
+               1        15        26         3         5        0.110E+07     -.158E+05       0.111E+07        34.60
+               1        16        27         3         6        0.111E+07     -.276E+05       0.114E+07        33.61
+               1        17        28         3         7        0.114E+07     -.360E+05       0.118E+07        32.62
+               1        18        29         3         8        0.118E+07     -.478E+05       0.123E+07        31.63
+               1        18        30         3         9        0.123E+07     -.450E+05       0.127E+07        30.65
+1
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP  1 IN STRESS PERIOD   6
+  ------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =    20252277.2354               STORAGE =         447.6796
+       CONSTANT HEAD =   629695803.3017         CONSTANT HEAD =     1147902.6963
+            RECHARGE =    15097200.0000              RECHARGE =       55200.0000
+      STREAM LEAKAGE =           0.0000        STREAM LEAKAGE =           0.0000
+        MANAGED FLOW =           0.0000          MANAGED FLOW =           0.0000
+
+            TOTAL IN =   665045280.5370              TOTAL IN =     1203550.3759
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =      404169.4014               STORAGE =        2786.1693
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            RECHARGE =           0.0000              RECHARGE =           0.0000
+      STREAM LEAKAGE =   633990780.0317        STREAM LEAKAGE =     1120761.9549
+        MANAGED FLOW =    30650520.1158          MANAGED FLOW =       79999.9990
+
+           TOTAL OUT =   665045469.5489             TOTAL OUT =     1203548.1232
+
+            IN - OUT =        -189.0119              IN - OUT =           2.2527
+
+ PERCENT DISCREPANCY =           0.00     PERCENT DISCREPANCY =           0.00
+
+
+
+
+
+
+          TIME SUMMARY AT END OF TIME STEP   1 IN STRESS PERIOD    6
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 7.86240E+06 1.31040E+05  2184.0      91.000     0.24914    
+ STRESS PERIOD TIME 7.86240E+06 1.31040E+05  2184.0      91.000     0.24914    
+         TOTAL TIME 4.73472E+07 7.89120E+05  13152.      548.00      1.5003    
+1
+1
+                            STRESS PERIOD NO.    7, LENGTH =   91.00000    
+                            -----------------------------------------------
+
+                              NUMBER OF TIME STEPS =     1
+
+                               MULTIPLIER FOR DELT =     1.500
+
+                            INITIAL TIME STEP SIZE =   91.00000    
+
+                 RECHARGE =   0.00000    
+
+REUSING STREAM NODES FROM LAST STRESS PERIOD
+ 
+ SOLVING FOR HEAD 
+
+
+     6 CALLS TO PCG ROUTINE FOR TIME STEP   1 IN STRESS PERIOD    7
+    23 TOTAL ITERATIONS
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
+ CELL-BY-CELL FLOW TERM FLAG = 1
+
+ OUTPUT FLAGS FOR ALL LAYERS ARE THE SAME:
+   HEAD    DRAWDOWN  HEAD  DRAWDOWN
+ PRINTOUT  PRINTOUT  SAVE    SAVE
+ ----------------------------------
+     0         0       0       0
+
+            LAYER      ROW     COLUMN     STREAM    REACH      FLOW INTO    FLOW INTO      FLOW OUT OF     HEAD IN
+                                           NUMBER   NUMBER    STREAM REACH    AQUIFER      STREAM REACH     STREAM
+
+
+               1        13         1         1         1        0.100E+06     -.269E+05       0.127E+06        48.65
+               1        13         2         1         2        0.127E+06     -.367E+05       0.164E+06        48.18
+               1        14         3         1         3        0.164E+06     -.322E+05       0.196E+06        47.70
+               1        15         4         1         4        0.196E+06     -.314E+05       0.227E+06        47.22
+               1        16         5         1         5        0.227E+06     -.330E+05       0.260E+06        46.74
+               1        16         6         1         6        0.260E+06     -.288E+05       0.289E+06        46.26
+               1        16         7         1         7        0.289E+06     -.285E+05       0.317E+06        45.78
+               1        16         8         1         8        0.317E+06     -.285E+05       0.346E+06        45.29
+               1        16         9         1         9        0.346E+06     -.281E+05       0.374E+06        44.81
+               1        16        10         1        10        0.374E+06     -.269E+05       0.401E+06        44.32
+               1        16        11         1        11        0.401E+06     -.224E+05       0.423E+06        43.83
+               1        16        12         1        12        0.423E+06     -.574E+05       0.481E+06        40.35
+               1        15        13         1        13        0.481E+06     -.274E+05       0.508E+06        42.87
+               1        14        14         1        14        0.508E+06     -.309E+05       0.539E+06        42.39
+               1        13        15         1        15        0.539E+06     -.343E+05       0.573E+06        41.90
+               1        12        16         1        16        0.573E+06     -.416E+05       0.615E+06        41.42
+               1        12        17         1        17        0.615E+06     -.324E+05       0.647E+06        40.93
+               1        12        18         1        18        0.647E+06     -.311E+05       0.678E+06        40.44
+               1        12        19         1        19        0.678E+06     -.357E+05       0.714E+06        39.96
+               1        13        20         1        20        0.714E+06     -.258E+05       0.740E+06        39.47
+               1        14        21         1        21        0.740E+06     -.197E+05       0.760E+06        38.98
+               1        14        22         1        22        0.760E+06     -.739E+04       0.767E+06        38.48
+               1         9        30         2         1        0.500E+05     -.262E+05       0.762E+05        40.39
+               1         9        29         2         2        0.762E+05     -.286E+05       0.105E+06        40.18
+               1         9        28         2         3        0.105E+06     -.329E+05       0.138E+06        39.96
+               1         9        27         2         4        0.138E+06     -.469E+05       0.185E+06        39.75
+               1        10        26         2         5        0.185E+06     -.328E+05       0.217E+06        39.54
+               1        11        25         2         6        0.217E+06     -.244E+05       0.242E+06        39.31
+               1        12        24         2         7        0.242E+06     -.178E+05       0.260E+06        39.08
+               1        13        23         2         8        0.260E+06     -.124E+05       0.272E+06        38.84
+               1        14        22         2         9        0.272E+06     -.101E+05       0.282E+06        38.35
+               1        14        22         3         1        0.105E+07     -.535E+04       0.105E+07        38.59
+               1        15        23         3         2        0.105E+07     -.201E+05       0.107E+07        37.59
+               1        15        24         3         3        0.107E+07     -.180E+05       0.109E+07        36.60
+               1        15        25         3         4        0.109E+07     -.183E+05       0.111E+07        35.60
+               1        15        26         3         5        0.111E+07     -.217E+05       0.113E+07        34.61
+               1        16        27         3         6        0.113E+07     -.290E+05       0.116E+07        33.62
+               1        17        28         3         7        0.116E+07     -.363E+05       0.120E+07        32.63
+               1        18        29         3         8        0.120E+07     -.476E+05       0.125E+07        31.64
+               1        18        30         3         9        0.125E+07     -.448E+05       0.129E+07        30.65
+1
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP  1 IN STRESS PERIOD   7
+  ------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =    20446031.9148               STORAGE =        2129.1723
+       CONSTANT HEAD =   736047751.2569         CONSTANT HEAD =     1168702.7248
+            RECHARGE =    15097200.0000              RECHARGE =           0.0000
+      STREAM LEAKAGE =           0.0000        STREAM LEAKAGE =           0.0000
+        MANAGED FLOW =           0.0000          MANAGED FLOW =           0.0000
+
+            TOTAL IN =   771590983.1717              TOTAL IN =     1170831.8971
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =      443611.9577               STORAGE =         433.4347
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            RECHARGE =           0.0000              RECHARGE =           0.0000
+      STREAM LEAKAGE =   737732189.3460        STREAM LEAKAGE =     1140015.4870
+        MANAGED FLOW =    33415605.6814          MANAGED FLOW =       30385.5557
+
+           TOTAL OUT =   771591406.9852             TOTAL OUT =     1170834.4773
+
+            IN - OUT =        -423.8135              IN - OUT =          -2.5802
+
+ PERCENT DISCREPANCY =           0.00     PERCENT DISCREPANCY =           0.00
+
+
+
+
+
+
+          TIME SUMMARY AT END OF TIME STEP   1 IN STRESS PERIOD    7
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 7.86240E+06 1.31040E+05  2184.0      91.000     0.24914    
+ STRESS PERIOD TIME 7.86240E+06 1.31040E+05  2184.0      91.000     0.24914    
+         TOTAL TIME 5.52096E+07 9.20160E+05  15336.      639.00      1.7495    
+1
+1
+                            STRESS PERIOD NO.    8, LENGTH =   91.00000    
+                            -----------------------------------------------
+
+                              NUMBER OF TIME STEPS =     1
+
+                               MULTIPLIER FOR DELT =     1.500
+
+                            INITIAL TIME STEP SIZE =   91.00000    
+
+                 RECHARGE =  1.000000E-03
+
+REUSING STREAM NODES FROM LAST STRESS PERIOD
+ 
+ SOLVING FOR HEAD 
+
+
+     6 CALLS TO PCG ROUTINE FOR TIME STEP   1 IN STRESS PERIOD    8
+    22 TOTAL ITERATIONS
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
+ CELL-BY-CELL FLOW TERM FLAG = 1
+
+ OUTPUT FLAGS FOR ALL LAYERS ARE THE SAME:
+   HEAD    DRAWDOWN  HEAD  DRAWDOWN
+ PRINTOUT  PRINTOUT  SAVE    SAVE
+ ----------------------------------
+     0         0       0       0
+
+            LAYER      ROW     COLUMN     STREAM    REACH      FLOW INTO    FLOW INTO      FLOW OUT OF     HEAD IN
+                                           NUMBER   NUMBER    STREAM REACH    AQUIFER      STREAM REACH     STREAM
+
+
+               1        13         1         1         1        0.100E+06     -.273E+05       0.127E+06        48.65
+               1        13         2         1         2        0.127E+06     -.371E+05       0.164E+06        48.18
+               1        14         3         1         3        0.164E+06     -.326E+05       0.197E+06        47.70
+               1        15         4         1         4        0.197E+06     -.319E+05       0.229E+06        47.22
+               1        16         5         1         5        0.229E+06     -.334E+05       0.262E+06        46.74
+               1        16         6         1         6        0.262E+06     -.291E+05       0.291E+06        46.26
+               1        16         7         1         7        0.291E+06     -.288E+05       0.320E+06        45.78
+               1        16         8         1         8        0.320E+06     -.288E+05       0.349E+06        45.29
+               1        16         9         1         9        0.349E+06     -.284E+05       0.378E+06        44.81
+               1        16        10         1        10        0.378E+06     -.272E+05       0.405E+06        44.32
+               1        16        11         1        11        0.405E+06     -.228E+05       0.428E+06        43.84
+               1        16        12         1        12        0.428E+06     -.579E+05       0.485E+06        40.35
+               1        15        13         1        13        0.485E+06     -.279E+05       0.513E+06        42.87
+               1        14        14         1        14        0.513E+06     -.314E+05       0.545E+06        42.39
+               1        13        15         1        15        0.545E+06     -.347E+05       0.579E+06        41.90
+               1        12        16         1        16        0.579E+06     -.421E+05       0.621E+06        41.42
+               1        12        17         1        17        0.621E+06     -.327E+05       0.654E+06        40.93
+               1        12        18         1        18        0.654E+06     -.314E+05       0.686E+06        40.45
+               1        12        19         1        19        0.686E+06     -.361E+05       0.722E+06        39.96
+               1        13        20         1        20        0.722E+06     -.261E+05       0.748E+06        39.47
+               1        14        21         1        21        0.748E+06     -.200E+05       0.768E+06        38.98
+               1        14        22         1        22        0.768E+06     -.739E+04       0.775E+06        38.49
+               1         9        30         2         1        0.500E+05     -.264E+05       0.764E+05        40.39
+               1         9        29         2         2        0.764E+05     -.288E+05       0.105E+06        40.18
+               1         9        28         2         3        0.105E+06     -.331E+05       0.138E+06        39.96
+               1         9        27         2         4        0.138E+06     -.471E+05       0.185E+06        39.75
+               1        10        26         2         5        0.185E+06     -.330E+05       0.218E+06        39.54
+               1        11        25         2         6        0.218E+06     -.243E+05       0.243E+06        39.31
+               1        12        24         2         7        0.243E+06     -.175E+05       0.260E+06        39.08
+               1        13        23         2         8        0.260E+06     -.121E+05       0.272E+06        38.84
+               1        14        22         2         9        0.272E+06     -.102E+05       0.282E+06        38.35
+               1        14        22         3         1        0.106E+07     -.534E+04       0.106E+07        38.59
+               1        15        23         3         2        0.106E+07     -.200E+05       0.108E+07        37.59
+               1        15        24         3         3        0.108E+07     -.174E+05       0.110E+07        36.60
+               1        15        25         3         4        0.110E+07     -.168E+05       0.112E+07        35.60
+               1        15        26         3         5        0.112E+07     -.209E+05       0.114E+07        34.61
+               1        16        27         3         6        0.114E+07     -.290E+05       0.117E+07        33.62
+               1        17        28         3         7        0.117E+07     -.365E+05       0.120E+07        32.63
+               1        18        29         3         8        0.120E+07     -.478E+05       0.125E+07        31.64
+               1        18        30         3         9        0.125E+07     -.450E+05       0.130E+07        30.66
+1
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP  1 IN STRESS PERIOD   8
+  ------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =    20449927.6114               STORAGE =          42.8099
+       CONSTANT HEAD =   841448287.5491         CONSTANT HEAD =     1158247.6516
+            RECHARGE =    17608800.0000              RECHARGE =       27600.0000
+      STREAM LEAKAGE =           0.0000        STREAM LEAKAGE =           0.0000
+        MANAGED FLOW =           0.0000          MANAGED FLOW =           0.0000
+
+            TOTAL IN =   879507015.1604              TOTAL IN =     1185890.4614
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =      545713.8093               STORAGE =        1121.9984
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            RECHARGE =           0.0000              RECHARGE =           0.0000
+      STREAM LEAKAGE =   842061451.2246        STREAM LEAKAGE =     1146475.4053
+        MANAGED FLOW =    36900113.9639          MANAGED FLOW =       38291.2998
+
+           TOTAL OUT =   879507278.9978             TOTAL OUT =     1185888.7034
+
+            IN - OUT =        -263.8374              IN - OUT =           1.7580
+
+ PERCENT DISCREPANCY =           0.00     PERCENT DISCREPANCY =           0.00
+
+
+
+
+
+
+          TIME SUMMARY AT END OF TIME STEP   1 IN STRESS PERIOD    8
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 7.86240E+06 1.31040E+05  2184.0      91.000     0.24914    
+ STRESS PERIOD TIME 7.86240E+06 1.31040E+05  2184.0      91.000     0.24914    
+         TOTAL TIME 6.30720E+07 1.05120E+06  17520.      730.00      1.9986    
+1
+1
+                            STRESS PERIOD NO.    9, LENGTH =   92.00000    
+                            -----------------------------------------------
+
+                              NUMBER OF TIME STEPS =     1
+
+                               MULTIPLIER FOR DELT =     1.500
+
+                            INITIAL TIME STEP SIZE =   92.00000    
+
+                 RECHARGE =  5.000000E-04
+
+REUSING STREAM NODES FROM LAST STRESS PERIOD
+ 
+ SOLVING FOR HEAD 
+
+
+     6 CALLS TO PCG ROUTINE FOR TIME STEP   1 IN STRESS PERIOD    9
+    23 TOTAL ITERATIONS
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
+ CELL-BY-CELL FLOW TERM FLAG = 1
+
+ OUTPUT FLAGS FOR ALL LAYERS ARE THE SAME:
+   HEAD    DRAWDOWN  HEAD  DRAWDOWN
+ PRINTOUT  PRINTOUT  SAVE    SAVE
+ ----------------------------------
+     0         0       0       0
+
+            LAYER      ROW     COLUMN     STREAM    REACH      FLOW INTO    FLOW INTO      FLOW OUT OF     HEAD IN
+                                           NUMBER   NUMBER    STREAM REACH    AQUIFER      STREAM REACH     STREAM
+
+
+               1        13         1         1         1        0.100E+06     -.271E+05       0.127E+06        48.65
+               1        13         2         1         2        0.127E+06     -.369E+05       0.164E+06        48.18
+               1        14         3         1         3        0.164E+06     -.324E+05       0.196E+06        47.70
+               1        15         4         1         4        0.196E+06     -.316E+05       0.228E+06        47.22
+               1        16         5         1         5        0.228E+06     -.331E+05       0.261E+06        46.74
+               1        16         6         1         6        0.261E+06     -.289E+05       0.290E+06        46.26
+               1        16         7         1         7        0.290E+06     -.286E+05       0.319E+06        45.78
+               1        16         8         1         8        0.319E+06     -.285E+05       0.347E+06        45.29
+               1        16         9         1         9        0.347E+06     -.281E+05       0.375E+06        44.81
+               1        16        10         1        10        0.375E+06     -.268E+05       0.402E+06        44.32
+               1        16        11         1        11        0.402E+06     -.221E+05       0.424E+06        43.83
+               1        16        12         1        12        0.424E+06     -.566E+05       0.481E+06        40.35
+               1        15        13         1        13        0.481E+06     -.261E+05       0.507E+06        42.87
+               1        14        14         1        14        0.507E+06     -.293E+05       0.536E+06        42.38
+               1        13        15         1        15        0.536E+06     -.328E+05       0.569E+06        41.90
+               1        12        16         1        16        0.569E+06     -.409E+05       0.610E+06        41.41
+               1        12        17         1        17        0.610E+06     -.314E+05       0.641E+06        40.93
+               1        12        18         1        18        0.641E+06     -.302E+05       0.671E+06        40.44
+               1        12        19         1        19        0.671E+06     -.351E+05       0.706E+06        39.95
+               1        13        20         1        20        0.706E+06     -.247E+05       0.731E+06        39.47
+               1        14        21         1        21        0.731E+06     -.186E+05       0.750E+06        38.97
+               1        14        22         1        22        0.750E+06     -.722E+04       0.757E+06        38.48
+               1         9        30         2         1        0.500E+05     -.263E+05       0.763E+05        40.39
+               1         9        29         2         2        0.763E+05     -.288E+05       0.105E+06        40.18
+               1         9        28         2         3        0.105E+06     -.330E+05       0.138E+06        39.96
+               1         9        27         2         4        0.138E+06     -.471E+05       0.185E+06        39.75
+               1        10        26         2         5        0.185E+06     -.330E+05       0.218E+06        39.54
+               1        11        25         2         6        0.218E+06     -.246E+05       0.243E+06        39.31
+               1        12        24         2         7        0.243E+06     -.179E+05       0.261E+06        39.08
+               1        13        23         2         8        0.261E+06     -.124E+05       0.273E+06        38.84
+               1        14        22         2         9        0.273E+06     -.987E+04       0.283E+06        38.35
+               1        14        22         3         1        0.104E+07     -.516E+04       0.104E+07        38.58
+               1        15        23         3         2        0.104E+07     -.196E+05       0.106E+07        37.59
+               1        15        24         3         3        0.106E+07     -.179E+05       0.108E+07        36.59
+               1        15        25         3         4        0.108E+07     -.183E+05       0.110E+07        35.60
+               1        15        26         3         5        0.110E+07     -.218E+05       0.112E+07        34.61
+               1        16        27         3         6        0.112E+07     -.290E+05       0.115E+07        33.61
+               1        17        28         3         7        0.115E+07     -.364E+05       0.119E+07        32.62
+               1        18        29         3         8        0.119E+07     -.476E+05       0.124E+07        31.64
+               1        18        30         3         9        0.124E+07     -.449E+05       0.128E+07        30.65
+1
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP  1 IN STRESS PERIOD   9
+  ------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =    20611559.7467               STORAGE =        1756.8710
+       CONSTANT HEAD =   948920448.6854         CONSTANT HEAD =     1168175.6645
+            RECHARGE =    18878400.0000              RECHARGE =       13800.0000
+      STREAM LEAKAGE =           0.0000        STREAM LEAKAGE =           0.0000
+        MANAGED FLOW =           0.0000          MANAGED FLOW =           0.0000
+
+            TOTAL IN =   988410408.4321              TOTAL IN =     1183732.5356
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =      550635.5961               STORAGE =          53.4977
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            RECHARGE =           0.0000              RECHARGE =           0.0000
+      STREAM LEAKAGE =   946039637.8986        STREAM LEAKAGE =     1130197.6812
+        MANAGED FLOW =    41820577.1866          MANAGED FLOW =       53483.2959
+
+           TOTAL OUT =   988410850.6813             TOTAL OUT =     1183734.4748
+
+            IN - OUT =        -442.2492              IN - OUT =          -1.9393
+
+ PERCENT DISCREPANCY =           0.00     PERCENT DISCREPANCY =           0.00
+
+
+
+
+
+
+          TIME SUMMARY AT END OF TIME STEP   1 IN STRESS PERIOD    9
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 7.94880E+06 1.32480E+05  2208.0      92.000     0.25188    
+ STRESS PERIOD TIME 7.94880E+06 1.32480E+05  2208.0      92.000     0.25188    
+         TOTAL TIME 7.10208E+07 1.18368E+06  19728.      822.00      2.2505    
+1
+1
+                            STRESS PERIOD NO.   10, LENGTH =   91.00000    
+                            -----------------------------------------------
+
+                              NUMBER OF TIME STEPS =     1
+
+                               MULTIPLIER FOR DELT =     1.500
+
+                            INITIAL TIME STEP SIZE =   91.00000    
+
+                 RECHARGE =  2.000000E-03
+
+REUSING STREAM NODES FROM LAST STRESS PERIOD
+ 
+ SOLVING FOR HEAD 
+
+
+     6 CALLS TO PCG ROUTINE FOR TIME STEP   1 IN STRESS PERIOD   10
+    24 TOTAL ITERATIONS
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
+ CELL-BY-CELL FLOW TERM FLAG = 1
+
+ OUTPUT FLAGS FOR ALL LAYERS ARE THE SAME:
+   HEAD    DRAWDOWN  HEAD  DRAWDOWN
+ PRINTOUT  PRINTOUT  SAVE    SAVE
+ ----------------------------------
+     0         0       0       0
+
+            LAYER      ROW     COLUMN     STREAM    REACH      FLOW INTO    FLOW INTO      FLOW OUT OF     HEAD IN
+                                           NUMBER   NUMBER    STREAM REACH    AQUIFER      STREAM REACH     STREAM
+
+
+               1        13         1         1         1        0.100E+06     -.278E+05       0.128E+06        48.65
+               1        13         2         1         2        0.128E+06     -.377E+05       0.165E+06        48.18
+               1        14         3         1         3        0.165E+06     -.332E+05       0.199E+06        47.70
+               1        15         4         1         4        0.199E+06     -.324E+05       0.231E+06        47.23
+               1        16         5         1         5        0.231E+06     -.338E+05       0.265E+06        46.75
+               1        16         6         1         6        0.265E+06     -.295E+05       0.294E+06        46.26
+               1        16         7         1         7        0.294E+06     -.292E+05       0.324E+06        45.78
+               1        16         8         1         8        0.324E+06     -.292E+05       0.353E+06        45.30
+               1        16         9         1         9        0.353E+06     -.288E+05       0.382E+06        44.81
+               1        16        10         1        10        0.382E+06     -.276E+05       0.409E+06        44.33
+               1        16        11         1        11        0.409E+06     -.231E+05       0.432E+06        43.84
+               1        16        12         1        12        0.432E+06     -.582E+05       0.490E+06        40.36
+               1        15        13         1        13        0.490E+06     -.283E+05       0.519E+06        42.88
+               1        14        14         1        14        0.519E+06     -.318E+05       0.550E+06        42.39
+               1        13        15         1        15        0.550E+06     -.351E+05       0.586E+06        41.90
+               1        12        16         1        16        0.586E+06     -.425E+05       0.628E+06        41.42
+               1        12        17         1        17        0.628E+06     -.330E+05       0.661E+06        40.94
+               1        12        18         1        18        0.661E+06     -.317E+05       0.693E+06        40.45
+               1        12        19         1        19        0.693E+06     -.363E+05       0.729E+06        39.96
+               1        13        20         1        20        0.729E+06     -.262E+05       0.755E+06        39.47
+               1        14        21         1        21        0.755E+06     -.199E+05       0.775E+06        38.98
+               1        14        22         1        22        0.775E+06     -.681E+04       0.782E+06        38.49
+               1         9        30         2         1        0.500E+05     -.263E+05       0.763E+05        40.39
+               1         9        29         2         2        0.763E+05     -.287E+05       0.105E+06        40.18
+               1         9        28         2         3        0.105E+06     -.329E+05       0.138E+06        39.96
+               1         9        27         2         4        0.138E+06     -.470E+05       0.185E+06        39.75
+               1        10        26         2         5        0.185E+06     -.322E+05       0.217E+06        39.54
+               1        11        25         2         6        0.217E+06     -.223E+05       0.239E+06        39.31
+               1        12        24         2         7        0.239E+06     -.142E+05       0.254E+06        39.07
+               1        13        23         2         8        0.254E+06     -.935E+04       0.263E+06        38.83
+               1        14        22         2         9        0.263E+06     -.980E+04       0.273E+06        38.34
+               1        14        22         3         1        0.105E+07     -.484E+04       0.106E+07        38.59
+               1        15        23         3         2        0.106E+07     -.185E+05       0.108E+07        37.59
+               1        15        24         3         3        0.108E+07     -.131E+05       0.109E+07        36.60
+               1        15        25         3         4        0.109E+07     -.753E+04       0.110E+07        35.60
+               1        15        26         3         5        0.110E+07     -.158E+05       0.111E+07        34.60
+               1        16        27         3         6        0.111E+07     -.276E+05       0.114E+07        33.61
+               1        17        28         3         7        0.114E+07     -.360E+05       0.118E+07        32.62
+               1        18        29         3         8        0.118E+07     -.478E+05       0.123E+07        31.63
+               1        18        30         3         9        0.123E+07     -.450E+05       0.127E+07        30.65
+1
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP  1 IN STRESS PERIOD  10
+  ------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =    20652298.4380               STORAGE =         447.6779
+       CONSTANT HEAD =  1053379600.1533         CONSTANT HEAD =     1147902.7634
+            RECHARGE =    23901600.0000              RECHARGE =       55200.0000
+      STREAM LEAKAGE =           0.0000        STREAM LEAKAGE =           0.0000
+        MANAGED FLOW =           0.0000          MANAGED FLOW =           0.0000
+
+            TOTAL IN =  1097933498.5914              TOTAL IN =     1203550.4413
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =      804189.6648               STORAGE =        2786.3084
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            RECHARGE =           0.0000              RECHARGE =           0.0000
+      STREAM LEAKAGE =  1048028969.0689        STREAM LEAKAGE =     1120761.8810
+        MANAGED FLOW =    49100577.0977          MANAGED FLOW =       79999.9990
+
+           TOTAL OUT =  1097933735.8315             TOTAL OUT =     1203548.1885
+
+            IN - OUT =        -237.2401              IN - OUT =           2.2528
+
+ PERCENT DISCREPANCY =           0.00     PERCENT DISCREPANCY =           0.00
+
+
+
+
+
+
+          TIME SUMMARY AT END OF TIME STEP   1 IN STRESS PERIOD   10
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 7.86240E+06 1.31040E+05  2184.0      91.000     0.24914    
+ STRESS PERIOD TIME 7.86240E+06 1.31040E+05  2184.0      91.000     0.24914    
+         TOTAL TIME 7.88832E+07 1.31472E+06  21912.      913.00      2.4997    
+1
+1
+                            STRESS PERIOD NO.   11, LENGTH =   91.00000    
+                            -----------------------------------------------
+
+                              NUMBER OF TIME STEPS =     1
+
+                               MULTIPLIER FOR DELT =     1.500
+
+                            INITIAL TIME STEP SIZE =   91.00000    
+
+                 RECHARGE =   0.00000    
+
+REUSING STREAM NODES FROM LAST STRESS PERIOD
+ 
+ SOLVING FOR HEAD 
+
+
+     6 CALLS TO PCG ROUTINE FOR TIME STEP   1 IN STRESS PERIOD   11
+    23 TOTAL ITERATIONS
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
+ CELL-BY-CELL FLOW TERM FLAG = 1
+
+ OUTPUT FLAGS FOR ALL LAYERS ARE THE SAME:
+   HEAD    DRAWDOWN  HEAD  DRAWDOWN
+ PRINTOUT  PRINTOUT  SAVE    SAVE
+ ----------------------------------
+     0         0       0       0
+
+            LAYER      ROW     COLUMN     STREAM    REACH      FLOW INTO    FLOW INTO      FLOW OUT OF     HEAD IN
+                                           NUMBER   NUMBER    STREAM REACH    AQUIFER      STREAM REACH     STREAM
+
+
+               1        13         1         1         1        0.100E+06     -.269E+05       0.127E+06        48.65
+               1        13         2         1         2        0.127E+06     -.367E+05       0.164E+06        48.18
+               1        14         3         1         3        0.164E+06     -.322E+05       0.196E+06        47.70
+               1        15         4         1         4        0.196E+06     -.314E+05       0.227E+06        47.22
+               1        16         5         1         5        0.227E+06     -.330E+05       0.260E+06        46.74
+               1        16         6         1         6        0.260E+06     -.288E+05       0.289E+06        46.26
+               1        16         7         1         7        0.289E+06     -.285E+05       0.317E+06        45.78
+               1        16         8         1         8        0.317E+06     -.285E+05       0.346E+06        45.29
+               1        16         9         1         9        0.346E+06     -.281E+05       0.374E+06        44.81
+               1        16        10         1        10        0.374E+06     -.269E+05       0.401E+06        44.32
+               1        16        11         1        11        0.401E+06     -.224E+05       0.423E+06        43.83
+               1        16        12         1        12        0.423E+06     -.574E+05       0.481E+06        40.35
+               1        15        13         1        13        0.481E+06     -.274E+05       0.508E+06        42.87
+               1        14        14         1        14        0.508E+06     -.309E+05       0.539E+06        42.39
+               1        13        15         1        15        0.539E+06     -.343E+05       0.573E+06        41.90
+               1        12        16         1        16        0.573E+06     -.416E+05       0.615E+06        41.42
+               1        12        17         1        17        0.615E+06     -.324E+05       0.647E+06        40.93
+               1        12        18         1        18        0.647E+06     -.311E+05       0.678E+06        40.44
+               1        12        19         1        19        0.678E+06     -.357E+05       0.714E+06        39.96
+               1        13        20         1        20        0.714E+06     -.258E+05       0.740E+06        39.47
+               1        14        21         1        21        0.740E+06     -.197E+05       0.760E+06        38.98
+               1        14        22         1        22        0.760E+06     -.739E+04       0.767E+06        38.48
+               1         9        30         2         1        0.500E+05     -.262E+05       0.762E+05        40.39
+               1         9        29         2         2        0.762E+05     -.286E+05       0.105E+06        40.18
+               1         9        28         2         3        0.105E+06     -.329E+05       0.138E+06        39.96
+               1         9        27         2         4        0.138E+06     -.469E+05       0.185E+06        39.75
+               1        10        26         2         5        0.185E+06     -.328E+05       0.217E+06        39.54
+               1        11        25         2         6        0.217E+06     -.244E+05       0.242E+06        39.31
+               1        12        24         2         7        0.242E+06     -.178E+05       0.260E+06        39.08
+               1        13        23         2         8        0.260E+06     -.124E+05       0.272E+06        38.84
+               1        14        22         2         9        0.272E+06     -.101E+05       0.282E+06        38.35
+               1        14        22         3         1        0.105E+07     -.535E+04       0.105E+07        38.59
+               1        15        23         3         2        0.105E+07     -.201E+05       0.107E+07        37.59
+               1        15        24         3         3        0.107E+07     -.180E+05       0.109E+07        36.60
+               1        15        25         3         4        0.109E+07     -.183E+05       0.111E+07        35.60
+               1        15        26         3         5        0.111E+07     -.217E+05       0.113E+07        34.61
+               1        16        27         3         6        0.113E+07     -.290E+05       0.116E+07        33.62
+               1        17        28         3         7        0.116E+07     -.363E+05       0.120E+07        32.63
+               1        18        29         3         8        0.120E+07     -.476E+05       0.125E+07        31.64
+               1        18        30         3         9        0.125E+07     -.448E+05       0.129E+07        30.65
+1
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP  1 IN STRESS PERIOD  11
+  ------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =    20846052.2523               STORAGE =        2129.1628
+       CONSTANT HEAD =  1159731548.5261         CONSTANT HEAD =     1168702.7294
+            RECHARGE =    23901600.0000              RECHARGE =           0.0000
+      STREAM LEAKAGE =           0.0000        STREAM LEAKAGE =           0.0000
+        MANAGED FLOW =           0.0000          MANAGED FLOW =           0.0000
+
+            TOTAL IN =  1204479200.7783              TOTAL IN =     1170831.8922
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =      843632.2301               STORAGE =         433.4348
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            RECHARGE =           0.0000              RECHARGE =           0.0000
+      STREAM LEAKAGE =  1151770377.9257        STREAM LEAKAGE =     1140015.4819
+        MANAGED FLOW =    51865662.6631          MANAGED FLOW =       30385.5557
+
+           TOTAL OUT =  1204479672.8190             TOTAL OUT =     1170834.4724
+
+            IN - OUT =        -472.0406              IN - OUT =          -2.5802
+
+ PERCENT DISCREPANCY =           0.00     PERCENT DISCREPANCY =           0.00
+
+
+
+
+
+
+          TIME SUMMARY AT END OF TIME STEP   1 IN STRESS PERIOD   11
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 7.86240E+06 1.31040E+05  2184.0      91.000     0.24914    
+ STRESS PERIOD TIME 7.86240E+06 1.31040E+05  2184.0      91.000     0.24914    
+         TOTAL TIME 8.67456E+07 1.44576E+06  24096.      1004.0      2.7488    
+1
+1
+                            STRESS PERIOD NO.   12, LENGTH =   91.00000    
+                            -----------------------------------------------
+
+                              NUMBER OF TIME STEPS =     1
+
+                               MULTIPLIER FOR DELT =     1.500
+
+                            INITIAL TIME STEP SIZE =   91.00000    
+
+                 RECHARGE =  1.000000E-03
+
+REUSING STREAM NODES FROM LAST STRESS PERIOD
+ 
+ SOLVING FOR HEAD 
+
+
+     6 CALLS TO PCG ROUTINE FOR TIME STEP   1 IN STRESS PERIOD   12
+    22 TOTAL ITERATIONS
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
+ CELL-BY-CELL FLOW TERM FLAG = 1
+
+ OUTPUT FLAGS FOR ALL LAYERS ARE THE SAME:
+   HEAD    DRAWDOWN  HEAD  DRAWDOWN
+ PRINTOUT  PRINTOUT  SAVE    SAVE
+ ----------------------------------
+     0         0       0       0
+
+            LAYER      ROW     COLUMN     STREAM    REACH      FLOW INTO    FLOW INTO      FLOW OUT OF     HEAD IN
+                                           NUMBER   NUMBER    STREAM REACH    AQUIFER      STREAM REACH     STREAM
+
+
+               1        13         1         1         1        0.100E+06     -.273E+05       0.127E+06        48.65
+               1        13         2         1         2        0.127E+06     -.371E+05       0.164E+06        48.18
+               1        14         3         1         3        0.164E+06     -.326E+05       0.197E+06        47.70
+               1        15         4         1         4        0.197E+06     -.319E+05       0.229E+06        47.22
+               1        16         5         1         5        0.229E+06     -.334E+05       0.262E+06        46.74
+               1        16         6         1         6        0.262E+06     -.291E+05       0.291E+06        46.26
+               1        16         7         1         7        0.291E+06     -.288E+05       0.320E+06        45.78
+               1        16         8         1         8        0.320E+06     -.288E+05       0.349E+06        45.29
+               1        16         9         1         9        0.349E+06     -.284E+05       0.378E+06        44.81
+               1        16        10         1        10        0.378E+06     -.272E+05       0.405E+06        44.32
+               1        16        11         1        11        0.405E+06     -.228E+05       0.428E+06        43.84
+               1        16        12         1        12        0.428E+06     -.579E+05       0.485E+06        40.35
+               1        15        13         1        13        0.485E+06     -.279E+05       0.513E+06        42.87
+               1        14        14         1        14        0.513E+06     -.314E+05       0.545E+06        42.39
+               1        13        15         1        15        0.545E+06     -.347E+05       0.579E+06        41.90
+               1        12        16         1        16        0.579E+06     -.421E+05       0.621E+06        41.42
+               1        12        17         1        17        0.621E+06     -.327E+05       0.654E+06        40.93
+               1        12        18         1        18        0.654E+06     -.314E+05       0.686E+06        40.45
+               1        12        19         1        19        0.686E+06     -.361E+05       0.722E+06        39.96
+               1        13        20         1        20        0.722E+06     -.261E+05       0.748E+06        39.47
+               1        14        21         1        21        0.748E+06     -.200E+05       0.768E+06        38.98
+               1        14        22         1        22        0.768E+06     -.739E+04       0.775E+06        38.49
+               1         9        30         2         1        0.500E+05     -.264E+05       0.764E+05        40.39
+               1         9        29         2         2        0.764E+05     -.288E+05       0.105E+06        40.18
+               1         9        28         2         3        0.105E+06     -.331E+05       0.138E+06        39.96
+               1         9        27         2         4        0.138E+06     -.471E+05       0.185E+06        39.75
+               1        10        26         2         5        0.185E+06     -.330E+05       0.218E+06        39.54
+               1        11        25         2         6        0.218E+06     -.243E+05       0.243E+06        39.31
+               1        12        24         2         7        0.243E+06     -.175E+05       0.260E+06        39.08
+               1        13        23         2         8        0.260E+06     -.121E+05       0.272E+06        38.84
+               1        14        22         2         9        0.272E+06     -.102E+05       0.282E+06        38.35
+               1        14        22         3         1        0.106E+07     -.534E+04       0.106E+07        38.59
+               1        15        23         3         2        0.106E+07     -.200E+05       0.108E+07        37.59
+               1        15        24         3         3        0.108E+07     -.174E+05       0.110E+07        36.60
+               1        15        25         3         4        0.110E+07     -.168E+05       0.112E+07        35.60
+               1        15        26         3         5        0.112E+07     -.209E+05       0.114E+07        34.61
+               1        16        27         3         6        0.114E+07     -.290E+05       0.117E+07        33.62
+               1        17        28         3         7        0.117E+07     -.365E+05       0.120E+07        32.63
+               1        18        29         3         8        0.120E+07     -.478E+05       0.125E+07        31.64
+               1        18        30         3         9        0.125E+07     -.450E+05       0.130E+07        30.66
+1
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP  1 IN STRESS PERIOD  12
+  ------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =    20849947.9487               STORAGE =          42.8099
+       CONSTANT HEAD =  1265132084.8471         CONSTANT HEAD =     1158247.6519
+            RECHARGE =    26413200.0000              RECHARGE =       27600.0000
+      STREAM LEAKAGE =           0.0000        STREAM LEAKAGE =           0.0000
+        MANAGED FLOW =           0.0000          MANAGED FLOW =           0.0000
+
+            TOTAL IN =  1312395232.7958              TOTAL IN =     1185890.4617
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =      945734.1421               STORAGE =        1121.9990
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            RECHARGE =           0.0000              RECHARGE =           0.0000
+      STREAM LEAKAGE =  1256099639.7728        STREAM LEAKAGE =     1146475.4049
+        MANAGED FLOW =    55350170.9454          MANAGED FLOW =       38291.2998
+
+           TOTAL OUT =  1312395544.8602             TOTAL OUT =     1185888.7038
+
+            IN - OUT =        -312.0645              IN - OUT =           1.7580
+
+ PERCENT DISCREPANCY =           0.00     PERCENT DISCREPANCY =           0.00
+
+
+
+
+
+
+          TIME SUMMARY AT END OF TIME STEP   1 IN STRESS PERIOD   12
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 7.86240E+06 1.31040E+05  2184.0      91.000     0.24914    
+ STRESS PERIOD TIME 7.86240E+06 1.31040E+05  2184.0      91.000     0.24914    
+         TOTAL TIME 9.46080E+07 1.57680E+06  26280.      1095.0      2.9979    
+1

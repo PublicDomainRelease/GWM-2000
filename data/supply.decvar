@@ -1,0 +1,16 @@
+#SUPPLY Sample Problem, DECVAR file
+#February 20, 2005
+ 1                                #1-IPRN
+ 8 4 0                            #2-NFVAR NEVAR NBVAR
+ Q1  1  1  12  11  W  Y  1-12     #3a-FVNAME NC LAY ROW COL FTYPE FSTAT WSP
+ Q2a 1  1  16  17  W  Y  1:5:9
+ Q2b 1  1  16  17  W  Y  2:6:10
+ Q2c 1  1  16  17  W  Y  3:7:11
+ Q2d 1  1  16  17  W  Y  4:8:12
+ Q3  1  1  11  22  W  Y  5-8
+ Q4a 1  1  14  25  W  Y  2:6:10
+ Q4b 1  1  14  25  W  Y  4:8:12
+ Im9         IM     9             #4-EVNAME ETYPE ESP 
+ Im10        IM    10
+ Im11        IM    11
+ Im12        IM    12

@@ -1,0 +1,6 @@
+#  SEN file for GWM Seawater Sample Problem 
+#  The recharge parameter is set to 0.002 in this file
+#  and overrides the value specified in the recharge file
+    1  -1   0   1
+    0   0   0   0
+REC-SP1  0  0  0.0020  0  0.01  0.1
