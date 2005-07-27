@@ -363,11 +363,11 @@ C
 C***********************************************************************
       SUBROUTINE GWM1SMC1FM(RSTRT,NSLK)
 C***********************************************************************
-C   VERSION: 20FEB2005
+C   VERSION: 22JULY2005
 C   PURPOSE: PLACE SUMMATION CONSTRAINTS IN LP MATRIX STARTING IN ROW RSTRT
 C-----------------------------------------------------------------------
       USE GWM1RMS1, ONLY : AMAT,RHS,
-     &                     RHSIN,RHSINF,RANGENAME,RANGENAMEF,NDV,CONEQU
+     &                     RHSIN,RHSINF,RANGENAME,RANGENAMEF,NDV,CONTYP
       INTEGER(I4B),INTENT(IN)::NSLK
       INTEGER(I4B),INTENT(INOUT)::RSTRT
 C-----LOCAL VARIABLES
@@ -388,9 +388,9 @@ C
         RHSINF(ROW)= SMCRHS(ISMC)                ! STORE THE INPUT RHS
         RANGENAMEF(ROW+NDV-1)=SMCNAME(ISMC)      ! LOAD FOR RANGE ANALYSIS OUTPUT
         IF(SMCDIR(ISMC).EQ.0)THEN                ! CONSTRAINT IS EQUALITY
-          CONEQU(ROW) = .TRUE.                   ! SET LOGICAL FOR OUTPUT
+          CONTYP(ROW) = 0                        ! SET FOR RANGE OUTPUT
         ELSEIF(SMCDIR(ISMC).NE.0)THEN            ! CONSTRAINT IS INEQUALITY
-          CONEQU(ROW) = .FALSE.                  ! SET LOGICAL FOR OUTPUT
+          CONTYP(ROW) = 1                        ! SET FOR RANGE OUTPUT
         ENDIF
   110 ENDDO
 C

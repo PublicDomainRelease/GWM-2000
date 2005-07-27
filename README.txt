@@ -1,7 +1,7 @@
 README.TXT
 
 
-                 MF2K-GWM - Version: 1.0.0 04/01/2005
+                 MF2K-GWM - Version: 1.0.1 07/28/2005
                  Built from MODFLOW-2000 Version 1.13
        Three-dimensional finite-difference ground-water flow model
                                 With
@@ -217,7 +217,7 @@ test name      description of test
  seawater      SEAWATER sample problem, nonlinear formulation
  supply        SUPPLY sample problem, nonlinear formulation
 
-Ahlfeld, D.A., Barlow, P.M., and Mulligan, A.E., 2005, GWM—A ground-
+Ahlfeld, D.P., Barlow, P.M., and Mulligan, A.E., 2005, GWM—A ground-
 water management process for the U.S. Geological Survey modular ground-
 water model (MODFLOW-2000): U.S. Geological Survey Open-File Report 
 2005-1072, 124 p.

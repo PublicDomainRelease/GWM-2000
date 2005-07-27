@@ -1,5 +1,5 @@
       MODULE GWM1RMS1
-C     VERSION: 20FEB2005
+C     VERSION: 22JULY2005
       IMPLICIT NONE
       PRIVATE
       PUBLIC::IRM,AMAT,CST,BNDS,RHS,NRMC,NV,NDV,NCON,NCONF,NVF,NSIGDIG,
@@ -8,7 +8,7 @@ C     VERSION: 20FEB2005
      3        DELINC,NONLIN,SLPITCNT,SLPITMAX,LASTLP,
      4        SLPITPRT,SLPINFCNT,SLPVCRIT,SLPZCRIT,OBJOLD,FVOLD,BBITMAX,
      5        BBITPRT,RHSREL,RHSRLL,RHSREU,RHSRLU,CSTREL,CSTRLL,CSTREU,
-     6        CSTRLU,RHSRLB,RHSRUB,RHSROR,CSTROR,CSTRLB,CSTRUB,CONEQU,
+     6        CSTRLU,RHSRLB,RHSRUB,RHSROR,CSTROR,CSTRLB,CSTRUB,CONTYP,
      7        RANGENAME,RANGENAMEF,RHSIN,RHSINF,RANGEFLG,OBJ,HCLOSEG
 C
       INTEGER, PARAMETER :: I4B = SELECTED_INT_KIND(9)
@@ -22,8 +22,8 @@ C-----GENERAL RMS VARIABLES
       LOGICAL(LGT),SAVE::MFCNVRG,DEWATER
       INTEGER(I4B),SAVE::NRMC,NV,NDV,NCON,NCONF,NVF
       CHARACTER(LEN=10),SAVE,ALLOCATABLE::RANGENAME(:),RANGENAMEF(:)
+      INTEGER(I4B),SAVE,ALLOCATABLE::CONTYP(:)
       REAL(DP),SAVE,ALLOCATABLE::RHSIN(:),RHSINF(:)
-      LOGICAL(LGT),SAVE,ALLOCATABLE::CONEQU(:)
 C
 C       NRMC     -number of constraints in the response matrix
 C       NCON     -total number of constraints equations
@@ -39,7 +39,7 @@ C       RANGENAME-mapping from a variable number to a name; used for output
 C       RHSIN    -original input value of the rhs for each constraint;used for output
 C       RANGENAMEF,RHSINF-final values of RANGENAME and RHSINF;used for output
 C       NVF,NCONF-final values of NVF and NCONF; used for output
-C       CONEQU   -if true then constraint is equality, false it is an inequality
+C       CONTYP   -indicates if constraint equality, inequality or transformed inequality
 C
 C-----VARIABLES FOR RESPONSE MATRIX AND PERTURBATION CALCULATIONS
       INTEGER(I4B),SAVE::IRM

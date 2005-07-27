@@ -1,3 +1,4 @@
+
 C
       MODULE GWM1RMS1LP
 C     VERSION: 20FEB2005
@@ -1151,7 +1152,7 @@ C
 C***********************************************************************
       SUBROUTINE BSOLVE(M,NV,NDV,AMAT,CST,BNDS,RHS,OBJ,IFLG)
 C***********************************************************************
-C  VERSION: 20FEB2005
+C  VERSION: 13JULY2005
 C  PURPOSE - CALL AN LP SOLVER REPEATEDLY TO SOLVE MIXED BINARY PROBLEM
 C
 C    INPUT:
@@ -1276,8 +1277,8 @@ C
 C-------PERFORM FATHOMING TEST ON THIS SUBPROBLEM
         CALL FATHOM(J,IFLG,OBJ,INC,OBJS,IRLX,IBIN,CST,NV)
 C
-C-------PRINT STATUS OF THIS SUBPROBLEM
-        IF(BBITPRT.NE.0) CALL BINWRT(NV,CST,OBJS(J))
+C-------PRINT STATUS OF THIS SUBPROBLEM IF SOLUTION EXISTS
+        IF(BBITPRT.NE.0 .AND. IFLG.EQ.0) CALL BINWRT(NV,CST,OBJS(J))
 C
 C-------RETURN LP PARAMETERS TO THEIR ORIGINAL VALUES
         DO 260 KK=1,NV
@@ -1664,7 +1665,7 @@ C***********************************************************************
       SUBROUTINE GWM1PSIMPLEX1(IBIN,J,M,NV,NDV,AMAT,CST,BNDS,RHS,
      1                         OBJ,IFLG,LPITMAX)
 C***********************************************************************
-C  VERSION: 20FEB2005
+C  VERSION: 13JULY2005
 C  PURPOSE - BUILD A TEMPORARY LP PROBLEM THAT ELIMINATES BINARY 
 C            VARIABLES THAT ARE SET IN BRANCH AND BOUND    
 C            IF A BINARY VARIABLE IS SET TO ZERO OR ONE IT IS REMOVED
@@ -1689,7 +1690,7 @@ C---------------------------------------------------------------------------
       END INTERFACE
 C-----LOCAL VARIABLES
       INTEGER(I4B)::I,II,III,INUM,K,KK,NDROP,NDVTMP,MTMP,NVTMP,IT
-      INTEGER(I4B)::NCVAR,ROWEMPTY
+      INTEGER(I4B)::NCVAR,ROWEMPTY,IINF
 C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 C
 C-----COUNT THE NUMBER OF BINARY VARIABLES THAT ARE TO BE DROPPED
@@ -1811,6 +1812,7 @@ C         ON THIS VARIABLE TO TURN OFF WELL
 C
 C-----ELIMINATE ROWS THAT ARE EMPTY
       ROWEMPTY = 0
+      IINF = 0
       DO 375 I=1,MTMP
         ROWCHK(I)=1
         DO 370 K=1,NDVTMP-1                      ! SEARCH NON-SLACK COLUMNS
@@ -1819,9 +1821,16 @@ C-----ELIMINATE ROWS THAT ARE EMPTY
 C-----IF YOU GOT HERE THEN THE ROW IS EMPTY
         ROWEMPTY = ROWEMPTY+1
         ROWCHK(I)=0
+C-------CHECK IF EMPTY CONSTRAINT ROW IS FEASIBLE
+        IF(TAMAT(I,NDVTMP).EQ.-ONE .AND. TRHS(I).GT.ZERO .OR.
+     &     TAMAT(I,NDVTMP).EQ.ZERO .AND. TRHS(I).NE.ZERO .OR.
+     &     TAMAT(I,NDVTMP).EQ. ONE .AND. TRHS(I).LT.ZERO)THEN
+          IINF = 1                               ! ROW IS NOT FEASIBLE
+        ENDIF
   375 ENDDO
 C
-      IF(ROWEMPTY.GT.0)THEN
+      IF(ROWEMPTY.GT.0.AND.IINF.EQ.0)THEN
+C-------EMPTY CONSTRAINTS ROWS ARE PRESENT AND MET; REARRANGE MATRIX
         ALLOCATE(TAMAT2(MTMP-ROWEMPTY,NDVTMP),STAT=ISTAT)
         IF(ISTAT.NE.0)GOTO 992
         IT = 0 
@@ -1838,40 +1847,40 @@ C
   390   ENDDO
         MTMP  = MTMP-ROWEMPTY                    ! DECREMENT ROW COUNTER
         NVTMP = NVTMP-ROWEMPTY                   ! ONE LESS SLACK FOR EACH EMPTY ROW
-C
 C-------SOLVE THE LINEAR PROGRAM 
         CALL GWM1SIMPLEX1(MTMP,NVTMP,NDVTMP,TAMAT2,TCST,
      &                TBNDS,TRHS,OBJ,IFLG,LPITMAX)
-      ELSE
 C
+      ELSEIF(ROWEMPTY.GT.0.AND.IINF.EQ.1)THEN
+C-------ONE OR MORE EMPTY CONSTRAINT ROWS ARE INFEASIBLE; DON'T BOTHER SOLVING
+        IFLG = 1                                 ! SET SIMPLEX FLAG 
+C
+      ELSEIF(ROWEMPTY.EQ.0)THEN
 C-------SOLVE THE LINEAR PROGRAM 
         CALL GWM1SIMPLEX1(MTMP,NVTMP,NDVTMP,TAMAT,TCST,
      &                    TBNDS,TRHS,OBJ,IFLG,LPITMAX)
       ENDIF
 C
-C-----LOAD SOLUTION OF TEMPORARY PROBLEM INTO FULL PROBLEM LOCATIONS
-C-----LOAD NON-BINARY VARIABLES
-      DO 400 I=1,NCVAR
-        CST(I) = TCST(I)
-        BNDS(I)= TBNDS(I)
-  400 ENDDO
+      IF(IFLG.EQ.0)THEN                          ! SOLUTION IS AVAILABLE                     
+C-------LOAD SOLUTION OF TEMPORARY PROBLEM INTO FULL PROBLEM LOCATIONS
+        DO 400 I=1,NCVAR                         ! LOAD NON-BINARY VARIABLES
+          CST(I) = TCST(I)
+          BNDS(I)= TBNDS(I)
+  400   ENDDO
 C
-C-----LOAD BINARY VARIABLES INTO FULL ARRAYS
-      K = NCVAR + 1
-      DO 410 I=NCVAR+1,NCVAR+NBVAR
-        IF(IBIN(I-NCVAR,J).LT.0)THEN
-C---------BINARY VARIABLE WAS IN THE TEMPORARY PROBLEM
-          CST(I) = TCST(K)
-          K = K + 1
-        ELSEIF(IBIN(I-NCVAR,J).EQ.1)THEN
-C---------BINARY VARIABLE WAS SET TO 1: ADD ITS COST COEFFICIENT TO OBJ 
-          OBJ = OBJ + CST(I)
-          CST(I) = ONE
-        ELSEIF(IBIN(I-NCVAR,J).EQ.0)THEN
-C---------BINARY VARIABLE WAS SET TO 0
-          CST(I) = ZERO
-        ENDIF
-  410 ENDDO
+        K = NCVAR + 1
+        DO 410 I=NCVAR+1,NCVAR+NBVAR             ! LOAD BINARY VARIABLES 
+          IF(IBIN(I-NCVAR,J).LT.0)THEN           ! BINARY WAS IN TEMP PROBLEM
+            CST(I) = TCST(K)
+            K = K + 1
+          ELSEIF(IBIN(I-NCVAR,J).EQ.1)THEN       ! BINARY VARIABLE WAS SET TO 1:   
+            OBJ = OBJ + CST(I)                   ! ADD ITS COEFFICIENT TO OBJ
+            CST(I) = ONE
+          ELSEIF(IBIN(I-NCVAR,J).EQ.0)THEN       ! BINARY VARIABLE WAS SET TO 0
+            CST(I) = ZERO
+          ENDIF
+  410   ENDDO
+      ENDIF
 C
 C-----BNDS AND RHS ARE IGNORED DURING BRANCH AND BOUND ITERATIONS
 C       BUT HAVE MEANING ON THE LAST CALL TO GWM1PSIMPLEX1
@@ -1897,7 +1906,7 @@ C       BUT HAVE MEANING ON THE LAST CALL TO GWM1PSIMPLEX1
 C 
       DEALLOCATE(TAMAT,TCST,TBNDS,TRHS,ROWCHK,STAT=ISTAT)
       IF(ISTAT.NE.0)GOTO 993
-      IF(ROWEMPTY.GT.0) DEALLOCATE(TAMAT2,STAT=ISTAT)
+      IF(ROWEMPTY.GT.0.AND.IINF.EQ.0) DEALLOCATE(TAMAT2,STAT=ISTAT)
       IF(ISTAT.NE.0)GOTO 993
 C
       RETURN
@@ -1951,6 +1960,14 @@ C-----LOCAL VARIABLE
       INTEGER(I4B)::I,INFO
 C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 C
+      work = 0.0
+	iwork = 0
+	x=0.0
+	if(fact.ne.'F')then
+	af=0.0
+	ipiv=0
+	endif
+
 C-----LOAD RIGHT HAND SIDE INTO LAPACK STORAGE
       DO 100 I=1,N
         BLA(I,1) = BL(I)
@@ -2035,7 +2052,7 @@ C
 C***********************************************************************
       SUBROUTINE GWM1RMS1AR(FNAME,IOUT,NFVAR,NEVAR,NBVAR,NDV,NV,NCON)
 C***********************************************************************
-C   VERSION: 20FEB2005
+C   VERSION: 22JULY2005
 C   PURPOSE: READ INPUT FROM THE SOLUTION AND OUTPUT-CONTROL FILE
 C-----------------------------------------------------------------------
       USE GWM1BAS1, ONLY : ZERO,RMFILE,MPSFILE
@@ -2051,7 +2068,7 @@ C-----------------------------------------------------------------------
      5                     RHSREL,RHSROR,RHSRLL,RHSREU,RHSRLU,CSTROR,
      6                     CSTRLB,CSTRUB,CSTREL,CSTRLL,CSTREU,CSTRLU,
      7                     RANGEFLG,RHSIN,RHSINF,RANGENAME,RANGENAMEF,
-     8                     CONEQU
+     8                     CONTYP
       INTEGER(I4B),INTENT(IN)::NFVAR,NEVAR,NBVAR,NDV,NV,NCON,IOUT
       CHARACTER(LEN=200),INTENT(IN)::FNAME
       INTERFACE 
@@ -2327,7 +2344,7 @@ C-----ALLOCATE MEMORY FOR ARRAYS TO STORE THE LINEAR PROGRAM
      2          RHSREL(NCON),RHSRLL(NCON),RHSREU(NCON),RHSRLU(NCON),
      3          CSTROR(NV),CSTRLB(NV),CSTRUB(NV),
      4          CSTREL(NV),CSTRLL(NV),CSTREU(NV),CSTRLU(NV),
-     5          RHSIN(NCON),RHSINF(NCON-NLBR),CONEQU(NCON),
+     5          RHSIN(NCON),RHSINF(NCON-NLBR),CONTYP(NCON),
      6          RANGENAME(NCON-NLBR+NDV),RANGENAMEF(NCON-NLBR+NDV),
      7          STAT=ISTAT)
       IF(ISTAT.NE.0)GOTO 992
@@ -3601,7 +3618,7 @@ C
 C***********************************************************************
       SUBROUTINE GWM1RMS1OT(IFLG)
 C***********************************************************************
-C  VERSION: 20FEB2005
+C  VERSION: 22JULY2005
 C  PURPOSE - WRITE OUTPUT FOR GWM SOLUTION  
 C-----------------------------------------------------------------------
       USE GWM1BAS1, ONLY : ZERO,ONE,BIGINF,GWMOUT
@@ -3609,7 +3626,7 @@ C-----------------------------------------------------------------------
      1                     RHSINF,RANGENAME,RANGENAMEF,RANGEFLG,NCONF,
      2                     IRM,NVF,RHSREL,RHSRLL,RHSREU,RHSRLU,CSTREL,
      3                     CSTRLL,CSTREU,CSTRLU,RHSRLB,RHSRUB,RHSROR,
-     4                     CSTROR,CSTRLB,CSTRUB,CONEQU
+     4                     CSTROR,CSTRLB,CSTRUB,CONTYP
       USE GWM1DCV1, ONLY : NFVAR,NBVAR,FVBASE
       USE GWM1OBJ1, ONLY : OBJTYP,GWM1OBJ1OT
       USE GWM1BAS1, ONLY : GWM1BAS1PF
@@ -3625,8 +3642,9 @@ C-----------------------------------------------------------------------
       END INTERFACE
 C-----LOCAL VARIABLES
       CHARACTER(LEN=10)::NAME,ENTER,LEAVE
-      REAL(DP)::RHSDIFF,SLACK
+      REAL(DP)::RHSDIFF,SLACK,RHSUB,RHSLB
       INTEGER(I4B)::I,II,K,RSTRT,INDEX,NCON2
+      INTEGER(I4B)::LRHSREU,LRHSRLU,LRHSREL,LRHSRLL
 C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 C
 C-----WRITE CONSTRAINT STATUS FOR A FLOW PROCESS SIMULATION
@@ -3675,35 +3693,79 @@ C---------WRITE CONSTRAINT RANGE ANALYSIS
 		DO 100 I=1,NCONF
             NAME=RANGENAMEF(I+NDV-1)                ! NAME OF CONSTRAINT
             RHSDIFF = RHSINF(I)-RHSROR(I)           ! RELATIVE
-            IF(CONEQU(I))THEN		                  ! CONSTRAINT IS EQUALITY
+            IF(CONTYP(I).EQ.0)THEN		          ! CONSTRAINT IS EQUALITY
               SLACK=ZERO
-            ELSEIF(.NOT.CONEQU(I))THEN              ! CONSTRAINT IS NOT EQUALITY
+              IF(RHSRLB(I).GT.-BIGINF)THEN
+                RHSLB = RHSRLB(I)+RHSDIFF
+              ELSE
+                RHSLB = -BIGINF
+              ENDIF
+              IF(RHSRUB(I).LT. BIGINF)THEN
+                RHSUB = RHSRUB(I)+RHSDIFF
+              ELSE
+                RHSUB = BIGINF
+              ENDIF
+              LRHSREU = RHSREU(I)
+              LRHSRLU = RHSRLU(I)
+              LRHSREL = RHSREL(I)
+              LRHSRLL = RHSRLL(I)
+            ELSEIF(CONTYP(I).EQ.1)THEN              ! CONSTRAINT IS INEQUALITY
               II=II+1
               SLACK=CST(II+K)
+              IF(RHSRLB(I).GT.-BIGINF)THEN
+                RHSLB = RHSRLB(I)+RHSDIFF
+              ELSE
+                RHSLB = -BIGINF
+              ENDIF
+              IF(RHSRUB(I).LT. BIGINF)THEN
+                RHSUB = RHSRUB(I)+RHSDIFF
+              ELSE
+                RHSUB = BIGINF
+              ENDIF
+              LRHSREU = RHSREU(I)
+              LRHSRLU = RHSRLU(I)
+              LRHSREL = RHSREL(I)
+              LRHSRLL = RHSRLL(I)
+            ELSEIF(CONTYP(I).EQ.2)THEN              ! CONSTRAINT IS TRANSFORMED 
+              II=II+1                               ! INEQUALITY, SO NEED TO
+              SLACK=CST(II+K)                       ! SWAP BOUNDS DIRECTION
+              IF(RHSRLB(I).GT.-BIGINF)THEN          ! LOWER BD NOT -INFINITY
+                RHSUB = RHSINF(I)+SLACK             ! SET UPPER BOUND
+              ELSE                                  ! LOWER BOUND IS -INFINITY
+                RHSUB = BIGINF                      ! SWAP TO UPPER BD=INF
+              ENDIF
+              IF(RHSRUB(I).LT. BIGINF)THEN          ! UPPER BD NOT INFINITY
+                RHSLB = RHSINF(I)-SLACK
+              ELSE                                  ! UPPER BOUND IS INFINITY
+                RHSLB = -BIGINF                     ! SWAP TO LOWER BD=-INF
+              ENDIF
+              LRHSREU = RHSREL(I)                   ! SWAP ENTERING AND LEAVING
+              LRHSRLU = RHSRLL(I)                   ! VARIABLES FOR UPPER AND
+              LRHSREL = RHSREU(I)                   ! LOWER BOUNDS
+              LRHSRLL = RHSRLU(I)
             ENDIF
 C
 C-----------WRITE THE LOWER BOUND RANGE INFORMATION
-            IF(RHSRLB(I) .LE. -BIGINF) THEN
+            IF(RHSLB.EQ.-BIGINF) THEN
               WRITE(GWMOUT,4000,ERR=990)NAME,SLACK,RHSINF(I)
-            ELSEIF(RHSREL(I).EQ.0)THEN             ! NO ENTERING VARIABLE
-              WRITE(GWMOUT,4005,ERR=990)NAME,SLACK,RHSINF(I),
-     &                                  RHSRLB(I)+RHSDIFF
+            ELSEIF(LRHSREL.EQ.0)THEN                ! NO ENTERING VARIABLE
+              WRITE(GWMOUT,4005,ERR=990)NAME,SLACK,RHSINF(I),RHSLB
             ELSE
-              ENTER=GETNAME(RHSREL(I))             ! NAME OF ENTERING VARIABLE
-              LEAVE=GETNAME(RHSRLL(I))             ! NAME OF LEAVING VARIABLE
+              ENTER=GETNAME(LRHSREL)                ! NAME OF ENTERING VARIABLE
+              LEAVE=GETNAME(LRHSRLL)                ! NAME OF LEAVING VARIABLE
               WRITE(GWMOUT,4010,ERR=990)NAME,SLACK,RHSINF(I),
-     &                                  RHSRLB(I)+RHSDIFF,ENTER,LEAVE
+     &                                  RHSLB,ENTER,LEAVE
             ENDIF
 C
 C-----------WRITE THE UPPER BOUND RANGE INFORMATION
-            IF(RHSRUB(I).GE.BIGINF)THEN                                                
+            IF(RHSUB.EQ.BIGINF)THEN                                                
               WRITE(GWMOUT,4020,ERR=990)                                                  
-            ELSEIF(RHSREU(I).EQ.0)THEN             ! NO ENTERING VARIABLE
-              WRITE(GWMOUT,4025,ERR=990)RHSRUB(I)+RHSDIFF
+            ELSEIF(LRHSREU.EQ.0)THEN                ! NO ENTERING VARIABLE
+              WRITE(GWMOUT,4025,ERR=990)RHSUB
             ELSE  
-              ENTER=GETNAME(RHSREU(I))             ! NAME OF ENTERING VARIABLE
-              LEAVE=GETNAME(RHSRLU(I))             ! NAME OF LEAVING VARIABLE
-              WRITE(GWMOUT,4030,ERR=990)RHSRUB(I)+RHSDIFF,ENTER,LEAVE
+              ENTER=GETNAME(LRHSREU)                ! NAME OF ENTERING VARIABLE
+              LEAVE=GETNAME(LRHSRLU)                ! NAME OF LEAVING VARIABLE
+              WRITE(GWMOUT,4030,ERR=990)RHSUB,ENTER,LEAVE
             ENDIF
   100     ENDDO
 C

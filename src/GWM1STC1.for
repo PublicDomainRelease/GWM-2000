@@ -301,7 +301,7 @@ C
 C***********************************************************************
       SUBROUTINE GWM1STC1FP(RSTRT,IPERT)
 C***********************************************************************
-C  VERSION: 20FEB2005
+C  VERSION: 22JULY2005
 C  PURPOSE - USE SIMULATION RESULTS TO COMPUTE RESPONSE MATRIX AND 
 C            AUGMENTED RIGHT HAND SIDE
 C-----------------------------------------------------------------------
@@ -309,7 +309,7 @@ C-----------------------------------------------------------------------
       USE GWM1DCV1, ONLY : FVBASE
       USE GWM1BAS1, ONLY : RMFILE
       USE GWM1RMS1, ONLY : SLPITCNT,SLPITPRT,IBASE,IREF,IRM,DELINC,
-     &                     RHSIN,RHSINF,RANGENAME,RANGENAMEF,NDV
+     &                     RHSIN,RHSINF,RANGENAME,RANGENAMEF,CONTYP,NDV
 C-----AMAT HAS LOCAL NAME RESMAT
       USE GWM1RMS1, ONLY : RHS,RESMAT=>AMAT
       INTEGER(I4B),INTENT(INOUT)::RSTRT
@@ -388,6 +388,11 @@ C-----STORE THE INITIAL RHS FOR USE IN OUTPUT
         RANGENAME(ROW+NDV-1)=STCNAME(ISTC)        ! LOAD FOR RANGE ANALYSIS OUTPUT
         RHSINF(ROW)= STCRHS(ISTC)                 ! STORE THE INPUT RHS
         RANGENAMEF(ROW+NDV-1)=STCNAME(ISTC)       ! LOAD FOR RANGE ANALYSIS OUTPUT
+        IF(ISTC.LE.NSF)THEN                       ! STREAMFLOW CONSTRAINT
+          CONTYP(ROW)=1                           ! SET FOR RANGE OUTPUT
+        ELSE                                      ! STREAM DEPLETION CONSTRAINT
+          CONTYP(ROW)=2                           ! THIS IS TRANSFORMED CONSTRAINT
+        ENDIF
   100 ENDDO
 C
 C-----FOR STREAM CONSTRAINTS, CONVERT STREAM DEPLETION TO STREAM FLOW
@@ -412,12 +417,12 @@ C
 C***********************************************************************
       SUBROUTINE GWM1STC1FPR(RSTRT,IREAD)
 C***********************************************************************
-C  VERSION: 20FEB2005
+C  VERSION: 22JULY2005
 C  PURPOSE - READ RESPONSE MATRIX AND AUGMENTED RIGHT HAND SIDE
 C-----------------------------------------------------------------------
       USE GWM1DCV1, ONLY : NFVAR,NEVAR,NBVAR,FVBASE
       USE GWM1BAS1, ONLY : RMFILE
-      USE GWM1RMS1, ONLY : RHSIN,RHSINF,RANGENAME,RANGENAMEF,NDV
+      USE GWM1RMS1, ONLY : RHSIN,RHSINF,RANGENAME,RANGENAMEF,CONTYP,NDV
 C-----AMAT HAS LOCAL NAME RESMAT 
       USE GWM1RMS1, ONLY : RESMAT => AMAT
       USE GWM1RMS1, ONLY : RHS,IBASE
@@ -465,8 +470,14 @@ C-----STORE THE INITIAL RHS FOR USE IN OUTPUT
         RANGENAME(ROW+NDV-1)=STCNAME(ISTC)        ! LOAD FOR RANGE ANALYSIS OUTPUT
         RHSINF(ROW)= STCRHS(ISTC)                 ! STORE THE INPUT RHS
         RANGENAMEF(ROW+NDV-1)=STCNAME(ISTC)       ! LOAD FOR RANGE ANALYSIS OUTPUT
+        IF(ISTC.LE.NSF)THEN                       ! STREAMFLOW CONSTRAINT
+          CONTYP(ROW)=1                           ! SET FOR RANGE OUTPUT
+        ELSE                                      ! STREAM DEPLETION CONSTRAINT
+          CONTYP(ROW)=2                           ! THIS IS TRANSFORMED CONSTRAINT
+        ENDIF
   100 ENDDO
 C
+C-----TRANSFORM STREAM DEPLETION CONSTRAINTS
       DO 200 I=NSF+1,NSF+NSD
         READ(RMFILE)STCSTATE(I)                   ! READ THE REFERENCE STATE 
         STCRHS(I) = STCSTATE(I) - STCRHS(I)       ! STCRHS IS NOW MINIMUM HEAD
@@ -486,11 +497,11 @@ C
 C***********************************************************************
       SUBROUTINE GWM1STC1FM(RSTRT,NSLK)
 C***********************************************************************
-C  VERSION: 20FEB2005
+C  VERSION: 22JULY2005
 C  PURPOSE - PLACE SLACK COEFFICIENTS IN LP MATRIX STARTING IN ROW RSTRT
 C-----------------------------------------------------------------------
       USE GWM1BAS1, ONLY : ONE
-      USE GWM1RMS1, ONLY : AMAT,CONEQU
+      USE GWM1RMS1, ONLY : AMAT
       INTEGER(I4B),INTENT(INOUT)::RSTRT
       INTEGER(I4B),INTENT(IN)::NSLK
 C-----LOCAL VARIABLES
@@ -506,7 +517,6 @@ C-----SET STREAM FLOW CONSTRAINT SLACKS
         ELSE
           AMAT(ROW,NSLK) = -ONE
         ENDIF
-        CONEQU(ROW)=.FALSE.                      ! SET LOGICAL FOR OUTPUT
   100 ENDDO
 C
 C-----SET NEXT STARTING LOCATION

@@ -555,7 +555,7 @@ C
 C***********************************************************************
       SUBROUTINE GWM1HDC1FP(RSTRT,IPERT)
 C***********************************************************************
-C     VERSION: 20FEB2005
+C     VERSION: 22JULY2005
 C     PURPOSE - USE SIMULATION RESULTS TO COMPUTE RESPONSE MATRIX AND 
 C            AUGMENTED RIGHT HAND SIDE
 C-----------------------------------------------------------------------
@@ -563,7 +563,7 @@ C-----------------------------------------------------------------------
       USE GWM1DCV1, ONLY : FVBASE
       USE GWM1OBJ1, ONLY : SOLNTYP
       USE GWM1RMS1, ONLY : SLPITCNT,SLPITPRT,IBASE,IREF,IRM,DELINC,
-     &                     RHSIN,RHSINF,RANGENAME,RANGENAMEF,NDV
+     &                     RHSIN,RHSINF,RANGENAME,RANGENAMEF,CONTYP,NDV
 C-----AMAT HAS LOCAL NAME RESMAT
       USE GWM1RMS1, ONLY : RHS,RESMAT => AMAT
       INTEGER(I4B),INTENT(INOUT)::RSTRT
@@ -641,6 +641,11 @@ C-----STORE THE INITIAL RHS FOR LATER OUTPUT
         RANGENAME(ROW+NDV-1)=HDCNAME(IHDC)        ! LOAD FOR RANGE ANALYSIS OUTPUT
         RHSINF(ROW)= HDCRHS(IHDC)                 ! STORE THE INPUT RHS
         RANGENAMEF(ROW+NDV-1)=HDCNAME(IHDC)       ! LOAD FOR RANGE ANALYSIS OUTPUT
+        IF(IHDC.GT.NHB.AND.IHDC.LE.NHB+NDD)THEN   ! DRAWDOWN CONSTRAINT
+          CONTYP(ROW)=2                           ! THIS IS TRANSFORMED CONSTRAINT
+        ELSE                                      ! NON-DRAWDOWN CONSTRAINT
+          CONTYP(ROW)=1                           ! SET FOR RANGE OUTPUT
+        ENDIF
   100 ENDDO
 C
 C-----FOR HEAD CONSTRAINTS, CONVERT DRAWDOWN TO HEAD BOUND
@@ -665,12 +670,12 @@ C
 C***********************************************************************
       SUBROUTINE GWM1HDC1FPR(RSTRT,IREAD)
 C***********************************************************************
-C     VERSION: 20FEB2005
+C     VERSION: 22JULY2005
 C     PURPOSE - READ RESPONSE MATRIX AND AUGMENTED RIGHT HAND SIDE
 C-----------------------------------------------------------------------
       USE GWM1BAS1, ONLY : RMFILE
       USE GWM1DCV1, ONLY : NFVAR,NEVAR,NBVAR,FVBASE
-      USE GWM1RMS1, ONLY : RHSIN,RHSINF,RANGENAME,RANGENAMEF,NDV
+      USE GWM1RMS1, ONLY : RHSIN,RHSINF,RANGENAME,RANGENAMEF,CONTYP,NDV
 C-----AMAT HAS LOCAL NAME RESMAT 
       USE GWM1RMS1, ONLY : RESMAT => AMAT
       USE GWM1RMS1, ONLY : RHS,IBASE
@@ -718,6 +723,11 @@ C-----STORE THE INITIAL RHS FOR LATER OUTPUT
         RANGENAME(ROW+NDV-1)=HDCNAME(IHDC)        ! LOAD FOR RANGE ANALYSIS OUTPUT
         RHSINF(ROW)= HDCRHS(IHDC)                 ! STORE THE INPUT RHS
         RANGENAMEF(ROW+NDV-1)=HDCNAME(IHDC)       ! LOAD FOR RANGE ANALYSIS OUTPUT
+        IF(IHDC.GT.NHB.AND.IHDC.LE.NHB+NDD)THEN   ! DRAWDOWN CONSTRAINT
+          CONTYP(ROW)=2                           ! THIS IS TRANSFORMED CONSTRAINT
+        ELSE                                      ! NON-DRAWDOWN CONSTRAINT
+          CONTYP(ROW)=1                           ! SET FOR RANGE OUTPUT
+        ENDIF
   100 ENDDO
 C
       DO 200 I=NHB+1,NHB+NDD
@@ -739,11 +749,11 @@ C
 C***********************************************************************
       SUBROUTINE GWM1HDC1FM(RSTRT,NSLK)
 C***********************************************************************
-C     VERSION: 20FEB2005
+C     VERSION: 22JULY2005
 C     PURPOSE: PLACE SLACK COEFFICIENTS IN LP MATRIX STARTING IN ROW RSTRT
 C-----------------------------------------------------------------------
       USE GWM1BAS1, ONLY : ONE
-      USE GWM1RMS1, ONLY : AMAT,CONEQU
+      USE GWM1RMS1, ONLY : AMAT
       INTEGER(I4B),INTENT(INOUT)::RSTRT
       INTEGER(I4B),INTENT(IN)::NSLK
 C-----LOCAL VARIABLES
@@ -759,13 +769,11 @@ C-----SET HEAD CONSTRAINT SLACKS/SURPLUSES
         ELSE
           AMAT(ROW,NSLK) = -ONE
         ENDIF
-        CONEQU(ROW)=.FALSE.                      ! SET LOGICAL FOR OUTPUT
   100 ENDDO
 C
 C-----SET HEAD DIFFERENCE CONSTRAINT SLACKS
       DO 200 ROW=RSTRT+NHB+NDD,RSTRT+HDCNUM-1
         AMAT(ROW,NSLK) = -ONE
-        CONEQU(ROW)=.FALSE.                      ! SET LOGICAL FOR OUTPUT
   200 ENDDO
 C
 C-----SET NEXT STARTING LOCATION

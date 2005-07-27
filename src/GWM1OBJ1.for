@@ -39,7 +39,7 @@ C
 C***********************************************************************
       SUBROUTINE GWM1OBJ1AR(FNAME,IOUT,NPER,PERLEN,NFVAR,NEVAR,NBVAR)
 C***********************************************************************
-C     VERSION: 20FEB2005
+C     VERSION: 21JULY2005
 C     PURPOSE: READ INPUT FROM THE OBJECTIVE-FUNCTION FILE
 C-----------------------------------------------------------------------
       USE GWM1BAS1, ONLY : ZERO
@@ -337,7 +337,8 @@ C
  7400 FORMAT(1X,/1X,'PROGRAM STOPPED. ',A,' WAS NOT DEFINED AS A',
      1  ' BINARY-VARIABLE NAME (BVNAME)',/,' IN THE DECISION-VARIABLE',
      2  ' FILE.')
- 7500 FORMAT(1X,/1X,'OBJECTIVE FUNCTION:',/)
+ 7500 FORMAT(/1X,'OBJECTIVE FUNCTION: (excluding flow duration terms)'
+     1   ,/)
  7510 FORMAT(1X,A3,3X,3(1X,A1,ES10.2,1X,A10))
  7520 FORMAT(7X,3(1X,A1,ES10.2,1X,A10))
  8000 FORMAT(/,1X,I8,' BYTES OF MEMORY ALLOCATED TO STORE DATA FOR',
