@@ -1,5 +1,5 @@
       MODULE GWM1BAS1
-C     VERSION: 20FEB2005
+C     VERSION: 22SEPT2005
       IMPLICIT NONE
       PRIVATE
       PUBLIC::GWMOUT,MPSFILE,RMFILE,ZERO,ONE,
@@ -14,7 +14,7 @@ C
 C-----DEFINE NUMERIC CONSTANTS AND UNIT NAMES
       REAL(DP),PARAMETER::ZERO=0.0D0, ONE=1.0D0
       REAL(DP),PARAMETER::SMALLEPS = 10.0D0**(-1*PRECISION(ONE) + 1)
-      REAL(DP),PARAMETER::BIGINF   = 10.0D0**RANGE(ONE)
+      REAL(DP),PARAMETER::BIGINF   = 10.0D0**(RANGE(ONE)/2)
       INTEGER(I4B),SAVE::GWMOUT,MPSFILE,RMFILE
 C
 C      SMALLEPS -value used to represent machine precision. SMALLEPS is used to 
@@ -25,7 +25,7 @@ C                 and upper bounds on variables.
 C      BIGINF  - value used to define machine infinity. BIGINF is used to set 
 C                 infinite upper bounds on slack and other variables, as the 
 C                 starting objective value in the branch and bound algorithm and
-C                 as a flag in range analysis.
+C                 as a flag in range analysis and computation of shadow prices.
 C      GWMOUT   -unit number for writing GWM output
 C      MPSFILE  -unit number for writing the MPS file
 C      RMFILE   -unit number for writing or reading the response matrix
@@ -133,7 +133,7 @@ C
 C***********************************************************************
       SUBROUTINE GWM1BAS1CS(CTYPE,CNAME,CARHS,CDIR,TFLG)
 C***********************************************************************
-C     VERSION: 20FEB2005
+C     VERSION: 21SEPT2005
 C     PURPOSE: WRITE STATUS OF CONSTRAINTS
 C-----------------------------------------------------------------------
       CHARACTER (LEN=*),INTENT(IN)::CTYPE
@@ -165,7 +165,9 @@ C
 	IF(TFLG.EQ.1)THEN                          ! WRITE CONSTRAINT STATUS
 	  WRITE(GWMOUT,1100)CTYPE,CNAME,CSTAT,ABS(CARHS) 
 	ELSEIF(TFLG.EQ.0)THEN                      ! WRITE SHADOW PRICE INFO
-        IF(CARHS.NE.ZERO)THEN 
+        IF(CARHS.EQ.BIGINF)THEN                  ! CONSTRAINT BINDING BUT 
+          WRITE(GWMOUT,1000)CTYPE,CNAME,CSTAT,ZERO  ! BUT SHADOW PRICE IS ZERO
+        ELSEIF(CARHS.NE.ZERO)THEN 
 	    WRITE(GWMOUT,1000)CTYPE,CNAME,CSTAT,CARHS 
         ELSE                                     ! NO SHADOW PRICE AVAILABLE
 	    WRITE(GWMOUT,1050)CTYPE,CNAME,CSTAT

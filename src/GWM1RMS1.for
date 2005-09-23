@@ -2897,7 +2897,7 @@ C
 C***********************************************************************
       SUBROUTINE GWM1RMS1FP(MFCNVRG,IPERT,NPERT,LASTSIM)
 C***********************************************************************
-C  VERSION: 20FEB2005
+C  VERSION: 23SEPT2005
 C  PURPOSE - USE SIMULATION RESULTS TO COMPUTE RESPONSE MATRIX AND 
 C            AUGMENTED RIGHT HAND SIDE; INCREMENT THE PERTURBATION INDEX
 C-----------------------------------------------------------------------
@@ -2923,7 +2923,13 @@ C
 C-----IF LAST SIMULATION SKIP TESTS
       IF(LASTSIM)THEN
         IPERT = IPERT+1                    ! INCREMENT TO TERMINATE LOOP
-        CALL GWM1RMS1OT(3)                 ! WRITE CONSTRAINTS STATUS
+        IF(MFCNVRG.AND..NOT.DEWATER)THEN   ! FINAL FLOW PROCESS CONVERGED
+          CALL GWM1RMS1OT(3)               ! WRITE CONSTRAINT STATUS
+        ELSEIF(MFCNVRG.AND.DEWATER)THEN    ! FINAL FLOW PROCESS HAS DEWATERING
+          CALL GWM1RMS1OT(4)               ! WRITE CONSTRAINTS AND WARNING 
+        ELSEIF(.NOT.MFCNVRG)THEN           ! FINAL FLOW PROCESS DID NOT CONVERGE
+          CALL GWM1RMS1OT(5)               ! WRITE MESSAGE 
+        ENDIF
         RETURN
       ENDIF
 C
@@ -3195,7 +3201,7 @@ C
 C***********************************************************************
       SUBROUTINE GWM1RMS1AP(GWMCNVRG)
 C***********************************************************************
-C  VERSION: 20FEB2005
+C  VERSION: 21SEPT2005
 C  PURPOSE - CALL THE APPROPRIATE SOLVER FOR THE OPTIMIZATION PROBLEM
 C              AND RETURN THE SOLUTION WITH SIGN GIVEN TO PUMPING RATES
 C-----------------------------------------------------------------------
@@ -3261,12 +3267,18 @@ C***********************************************************************
       USE GWM1RMS1LP, ONLY : GWM1SIMPLEX1,BSOLVE
       USE GWM1BAS1, ONLY : GWM1BAS1PS
       INTEGER(I4B)::J,II
+      REAL(DP)::LHS
+      REAL(DP), ALLOCATABLE :: RHS1(:)
 C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+C
+C-----ALLOCATE MEMORY FOR USE BY BRANCH AND BOUND ALGORITHM
+      ALLOCATE (RHS1(NCON),STAT=ISTAT)
+      IF(ISTAT.NE.0)GOTO 992
 C
 C-----SET BOUNDS AND COSTS ON SLACK/SURPLUS VARIABLES
       DO 100 I=NDV,NV
-          BNDS(I) = BIGINF
-          CST(I) = ZERO
+        BNDS(I) = BIGINF
+        CST(I) = ZERO
   100 ENDDO
 C
 C-----CHECK THAT A MATRIX HAS NO REDUNDANT ROWS
@@ -3284,6 +3296,7 @@ C-----CHECK THAT A MATRIX HAS NO REDUNDANT ROWS
      &          '  REDUNDANT CONSTRAINTS MAY LEAD TO SIMPLEX FAILURE',0)
           ENDIF
   120   ENDDO
+        RHS1(I) = RHS(I)                         ! SAVE RHS FOR COMPARISON
   140 ENDDO
 C
 C-----SOLVERS TREAT EXTRACTION FLOWS AS POSITIVE.
@@ -3329,15 +3342,40 @@ C-----IF DUAL VALUES ARE WITHIN ROUNDOFF ERROR OF ZERO, RESET TO ZERO
         IF(ABS(RHS(I)).LT.SMALLEPS) RHS(I)=ZERO
         IF(OBJTYP.EQ.'MAX')RHS(I)=-RHS(I)    ! CONVERT DUALS FOR MAXIMIZATION PROBLEM
   500 ENDDO
-
+C
+C-----FOR EACH CONSTRAINT DETERMINE IF IT IS BINDING AND IF DUAL IS ZERO
+      DO 600 I=1,NCON
+	  LHS = ZERO
+        DO 590 J=1,NFVAR+NEVAR+NBVAR
+          LHS = LHS + AMAT(I,J)*CST(J)           ! COMPUTE LHS OF CONSTRAINT
+  590   ENDDO
+        IF(ABS(LHS-RHS1(I)).LT.SMALLEPS)THEN     ! CONSTRAINT IS BINDING
+          IF(RHS(I).EQ.ZERO)THEN                 ! BUT DUAL VALUE IS ZERO
+            RHS(I) = BIGINF                      ! SO SET IT TO BIGINF AS FLAG
+          ENDIF
+        ENDIF
+  600 ENDDO
+      DEALLOCATE (RHS1,STAT=ISTAT)                ! DEALLOCATE STORED RHS
+      IF(ISTAT.NE.0)GOTO 993
 C
 C-----MODFLOW TREATS EXTRACTION FLOWS AS NEGATIVE.
 C     SO, FOR EXTRACTION FLOWS, REVERSE THE DIRECTION OF OPTIMAL FLOW RATE
-      DO 600 I=1,NFVAR
+      DO 700 I=1,NFVAR
         IF (FVDIR(I).EQ.2) CST(I) = -CST(I)
-  600 ENDDO
+  700 ENDDO
 C
       RETURN
+C
+  992 CONTINUE                                   ! ARRAY-ALLOCATING ERROR
+      WRITE(*,9920)
+ 9920 FORMAT(/,'** ERROR ALLOCATING ARRAY RHS1-- STOP IN SGWM1RMS1AP')
+      CALL USTOP(' ')
+C
+  993 CONTINUE                                   ! ARRAY-DEALLOCATING ERROR
+      WRITE(*,9930)
+ 9930 FORMAT(/,'** ERROR DEALLOCATING ARRAY RHS1-- STOP IN SGWM1RMS1AP')
+      CALL USTOP(' ')
+C
       END SUBROUTINE SGWM1RMS1AP
 C
       END SUBROUTINE GWM1RMS1AP
@@ -3618,7 +3656,7 @@ C
 C***********************************************************************
       SUBROUTINE GWM1RMS1OT(IFLG)
 C***********************************************************************
-C  VERSION: 22JULY2005
+C  VERSION: 23SEPT2005
 C  PURPOSE - WRITE OUTPUT FOR GWM SOLUTION  
 C-----------------------------------------------------------------------
       USE GWM1BAS1, ONLY : ZERO,ONE,BIGINF,GWMOUT
@@ -3835,7 +3873,7 @@ C
         ENDIF
 C
 C-----WRITE FINAL CONSTRAINT STATUS
-      ELSEIF(IFLG.EQ.3)THEN          
+      ELSEIF(IFLG.EQ.3 .OR. IFLG.EQ.4)THEN          
         WRITE(GWMOUT,1000,ERR=990)'Final Flow Process Simulation'
         CALL GWM1BAS1PF('      Status of Simulation-Based Constraints '
      &       ,0,ZERO)
@@ -3851,7 +3889,13 @@ C-----WRITE FINAL CONSTRAINT STATUS
         RSTRT = 0                                 ! RSTRT IS A DUMMY ARGUMENT HERE
         CALL GWM1HDC1OT(RSTRT,1)                  ! WRITE HEAD CONSTRAINT STATUS
         CALL GWM1STC1OT(RSTRT,1)                  ! WRITE STREAM CONSTRAINT STATUS
-        WRITE(GWMOUT,7000,ERR=990)
+	  WRITE(GWMOUT,7000,ERR=990)
+        IF(IFLG.EQ.4)WRITE(GWMOUT,7010,ERR=990)   ! DEWATERING IN CONSTRAINED HEADS
+C
+C-----WRITE WARNING MESSAGE: FINAL FLOW PROCESS FAILED TO CONVERGE
+      ELSEIF(IFLG.EQ.5)THEN          
+        WRITE(GWMOUT,1000,ERR=990)'Final Flow Process Simulation'
+        WRITE(GWMOUT,7020,ERR=990)
       ENDIF
 C
  1000 FORMAT(/,70('-'),/,T16,A,/,70('-'))
@@ -3908,6 +3952,13 @@ C
      &  'constraints computed directly by the flow process ',/,
      &  '    may differ slightly from those computed using ',
      &  'the linear program.  ')
+ 7010 FORMAT(/,
+     &  '    WARNING: At least one constrained head dewatered',
+     &  ' in the final flow',/,'             process simulation')
+ 7020 FORMAT(/,
+     &  '  WARNING: Final flow process simulation failed',
+     &  ' to converge ',/,'    when using the optimal',
+     &  ' rates for flow variables. ')
 C
       RETURN
 C
