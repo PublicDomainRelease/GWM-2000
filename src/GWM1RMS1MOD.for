@@ -1,11 +1,11 @@
       MODULE GWM1RMS1
-C     VERSION: 22JULY2005
+C     VERSION: 19JAN2006
       IMPLICIT NONE
       PRIVATE
       PUBLIC::IRM,AMAT,CST,BNDS,RHS,NRMC,NV,NDV,NCON,NCONF,NVF,NSIGDIG,
      1        NPGNMX,IPGNA,NPGNA,NINFMX,DINIT,DMIN,DSC,DELTA,AFACT,
      2        PGFACT,LPITMAX,VARBASE,MFCNVRG,IBASE,IREF,DEWATER,
-     3        DELINC,NONLIN,SLPITCNT,SLPITMAX,LASTLP,
+     3        DEWATERQ,DELINC,NONLIN,SLPITCNT,SLPITMAX,LASTLP,NRESET,
      4        SLPITPRT,SLPINFCNT,SLPVCRIT,SLPZCRIT,OBJOLD,FVOLD,BBITMAX,
      5        BBITPRT,RHSREL,RHSRLL,RHSREU,RHSRLU,CSTREL,CSTRLL,CSTREU,
      6        CSTRLU,RHSRLB,RHSRUB,RHSROR,CSTROR,CSTRLB,CSTRUB,CONTYP,
@@ -19,7 +19,7 @@ C-----GENERAL RMS VARIABLES
       LOGICAL(LGT),SAVE::NONLIN
       INTEGER(I4B),SAVE::IBASE,IREF
       REAL(DP),SAVE::OBJ
-      LOGICAL(LGT),SAVE::MFCNVRG,DEWATER
+      LOGICAL(LGT),SAVE::MFCNVRG,DEWATER,DEWATERQ
       INTEGER(I4B),SAVE::NRMC,NV,NDV,NCON,NCONF,NVF
       CHARACTER(LEN=10),SAVE,ALLOCATABLE::RANGENAME(:),RANGENAMEF(:)
       INTEGER(I4B),SAVE,ALLOCATABLE::CONTYP(:)
@@ -33,7 +33,8 @@ C       NONLIN   -indicator that problem will be solved as a nonlinear problem
 C       IBASE    -indicator that base values have been read (1-yes, 0-no)
 C       IREF     -indicator that reference simulation is needed
 C       OBJ      -current value of objective function
-C       DEWATER  -status of presence of dewatering in most recent simulation
+C       DEWATER  -status of presence of dewatering at constraints in most recent simulation
+C       DEWATERQ -status of presence of dewatering at wells in most recent simulation
 C       MFCNVRG  -status of flow-process convergence for most recent simulation
 C       RANGENAME-mapping from a variable number to a name; used for output 
 C       RHSIN    -original input value of the rhs for each constraint;used for output
@@ -45,7 +46,7 @@ C-----VARIABLES FOR RESPONSE MATRIX AND PERTURBATION CALCULATIONS
       INTEGER(I4B),SAVE::IRM
       REAL(DP),SAVE::DINIT,DMIN,DSC,DELTA,AFACT,PGFACT
       REAL(DP),SAVE,ALLOCATABLE::DELINC(:)
-      INTEGER(I4B),SAVE::NSIGDIG,NPGNMX,IPGNA,NPGNA
+      INTEGER(I4B),SAVE::NSIGDIG,NPGNMX,IPGNA,NPGNA,NRESET
       REAL(DP),SAVE::VARBASE,HCLOSEG
 C
 C       IRM      -indicator for input/output of response matrix
@@ -53,6 +54,7 @@ C       DINIT,DMIN,DSC -input parameters that control perturbation parameter
 C       DELTA    -computed value of perturbation parameter
 C       DELINC   -array for storing individual perturbation values
 C       AFACT    -relaxation parameter on the base solution
+C       NRESET   -counter for number of base solution resets
 C       PGFACT   -perturbation step length adjustment factor
 C       NSIGDIG  -required number of significant digits in response coefficient
 C       HCLOSEG  -flow process convergence criteria used for perturbation testing

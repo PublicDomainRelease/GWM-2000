@@ -2034,7 +2034,7 @@ C
       PRIVATE
       PUBLIC::GWM1RMS1AR,GWM1RMS1PL,GWM1RMS1PP,GWM1RMS1FP,GWM1RMS1FM,
      1        GWM1RMS1AP,GWM1RMS1MPS,GWM1RMS1SLP,GWM1RMS1LP_CHKSOL,
-     2        GWM1RMS1OT
+     2        GWM1RMS1OT,GWM1RMS1OS1,GWM1RMS1OS2
 C
       INTEGER, PARAMETER :: I4B = SELECTED_INT_KIND(9)
       INTEGER, PARAMETER :: I2B = SELECTED_INT_KIND(4)
@@ -2514,13 +2514,14 @@ C
 C***********************************************************************
       SUBROUTINE GWM1RMS1PL(IPERT,NPERT,FIRSTSIM,LASTSIM)
 C***********************************************************************
-C  VERSION: 20FEB2005
+C  VERSION: 19JAN2006
 C  PURPOSE - SET THE TERMINAL VALUE OF THE PERTURBATION LOOP
 C            AND READ THE RESPONSE MATRIX FROM FILE IF AVAILABLE 
 C-----------------------------------------------------------------------
       USE GWM1RMS1, ONLY : SLPITCNT,SLPITMAX,SLPINFCNT,IBASE,IREF,
-     &                    OBJOLD,MFCNVRG,DELTA,DELINC,NRMC,NCON,NDV,IRM
-      USE GWM1DCV1, ONLY : NFVAR,NBVAR,NEVAR,FVBASE,FVMAX,FVDIR
+     &                     OBJOLD,MFCNVRG,DELTA,DELINC,NRMC,NCON,NDV,
+     &                     IRM,NRESET
+      USE GWM1DCV1, ONLY : NFVAR,NBVAR,NEVAR,FVBASE,FVMAX,FVDIR,FVINI
       USE GWM1HDC1, ONLY : HDCRHS,HDCSTATE0,HDCNAME,HDCDIR
       USE GWM1OBJ1, ONLY : SOLNTYP
       USE GWM1BAS1, ONLY : ZERO,BIGINF,RMFILE,GWMOUT
@@ -2535,6 +2536,7 @@ C-------THIS IS THE FIRST TIME THROUGH THIS SUBROUTINE
         IF(SOLNTYP.EQ.'SLP')THEN                 ! PERFORM SLP INITIALIZATIONS
            SLPITCNT=0                            ! SLP ITERATION COUNTER
            SLPINFCNT=0                           ! SLP FAILURE COUNTER
+           NRESET=0                              ! BASE RESET COUNTER
            OBJOLD  = SQRT(BIGINF)                ! CONVERGENCE COMPARISON
         ENDIF
         IF(IRM.EQ.1 .OR. IRM.EQ.2)THEN           ! RESPONSE MATRIX NEEDED
@@ -2597,6 +2599,11 @@ C
         WRITE(GWMOUT,1000,ERR=990)TNFVAR,TNEVAR,TNBVAR,IBASE ! NOT A VALID MATRIX
         CALL USTOP(' ')
       ENDIF  
+      IF(IBASE.EQ.1)THEN                         ! BASE VALUES ARE AVAILABLE
+        DO 100 I=1,NFVAR                         
+          FVBASE(I)=FVINI(I)                     ! LOAD BASE FLOWS
+  100   ENDDO                                    
+      ENDIF
 C
       CALL GWM1BAS1PF(
      &'---------------------------------------------------------------'
@@ -2607,22 +2614,20 @@ C
      &                    ,0,ZERO)
       CALL GWM1BAS1PS('  Reading Response Matrix',0)
 C
-      IF(IBASE.EQ.1)THEN                       
-C-------READ THE REFERENCE STATE      
-        RSTRT = 1
-        CALL GWM1HDC1FPR(RSTRT,-1)
-        CALL GWM1STC1FPR(RSTRT,-1)
-      ENDIF
-C-------READ THE BASE STATE
+C-----PERFORM SOME INITIALIZATIONS AND READ REFERENCE STATE, IF ANY      
+      RSTRT = 1
+      CALL GWM1HDC1FPR(RSTRT,-1)
+      CALL GWM1STC1FPR(RSTRT,-1)
+C-----READ THE BASE STATE
       RSTRT = 1
       CALL GWM1HDC1FPR(RSTRT, 0)
       CALL GWM1STC1FPR(RSTRT, 0)
-C-------READ THE RESPONSE MATRIX
+C-----READ THE RESPONSE MATRIX
       RSTRT = 1
       CALL GWM1HDC1FPR(RSTRT, 1)
       CALL GWM1STC1FPR(RSTRT, 1)
 C
-C------WRITE CONSTRAINT STATUS
+C-----WRITE CONSTRAINT STATUS
       CALL GWM1RMS1OT(1)
 C
  1000 FORMAT('PROGRAM STOPPED: SPECIFIED RESPONSE MATRIX ',/,
@@ -2676,16 +2681,13 @@ C***********************************************************************
       SUBROUTINE GWM1RMS1SLP_SETBASE 
 C***********************************************************************
       USE GWM1RMS1, ONLY : CST,FVOLD
-      USE GWM1DCV1, ONLY : NFVAR,FVNAME,FVBASE,NEVAR,EVBASE,NBVAR,BVBASE
-      REAL(DP)::ALPHA
+      USE GWM1DCV1, ONLY : NFVAR,FVBASE,NEVAR,EVBASE,NBVAR,BVBASE
 C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 C
-C-----CALCULATE NEW BASE PUMP RATES AND STORE IN FVBASE
-      ALPHA = 1.0
+C-----STORE CURRENT VALUES OF FLOW VARIABLES IN FVBASE
       DO 100 I=1,NFVAR
-        FVOLD(I) = FVBASE(I)                    ! SAVE OLD SOLUTION
-C-------CALCULATE NEW BASE PUMP RATE USING ALPHA AND OLD RATES
-        FVBASE(I) = (1.0-ALPHA)*FVBASE(I)+ALPHA*CST(I)
+        FVOLD(I)  = FVBASE(I)                    ! SAVE THE OLD SOLUTION
+        FVBASE(I) = CST(I)                     
   100 ENDDO
 C-----RECORD CURRENT VALUES OF EXTERNAL VARIABLES FOR CONVERGENCE TEST
       DO 200 I=1,NEVAR
@@ -2705,12 +2707,13 @@ C
 C***********************************************************************
       SUBROUTINE GWM1RMS1PP(IOUT,MFCNVRG,IPERT,FIRSTSIM,LASTSIM)
 C***********************************************************************
-C  VERSION: 20FEB2005
+C  VERSION: 18JAN2006
 C  PURPOSE - SET OUTPUT FLAGS AT BEGINNING OF SIMULATION,
 C            PERTURB THE PUMPING RATE FOR RESPONSE MATRIX GENERATION
 C-----------------------------------------------------------------------
       USE GWM1RMS1, ONLY : NONLIN,NCON,NDV,FVOLD,AFACT,DEWATER,IPGNA,
-     1                     DELINC,SLPITCNT,VARBASE,PGFACT,IBASE,IREF
+     1                     DELINC,SLPITCNT,VARBASE,PGFACT,IBASE,IREF,
+     2                     DEWATERQ
       USE GWM1DCV1, ONLY : NFVAR,FVBASE,FVINI,FVMAX,FVNAME
       USE GWM1BAS1, ONLY : ZERO,GWMOUT
       USE GWM1OBJ1, ONLY : SOLNTYP
@@ -2726,13 +2729,18 @@ C-----------------------------------------------------------------------
       INTEGER(I4B)::I
 C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 C
-      IF(IPERT.LE.0)THEN
+C
+      IF(LASTSIM)THEN                            ! LAST SIMULATION
+        CALL SGWM1RMS1PP(4)
+      ELSEIF(IPERT.LE.0)THEN
 C-------THIS IS A BASE OR REFERENCE SIMULATION 
         IF(FIRSTSIM .AND. .NOT.LASTSIM)THEN
           DEWATER = .FALSE.                      ! INITIALIZE DEWATER FLAG
+          DEWATERQ= .FALSE.                      ! INITIALIZE DEWATERQ FLAG
           CALL SGWM1RMS1PP(1)
         ELSEIF(.NOT.FIRSTSIM .AND. .NOT.LASTSIM)THEN
-          IF(MFCNVRG.AND..NOT.DEWATER)THEN       ! FLOW PROCESS SUCCESSFUL
+          IF(MFCNVRG.AND..NOT.DEWATER.
+     &               AND..NOT.DEWATERQ)THEN      ! FLOW PROCESS SUCCESSFUL
             CALL SGWM1RMS1PP(2)
           ELSE                                   ! FLOW PROCESS FAILED 
             IF(SLPITCNT.GT.0)THEN                ! MUST BE AN SLP BASE SIMULATION
@@ -2751,20 +2759,25 @@ C-------THIS IS A BASE OR REFERENCE SIMULATION
      &             ,0,ZERO)
                 CALL USTOP
      &           ('FLOW PROCESS PRODUCED DEWATERED CONSTRAINED HEADS')
+              ELSEIF(DEWATERQ)THEN
+                CALL GWM1BAS1PF
+     &           ('FLOW PROCESS PRODUCED DEWATERED ACTIVE WELL CELL'
+     &             ,0,ZERO)
+                CALL USTOP
+     &           ('FLOW PROCESS PRODUCED DEWATERED ACTIVE WELL CELL')
               ENDIF
             ENDIF 
+            DEWATER = .FALSE.                    ! RESET DEWATER FLAG
+            DEWATERQ= .FALSE.                    ! INITIALIZE DEWATERQ FLAG
           ENDIF
-C
-        ELSEIF(LASTSIM)THEN                      ! LAST SIMULATION
-          CALL SGWM1RMS1PP(4)
         ENDIF
-        IF((SOLNTYP.EQ.'LP'.OR.SLPITCNT.EQ.0)! IF FIRST BASE SIMULATION 
-     &     .AND. IBASE.EQ.1.AND.IREF.EQ.1  ! BASE AND REFERENCE FLOWS ARE NOT SAME;
-     &     .AND. IPERT.EQ.0)THEN           ! REFERENCE SIMULATION HAS BEEN PERFORMED;
-          DO 100 I=1,NFVAR                       !    
-            FVBASE(I)=FVINI(I)                   ! FVBASE HAD REFERENCE
-  100     ENDDO                                  ! FLOW, NOW LOAD UP
-        ENDIF                                    ! INITIAL FLOWS
+        IF(IPERT.EQ.0  .AND.                     ! THIS IS A BASE SIMULATION
+     &    (SOLNTYP.EQ.'LP'.OR.SLPITCNT.EQ.0)     ! THIS IS THE FIRST ONE 
+     &    .AND. IBASE.EQ.1)THEN                  ! BASE VALUES ARE AVAILABLE
+          DO 100 I=1,NFVAR                          
+            FVBASE(I)=FVINI(I)                   ! LOAD BASE VALUES TO FVBASE 
+  100     ENDDO                                  
+        ENDIF                                    
       ELSEIF(IPERT.GT.0)THEN
 C-------THIS IS A PERTURBATION SIMULATION
         IF(IPERT.EQ.1.AND.IPGNA.EQ.0)THEN        ! WRITE PERTURBATION HEADER
@@ -2772,6 +2785,8 @@ C-------THIS IS A PERTURBATION SIMULATION
         ENDIF
         IF(IPGNA.GT.0)THEN                       ! PERTURBATION NOT SUCCESSFUL
           CALL GWM1RMS1PP_RESETDEL               ! RESET THE PERTURBATION
+          DEWATER = .FALSE.                      ! RESET DEWATER FLAG
+          DEWATERQ= .FALSE.                      ! INITIALIZE DEWATERQ FLAG
         ENDIF
         VARBASE = FVBASE(IPERT)                  ! SAVE BASE PUMPING RATE 
         FVBASE(IPERT) = VARBASE + DELINC(IPERT)  ! PERTURB PUMPING RATE
@@ -2893,23 +2908,84 @@ C
 C
       END SUBROUTINE GWM1RMS1PP
 C
+C***********************************************************************
+      SUBROUTINE GWM1RMS1OS1(NWELLS,MXWELL,WELL,
+     1        NCOL,NROW,NLAY,NWELVL,HNEW,HDRY)
+C***********************************************************************
+C     VERSION: 17JAN2006
+C     PURPOSE: CHECK THAT NO UNMANAGED WELL CELL HAS BEEN DEWATERED
+C-----------------------------------------------------------------------
+      USE GWM1RMS1, ONLY : DEWATERQ
+      INTEGER(I4B),INTENT(IN):: NWELLS,MXWELL,NWELVL,NCOL,NROW,NLAY
+      REAL(DP),INTENT(IN)::HNEW(NCOL,NROW,NLAY)
+      REAL(SP),INTENT(IN)::HDRY
+      REAL(SP),INTENT(IN)::WELL(NWELVL,MXWELL)
+C-----LOCAL VARIABLES
+      REAL(DP)::STATE
+      INTEGER(I4B)::L,IL,IR,IC
+C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+C
+C-----EXAMINE UNMANAGED WELLS
+      DO 100 L=1,NWELLS
+        IR=WELL(2,L)
+        IC=WELL(3,L)
+        IL=WELL(1,L)
+        STATE = HNEW(IC,IR,IL)
+        IF(REAL(STATE,SP).EQ.HDRY)DEWATERQ=.TRUE.         ! CELL HAS DEWATERED
+  100 CONTINUE
+C
+      RETURN
+      END SUBROUTINE GWM1RMS1OS1
 C
 C***********************************************************************
-      SUBROUTINE GWM1RMS1FP(MFCNVRG,IPERT,NPERT,LASTSIM)
+      SUBROUTINE GWM1RMS1OS2(NCOL,NROW,NLAY,KPER,HNEW,HDRY)
 C***********************************************************************
-C  VERSION: 23SEPT2005
+C     VERSION: 17JAN2006
+C     PURPOSE: CHECK THAT NO MANAGED WELL CELL HAS BEEN DEWATERED
+C-----------------------------------------------------------------------
+      USE GWM1RMS1, ONLY : DEWATERQ
+	USE GWM1DCV1, ONLY : NFVAR,FVNCELL,FVKLOC,FVILOC,FVJLOC,FVSP
+      INTEGER(I4B),INTENT(IN)::NCOL,NROW,NLAY,KPER
+      REAL(DP),INTENT(IN)::HNEW(NCOL,NROW,NLAY)
+      REAL(SP),INTENT(IN)::HDRY
+C-----LOCAL VARIABLES
+      REAL(DP)::STATE
+      INTEGER(I4B)::I,K,IL,IR,IC
+C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+C
+C-----EXAMINE MANAGED WELLS
+      DO 200 I=1,NFVAR                      ! LOOP OVER GWM FLOW VARIABLES
+        IF(FVSP(I,KPER)) THEN               ! FLOW VARIABLE ACTIVE IN STRESS PERIOD
+          DO 210 K=1,FVNCELL(I)             ! LOOP OVER CELLS FOR THIS VARIABLE
+            IL = FVKLOC(I,K)                ! ASSIGN CELL LAYER
+            IR = FVILOC(I,K)                ! ASSIGN CELL ROW
+            IC = FVJLOC(I,K)                ! ASSIGN CELL COLUMN
+            STATE = HNEW(IC,IR,IL)
+            IF(REAL(STATE,SP).EQ.HDRY)DEWATERQ=.TRUE.  ! CELL HAS DEWATERED
+  210     ENDDO
+        ENDIF
+  200 ENDDO
+C
+      RETURN
+      END SUBROUTINE GWM1RMS1OS2
+C
+C***********************************************************************
+      SUBROUTINE GWM1RMS1FP(MFCNVRG,IPERT,NPERT,FIRSTSIM,LASTSIM)
+C***********************************************************************
+C  VERSION: 19JAN2005
 C  PURPOSE - USE SIMULATION RESULTS TO COMPUTE RESPONSE MATRIX AND 
 C            AUGMENTED RIGHT HAND SIDE; INCREMENT THE PERTURBATION INDEX
 C-----------------------------------------------------------------------
-      USE GWM1RMS1, ONLY : IPGNA,IRM,NCON,NDV,IBASE,DEWATER,
-     1                  HCLOSEG,SLPITCNT,SLPITPRT,DELINC,NPGNMX,VARBASE
+      USE GWM1RMS1, ONLY : IPGNA,IRM,NCON,NDV,IBASE,DEWATER,DEWATERQ,
+     1                     HCLOSEG,SLPITCNT,SLPITPRT,DELINC,NPGNMX,
+     2                     VARBASE,NRESET,IREF
       USE GWM1DCV1, ONLY : NFVAR,NEVAR,NBVAR,FVBASE
       USE GWM1BAS1, ONLY : ZERO,RMFILE
       USE GWM1OBJ1, ONLY : SOLNTYP
       USE GWM1HDC1, ONLY : GWM1HDC1FP 
       USE GWM1STC1, ONLY : GWM1STC1FP 
       USE GWM1BAS1, ONLY : GWM1BAS1PF
-      LOGICAL(LGT),INTENT(IN)::MFCNVRG,LASTSIM
+      LOGICAL(LGT),INTENT(IN)::MFCNVRG,FIRSTSIM,LASTSIM
       INTEGER(I4B),INTENT(INOUT)::IPERT, NPERT 
       INTERFACE  
         SUBROUTINE USTOP(STOPMESS)
@@ -2923,9 +2999,11 @@ C
 C-----IF LAST SIMULATION SKIP TESTS
       IF(LASTSIM)THEN
         IPERT = IPERT+1                    ! INCREMENT TO TERMINATE LOOP
-        IF(MFCNVRG.AND..NOT.DEWATER)THEN   ! FINAL FLOW PROCESS CONVERGED
+        IF(MFCNVRG.AND..NOT.DEWATER
+     &            .AND..NOT.DEWATERQ)THEN  ! FINAL FLOW PROCESS CONVERGED
           CALL GWM1RMS1OT(3)               ! WRITE CONSTRAINT STATUS
-        ELSEIF(MFCNVRG.AND.DEWATER)THEN    ! FINAL FLOW PROCESS HAS DEWATERING
+        ELSEIF(MFCNVRG.AND.
+     &        (DEWATER.OR.DEWATERQ))THEN   ! FINAL FLOW PROCESS HAS DEWATERING
           CALL GWM1RMS1OT(4)               ! WRITE CONSTRAINTS AND WARNING 
         ELSEIF(.NOT.MFCNVRG)THEN           ! FINAL FLOW PROCESS DID NOT CONVERGE
           CALL GWM1RMS1OT(5)               ! WRITE MESSAGE 
@@ -2935,12 +3013,22 @@ C-----IF LAST SIMULATION SKIP TESTS
 C
 C-----TEST FOR PROBLEMS IN THE SIMULATION RESULTS
       IF(IPERT.LE.0.AND.                   ! THIS IS A BASE OR REFERENCE
-     &   (.NOT.MFCNVRG.OR.DEWATER))THEN    ! SIMULATION AND FLOW PROCESS
-        RETURN                             ! FAILED TO CONVERGE OR DEWATERED
+     &   (.NOT.MFCNVRG                     ! SIMULATION AND FLOW PROCESS
+     &     .OR.DEWATER.OR.DEWATERQ))THEN   ! FAILED TO CONVERGE OR DEWATERED
+        NRESET = NRESET + 1                ! INCREMENT BASE RESET COUNTER 
+        IF(NRESET.GT.NPGNMX)THEN           ! TOO MANY ATTEMPTS; STOP PROGRAM 
+          CALL GWM1BAS1PF('BASE RESET ATTEMPTS EXCEED MAXIMUM'
+     &                     ,0,ZERO)
+          CALL USTOP('BASE RESET ATTEMPTS EXCEED MAXIMUM')
+        ENDIF
+        RETURN                           
 C
       ELSEIF(IPERT.EQ.0                    ! THIS IS A BASE SIMULATION
-     &       .AND.MFCNVRG.AND..NOT.DEWATER)THEN ! WHICH IS SUCCESSFUL, SO
+     &       .AND.MFCNVRG 
+     &       .AND..NOT.DEWATER
+     &       .AND..NOT.DEWATERQ)THEN       ! WHICH IS SUCCESSFUL, SO
         NPGNA = 0                          ! INITIALIZE PERTURBATION COUNTER
+        NRESET = 0                         ! REZERO BASE RESET COUNTER
 C
       ELSEIF(IPERT.GT.0)THEN               ! THIS IS A PERTURBATION SIMULATION
         CALL SGWM1RMS1FP                   ! TEST IT FOR GOOD RESPONSE
@@ -2965,9 +3053,9 @@ C-----RESTORE ORIGINAL FLOW RATE FOR PERTURBATION SIMULATION
         FVBASE(IPERT) = VARBASE            
       ENDIF
 C
-C-----WRITE OUTPUT FOR BASE SIMULATIONS
-      IF(IPERT.EQ.0)THEN                   ! THIS IS A BASE SIMULATION
-        IF(IRM.EQ.1)WRITE(RMFILE)NFVAR,NEVAR,NBVAR,IBASE ! WRITE HEADER FOR TEST
+C-----WRITE RESPONSE MATRIX OUTPUT HEADER FOR FIRST SIMULATION
+      IF(IRM.EQ.1.AND.FIRSTSIM)THEN
+        WRITE(RMFILE)NFVAR,NEVAR,NBVAR,IBASE ! WRITE HEADER FOR TEST
       ENDIF
 C
 C-----SET RSTRT, THE ROW LOCATION FOR NEXT SET OF CONSTRAINTS
@@ -3011,7 +3099,7 @@ C
 C   PURPOSE - TEST RESULTS OF PERTURBED SIMULATION FOR GOOD RESPONSE
 C-----------------------------------------------------------------------
       USE GWM1BAS1, ONLY : ZERO
-      USE GWM1RMS1, ONLY : AMAT,DELINC,NRMC,NSIGDIG,DEWATER
+      USE GWM1RMS1, ONLY : AMAT,DELINC,NRMC,NSIGDIG,DEWATER,DEWATERQ
       USE GWM1HDC1, ONLY : HDCNUM,HDCSTATE,HDCSTATE0
       USE GWM1STC1, ONLY : NSF,NSD
       USE GWM1STC1, ONLY : STCNUM,STCSTATE,STCSTATE0
@@ -3059,12 +3147,22 @@ C-----CHECK IF RESPONSE COEFFICIENTS HAVE SUFFICIENT PRECISION
       ENDIF 
 C
 C-----CHECK IF ANY HEAD CELLS HAVE BECOME DEWATERED
-      IF(DEWATER)THEN                             ! A CONSTRAINTED CELL DEWATERED
+      IF(DEWATER)THEN                            ! A CONSTRAINTED CELL DEWATERED
         CALL GWM1BAS1PS('        Perturbation Failed: ',0)
         CALL GWM1BAS1PS(
      &             '          At Least One Constrained Head is Dry',0)
         IPGNA = 3                                ! SET PERTURBATION INSTRUCTION
         DEWATER = .FALSE.                        ! RESET DEWATER FLAG
+        RETURN
+      ENDIF
+C
+C-----CHECK IF ANY HEAD CELLS HAVE BECOME DEWATERED
+      IF(DEWATERQ)THEN                           ! AN ACTIVE WELL DEWATERED
+        CALL GWM1BAS1PS('        Perturbation Failed: ',0)
+        CALL GWM1BAS1PS(
+     &             '          At Least One Active Well is Dry',0)
+        IPGNA = 3                                ! SET PERTURBATION INSTRUCTION
+        DEWATERQ = .FALSE.                        ! RESET DEWATER FLAG
         RETURN
       ENDIF
 C
@@ -3656,7 +3754,7 @@ C
 C***********************************************************************
       SUBROUTINE GWM1RMS1OT(IFLG)
 C***********************************************************************
-C  VERSION: 23SEPT2005
+C  VERSION: 18JAN2006
 C  PURPOSE - WRITE OUTPUT FOR GWM SOLUTION  
 C-----------------------------------------------------------------------
       USE GWM1BAS1, ONLY : ZERO,ONE,BIGINF,GWMOUT
@@ -3890,7 +3988,7 @@ C-----WRITE FINAL CONSTRAINT STATUS
         CALL GWM1HDC1OT(RSTRT,1)                  ! WRITE HEAD CONSTRAINT STATUS
         CALL GWM1STC1OT(RSTRT,1)                  ! WRITE STREAM CONSTRAINT STATUS
 	  WRITE(GWMOUT,7000,ERR=990)
-        IF(IFLG.EQ.4)WRITE(GWMOUT,7010,ERR=990)   ! DEWATERING IN CONSTRAINED HEADS
+        IF(IFLG.EQ.4)WRITE(GWMOUT,7010,ERR=990)   ! DEWATERING IN HEADS OR WELLS
 C
 C-----WRITE WARNING MESSAGE: FINAL FLOW PROCESS FAILED TO CONVERGE
       ELSEIF(IFLG.EQ.5)THEN          
@@ -3953,8 +4051,9 @@ C
      &  '    may differ slightly from those computed using ',
      &  'the linear program.  ')
  7010 FORMAT(/,
-     &  '    WARNING: At least one constrained head dewatered',
-     &  ' in the final flow',/,'             process simulation')
+     &  '    WARNING: At least one constrained head or active',
+     &  ' well dewatered',/,
+     &  '             in the final flow process simulation')
  7020 FORMAT(/,
      &  '  WARNING: Final flow process simulation failed',
      &  ' to converge ',/,'    when using the optimal',

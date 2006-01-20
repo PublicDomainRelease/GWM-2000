@@ -670,7 +670,7 @@ C
 C***********************************************************************
       SUBROUTINE GWM1HDC1FPR(RSTRT,IREAD)
 C***********************************************************************
-C     VERSION: 22JULY2005
+C     VERSION: 20JAN2006
 C     PURPOSE - READ RESPONSE MATRIX AND AUGMENTED RIGHT HAND SIDE
 C-----------------------------------------------------------------------
       USE GWM1BAS1, ONLY : RMFILE
@@ -678,7 +678,7 @@ C-----------------------------------------------------------------------
       USE GWM1RMS1, ONLY : RHSIN,RHSINF,RANGENAME,RANGENAMEF,CONTYP,NDV
 C-----AMAT HAS LOCAL NAME RESMAT 
       USE GWM1RMS1, ONLY : RESMAT => AMAT
-      USE GWM1RMS1, ONLY : RHS,IBASE
+      USE GWM1RMS1, ONLY : RHS
       INTEGER(I4B),INTENT(INOUT)::RSTRT
       INTEGER(I4B),INTENT(IN)::IREAD
 C-----LOCAL VARIABLES
@@ -688,7 +688,6 @@ C
       IF(IREAD.EQ.-1)THEN                        ! READ THE REFERENCE STATE  
         CALL SGWM1HDC1FPR                   
       ELSEIF(IREAD.EQ.0)THEN                     ! READ THE BASE STATE
-        IF(IBASE.EQ.0)CALL SGWM1HDC1FPR                   
         IHDC = 0
         DO 100 ROW=RSTRT,RSTRT+HDCNUM-1 
           IHDC = IHDC+1

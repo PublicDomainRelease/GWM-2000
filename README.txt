@@ -1,7 +1,7 @@
 README.TXT
 
 
-                 MF2K-GWM - Version: 1.0.2 09/24/2005
+                 MF2K-GWM - Version: 1.0.3 01/21/2006
                  Built from MODFLOW-2000 Version 1.13
        Three-dimensional finite-difference ground-water flow model
                                 With
@@ -31,7 +31,7 @@ A. DISTRIBUTION FILE
 The following self-extracting distribution file is for use on personal
 computers:
 
-         mf2k_gwm.1_0_2.exe
+         mf2k_gwm.1_0_3.exe
 
 The distribution file contains:
 
@@ -50,7 +50,7 @@ directory that you specify:
 
 
    |
-   |--mf2k_gwm.1_0_2
+   |--mf2k_gwm.1_0_3
    |    |--bin       ; compiled executable
    |    |--data      ; standard data sets used in verification tests
    |    |--doc       ; documentation files
@@ -58,11 +58,11 @@ directory that you specify:
    |    |--test-win  ; batch files to run verification tests
 
 
-It is recommended that no user files are kept in the mf2k_gwm.1_0_2 
-directory structure.  If you do plan to put files in the mf2k_gwm.1_0_2 
+It is recommended that no user files are kept in the mf2k_gwm.1_0_3 
+directory structure.  If you do plan to put files in the mf2k_gwm.1_0_3 
 directory structure, do so only by creating subdirectories.
 
-Included in directory mf2k_gwm.1_0_2\doc is a Portable Document Format 
+Included in directory mf2k_gwm.1_0_3\doc is a Portable Document Format 
 (PDF) file. The PDF file is readable and printable on various computer 
 platforms using Acrobat Reader from Adobe. The Acrobat Reader is freely 
 available from the following World Wide Web sites:
@@ -73,7 +73,7 @@ available from the following World Wide Web sites:
 C. COMPILING
 
 Although an executable version of the program is provided, the source 
-code is available in the mf2k_gwm.1_0_2\src directory so that the 
+code is available in the mf2k_gwm.1_0_3\src directory so that the 
 programs can be recompiled if necessary.  However, no support can be 
 provided for users generating their own versions of the software. In 
 general, the requirements are a Fortran compiler and the knowledge of 
@@ -116,12 +116,12 @@ enforce default double precision for all REAL variables.
 D. INSTALLING 
 
 To make the executable versions of the programs accessible from any
-directory, the directory containing the executable (mf2k_gwm.1_0_2\bin)
+directory, the directory containing the executable (mf2k_gwm.1_0_3\bin)
 should be included in the PATH environment variable. For example, you 
 could add the following line to the AUTOEXEC.BAT file on Windows9x and 
 Windows ME systems:
 
-  PATH=%PATH%;C:\GWMpathname\mf2k_gwm.1_0_2\bin
+  PATH=%PATH%;C:\GWMpathname\mf2k_gwm.1_0_3\bin
 
 Where GWMpathname is the directory path you selected for installing 
 MF2K-GWM.
@@ -133,11 +133,11 @@ Control Panel. Double-click System and select the Environment tab.
 To add a new user variable, enter "PATH" in the Variable field and 
 enter
 
-   %PATH%;C:\GWMpathname\mf2k_gwm.1_0_2\bin
+   %PATH%;C:\GWMpathname\mf2k_gwm.1_0_3\bin
 
 in the Value field.  Click Set and then click OK.  If a PATH user 
 variable already is defined, click on it in the User Variables pane, 
-add ";C:\GWMpathname\mf2k_gwm.1_0_2\bin" to its definition in the Value 
+add ";C:\GWMpathname\mf2k_gwm.1_0_3\bin" to its definition in the Value 
 field, and click OK. Initiate and use a new MS-DOS Command Prompt 
 window after making this change.
 
@@ -145,7 +145,7 @@ On Windows 2000 or XP systems, from the Start menu, select Settings and
 then Control Panel. Double-click System and select the Advanced tab.  
 Click on Environment Variables. If a PATH user variable already is 
 defined, click on it in the User Variables pane, then click Edit. In 
-the Edit User Variable window, add ";C:\GWMpathname\mf2k_gwm.1_0_2\bin" 
+the Edit User Variable window, add ";C:\GWMpathname\mf2k_gwm.1_0_3\bin" 
 to the end of the Variable Value(ensure that the current contents of 
 the User Value are not deleted) and click OK. If a PATH user variable 
 is not already defined, in the User variables pane of the Environment 
@@ -167,7 +167,7 @@ to hold all of the required data. If there is less available RAM than
 this, the program will use virtual memory, but this slows computations 
 significantly.
 
-After the files in the mf2k_gwm.1_0_2\bin directory are installed in a
+After the files in the mf2k_gwm.1_0_3\bin directory are installed in a
 directory that is included in your PATH, the programs are initiated in
 a DOS Command-Prompt window using the commands:
 
@@ -193,18 +193,18 @@ F. TESTING
 Data files for four test problems are provided to confirm that 
 MODFLOW-2000 with GWM is correctly installed and running on the system.  
 The tests may also be looked at as examples of how to use the program.  
-The directory mf2k_gwm.1_0_2\data contains the input data and expected 
+The directory mf2k_gwm.1_0_3\data contains the input data and expected 
 results for the tests.
 
-The directory mf2k_gwm.1_0_2\test-win can be used to conveniently run the
-tests without destroying the original results in the mf2k_gwm.1_0_2\data
-directory. The mf2k_gwm.1_0_2\test-win directory contains batch (BAT) 
+The directory mf2k_gwm.1_0_3\test-win can be used to conveniently run the
+tests without destroying the original results in the mf2k_gwm.1_0_3\data
+directory. The mf2k_gwm.1_0_3\test-win directory contains batch (BAT) 
 files to run the tests.  Each test can be run by entering the name of 
 the test as a command in a DOS command-prompt window with the current 
-directory being mf2k_gwm.1_0_2\test-win or by double-clicking on the 
+directory being mf2k_gwm.1_0_3\test-win or by double-clicking on the 
 corresponding BAT file in Windows Explorer.  The output files that are 
-created in mf2k_gwm.1_0_2\test-win can then be compared to those in 
-mf2k_gwm.1_0_2\data.  
+created in mf2k_gwm.1_0_3\test-win can then be compared to those in 
+mf2k_gwm.1_0_3\data.  
 
 The four tests are described in the GWM documentation report (USGS 
 Open-File Report 2005-1072):

@@ -1,6 +1,6 @@
                                   MODFLOW-2000
       U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE GROUND-WATER FLOW MODEL
-                VERSION MF2K_GWM 1.0.0 022005,FROM MF2K V1.13.00
+                VERSION MF2K_GWM 1.0.3 012106,FROM MF2K V1.13.00
 
 
  This model run produced both GLOBAL and LIST files.  This is the GLOBAL file.
@@ -103,7 +103,7 @@
 
 
 
- GWM1 -- GROUND-WATER MANAGEMENT PROCESS, VERSION 1.0.0 022005
+ GWM1 -- GROUND-WATER MANAGEMENT PROCESS, VERSION 1.0.3 012106
  INPUT READ FROM UNIT  15
 
 
@@ -177,7 +177,7 @@
  NO. OF EXTERNAL DECISION VARIABLES IN OBJECTIVE FUNCTION (NEVOBJ):     0
  NO. OF BINARY DECISION VARIABLES IN OBJECTIVE FUNCTION (NBVOBJ):       7
 
- OBJECTIVE FUNCTION:
+ OBJECTIVE FUNCTION: (excluding flow duration terms)
 
  MIN    +  2.00E-02 Q1         +  2.00E-02 Q2         +  2.00E-02 Q3        
         +  2.00E-02 Q4         +  2.00E-02 Q5         +  2.00E-02 Q6        
@@ -1219,18 +1219,7 @@ Binary Variables
  SUBPROBLEM          62 IS FATHOMED - ALREADY BRANCHED FROM IT ONCE
  NEXT: BRANCH FROM SUBPROBLEM          61
                  AND VARIABLE           7
- SUBPROBLEM          65 IS FATHOMED -IT IS INTEGER AND INFERIOR
-    Name          Value       Name          Value       Name          Value
-Flow Variables
-    Q1          1.0000E+02    Q2          0.0000E+00    Q3          0.0000E+00
-    Q4          3.4164E+03    Q5          0.0000E+00    Q6          0.0000E+00
-    Q7          0.0000E+00
-Binary Variables
-    BV1         1.0000E+00    BV2         0.0000E+00    BV3         0.0000E+00
-    BV4         1.0000E+00    BV5         0.0000E+00    BV6         0.0000E+00
-    BV7         0.0000E+00
-    Objective Function =  7.432741E+04
- 
+ SUBPROBLEM          65 IS FATHOMED - IT IS INFEASIBLE
  SUBPROBLEM          55 IS FATHOMED - IT IS RELAXED AND INFERIOR
  SUBPROBLEM          61 IS FATHOMED - IT IS RELAXED AND INFERIOR
  SUBPROBLEM          66 IS FATHOMED -IT IS INTEGER AND THE NEW BEST SOLUTION

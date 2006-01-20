@@ -1,6 +1,6 @@
                                   MODFLOW-2000
       U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE GROUND-WATER FLOW MODEL
-                VERSION MF2K_GWM 1.0.0 022005,FROM MF2K V1.13.00
+                VERSION MF2K_GWM 1.0.3 012106,FROM MF2K V1.13.00
 
 
  This model run produced both GLOBAL and LIST files.  This is the LIST file.
