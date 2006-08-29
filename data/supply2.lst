@@ -1,12 +1,12 @@
                                   MODFLOW-2000
       U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE GROUND-WATER FLOW MODEL
-                VERSION MF2K_GWM 1.0.3 012106,FROM MF2K V1.13.00
+                 VERSION MF2K_GWM 1.1 083006,FROM MF2K V1.13.00
 
 
  This model run produced both GLOBAL and LIST files.  This is the LIST file.
 
 
- REWOUND supply.lst
+ REWOUND supply2.lst
  FILE TYPE:LIST   UNIT   10
 
  REWOUND ..\data\supply.dis
@@ -27,7 +27,7 @@
  REWOUND ..\data\supply.oc
  FILE TYPE:OC   UNIT   17
 
- REWOUND ..\data\supply.gwm
+ REWOUND ..\data\supply2.gwm
  FILE TYPE:GWM   UNIT   19
  
  #MODOFC transient water supply sample problem                                   
@@ -733,22 +733,22 @@ REUSING STREAM NODES FROM LAST STRESS PERIOD
            IN:                                      IN:
            ---                                      ---
              STORAGE =    20211538.3911               STORAGE =        1758.9618
-       CONSTANT HEAD =   525236657.9383         CONSTANT HEAD =     1168174.6651
+       CONSTANT HEAD =   525236657.9382         CONSTANT HEAD =     1168174.6650
             RECHARGE =    10074000.0000              RECHARGE =       13800.0000
       STREAM LEAKAGE =           0.0000        STREAM LEAKAGE =           0.0000
         MANAGED FLOW =           0.0000          MANAGED FLOW =           0.0000
 
-            TOTAL IN =   555522196.3294              TOTAL IN =     1183733.6269
+            TOTAL IN =   555522196.3293              TOTAL IN =     1183733.6269
 
           OUT:                                     OUT:
           ----                                     ----
              STORAGE =      150627.9928               STORAGE =          53.4810
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =   532001442.1369        STREAM LEAKAGE =     1130198.7923
-        MANAGED FLOW =    23370520.2044          MANAGED FLOW =       53483.2959
+      STREAM LEAKAGE =   532001442.1371        STREAM LEAKAGE =     1130198.7923
+        MANAGED FLOW =    23370520.2041          MANAGED FLOW =       53483.2959
 
-           TOTAL OUT =   555522590.3341             TOTAL OUT =     1183735.5692
+           TOTAL OUT =   555522590.3340             TOTAL OUT =     1183735.5692
 
             IN - OUT =        -394.0047              IN - OUT =          -1.9423
 
@@ -849,7 +849,7 @@ REUSING STREAM NODES FROM LAST STRESS PERIOD
            IN:                                      IN:
            ---                                      ---
              STORAGE =    20252277.2354               STORAGE =         447.6796
-       CONSTANT HEAD =   629695803.3017         CONSTANT HEAD =     1147902.6963
+       CONSTANT HEAD =   629695803.3016         CONSTANT HEAD =     1147902.6963
             RECHARGE =    15097200.0000              RECHARGE =       55200.0000
       STREAM LEAKAGE =           0.0000        STREAM LEAKAGE =           0.0000
         MANAGED FLOW =           0.0000          MANAGED FLOW =           0.0000
@@ -861,10 +861,10 @@ REUSING STREAM NODES FROM LAST STRESS PERIOD
              STORAGE =      404169.4014               STORAGE =        2786.1693
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =   633990780.0317        STREAM LEAKAGE =     1120761.9549
-        MANAGED FLOW =    30650520.1158          MANAGED FLOW =       79999.9990
+      STREAM LEAKAGE =   633990780.0322        STREAM LEAKAGE =     1120761.9549
+        MANAGED FLOW =    30650520.1152          MANAGED FLOW =       79999.9990
 
-           TOTAL OUT =   665045469.5489             TOTAL OUT =     1203548.1232
+           TOTAL OUT =   665045469.5488             TOTAL OUT =     1203548.1232
 
             IN - OUT =        -189.0119              IN - OUT =           2.2527
 
@@ -965,22 +965,22 @@ REUSING STREAM NODES FROM LAST STRESS PERIOD
            IN:                                      IN:
            ---                                      ---
              STORAGE =    20446031.9148               STORAGE =        2129.1723
-       CONSTANT HEAD =   736047751.2569         CONSTANT HEAD =     1168702.7248
+       CONSTANT HEAD =   736047751.2568         CONSTANT HEAD =     1168702.7248
             RECHARGE =    15097200.0000              RECHARGE =           0.0000
       STREAM LEAKAGE =           0.0000        STREAM LEAKAGE =           0.0000
         MANAGED FLOW =           0.0000          MANAGED FLOW =           0.0000
 
-            TOTAL IN =   771590983.1717              TOTAL IN =     1170831.8971
+            TOTAL IN =   771590983.1716              TOTAL IN =     1170831.8971
 
           OUT:                                     OUT:
           ----                                     ----
              STORAGE =      443611.9577               STORAGE =         433.4347
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =   737732189.3460        STREAM LEAKAGE =     1140015.4870
-        MANAGED FLOW =    33415605.6814          MANAGED FLOW =       30385.5557
+      STREAM LEAKAGE =   737732189.3467        STREAM LEAKAGE =     1140015.4870
+        MANAGED FLOW =    33415605.6807          MANAGED FLOW =       30385.5557
 
-           TOTAL OUT =   771591406.9852             TOTAL OUT =     1170834.4773
+           TOTAL OUT =   771591406.9851             TOTAL OUT =     1170834.4773
 
             IN - OUT =        -423.8135              IN - OUT =          -2.5802
 
@@ -1081,22 +1081,22 @@ REUSING STREAM NODES FROM LAST STRESS PERIOD
            IN:                                      IN:
            ---                                      ---
              STORAGE =    20449927.6114               STORAGE =          42.8099
-       CONSTANT HEAD =   841448287.5491         CONSTANT HEAD =     1158247.6516
+       CONSTANT HEAD =   841448287.5489         CONSTANT HEAD =     1158247.6516
             RECHARGE =    17608800.0000              RECHARGE =       27600.0000
       STREAM LEAKAGE =           0.0000        STREAM LEAKAGE =           0.0000
         MANAGED FLOW =           0.0000          MANAGED FLOW =           0.0000
 
-            TOTAL IN =   879507015.1604              TOTAL IN =     1185890.4614
+            TOTAL IN =   879507015.1603              TOTAL IN =     1185890.4614
 
           OUT:                                     OUT:
           ----                                     ----
              STORAGE =      545713.8093               STORAGE =        1121.9984
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =   842061451.2246        STREAM LEAKAGE =     1146475.4053
-        MANAGED FLOW =    36900113.9639          MANAGED FLOW =       38291.2998
+      STREAM LEAKAGE =   842061451.2254        STREAM LEAKAGE =     1146475.4053
+        MANAGED FLOW =    36900113.9629          MANAGED FLOW =       38291.2998
 
-           TOTAL OUT =   879507278.9978             TOTAL OUT =     1185888.7034
+           TOTAL OUT =   879507278.9977             TOTAL OUT =     1185888.7034
 
             IN - OUT =        -263.8374              IN - OUT =           1.7580
 
@@ -1197,22 +1197,22 @@ REUSING STREAM NODES FROM LAST STRESS PERIOD
            IN:                                      IN:
            ---                                      ---
              STORAGE =    20611559.7467               STORAGE =        1756.8710
-       CONSTANT HEAD =   948920448.6854         CONSTANT HEAD =     1168175.6645
+       CONSTANT HEAD =   948920448.6853         CONSTANT HEAD =     1168175.6645
             RECHARGE =    18878400.0000              RECHARGE =       13800.0000
       STREAM LEAKAGE =           0.0000        STREAM LEAKAGE =           0.0000
         MANAGED FLOW =           0.0000          MANAGED FLOW =           0.0000
 
-            TOTAL IN =   988410408.4321              TOTAL IN =     1183732.5356
+            TOTAL IN =   988410408.4319              TOTAL IN =     1183732.5356
 
           OUT:                                     OUT:
           ----                                     ----
              STORAGE =      550635.5961               STORAGE =          53.4977
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =   946039637.8986        STREAM LEAKAGE =     1130197.6812
-        MANAGED FLOW =    41820577.1866          MANAGED FLOW =       53483.2959
+      STREAM LEAKAGE =   946039637.8995        STREAM LEAKAGE =     1130197.6812
+        MANAGED FLOW =    41820577.1855          MANAGED FLOW =       53483.2959
 
-           TOTAL OUT =   988410850.6813             TOTAL OUT =     1183734.4748
+           TOTAL OUT =   988410850.6811             TOTAL OUT =     1183734.4748
 
             IN - OUT =        -442.2492              IN - OUT =          -1.9393
 
@@ -1313,22 +1313,22 @@ REUSING STREAM NODES FROM LAST STRESS PERIOD
            IN:                                      IN:
            ---                                      ---
              STORAGE =    20652298.4380               STORAGE =         447.6779
-       CONSTANT HEAD =  1053379600.1533         CONSTANT HEAD =     1147902.7634
+       CONSTANT HEAD =  1053379600.1532         CONSTANT HEAD =     1147902.7634
             RECHARGE =    23901600.0000              RECHARGE =       55200.0000
       STREAM LEAKAGE =           0.0000        STREAM LEAKAGE =           0.0000
         MANAGED FLOW =           0.0000          MANAGED FLOW =           0.0000
 
-            TOTAL IN =  1097933498.5914              TOTAL IN =     1203550.4413
+            TOTAL IN =  1097933498.5913              TOTAL IN =     1203550.4413
 
           OUT:                                     OUT:
           ----                                     ----
              STORAGE =      804189.6648               STORAGE =        2786.3084
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =  1048028969.0689        STREAM LEAKAGE =     1120761.8810
-        MANAGED FLOW =    49100577.0977          MANAGED FLOW =       79999.9990
+      STREAM LEAKAGE =  1048028969.0698        STREAM LEAKAGE =     1120761.8810
+        MANAGED FLOW =    49100577.0967          MANAGED FLOW =       79999.9990
 
-           TOTAL OUT =  1097933735.8315             TOTAL OUT =     1203548.1885
+           TOTAL OUT =  1097933735.8313             TOTAL OUT =     1203548.1885
 
             IN - OUT =        -237.2401              IN - OUT =           2.2528
 
@@ -1429,22 +1429,22 @@ REUSING STREAM NODES FROM LAST STRESS PERIOD
            IN:                                      IN:
            ---                                      ---
              STORAGE =    20846052.2523               STORAGE =        2129.1628
-       CONSTANT HEAD =  1159731548.5261         CONSTANT HEAD =     1168702.7294
+       CONSTANT HEAD =  1159731548.5259         CONSTANT HEAD =     1168702.7294
             RECHARGE =    23901600.0000              RECHARGE =           0.0000
       STREAM LEAKAGE =           0.0000        STREAM LEAKAGE =           0.0000
         MANAGED FLOW =           0.0000          MANAGED FLOW =           0.0000
 
-            TOTAL IN =  1204479200.7783              TOTAL IN =     1170831.8922
+            TOTAL IN =  1204479200.7782              TOTAL IN =     1170831.8922
 
           OUT:                                     OUT:
           ----                                     ----
              STORAGE =      843632.2301               STORAGE =         433.4348
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =  1151770377.9257        STREAM LEAKAGE =     1140015.4819
-        MANAGED FLOW =    51865662.6631          MANAGED FLOW =       30385.5557
+      STREAM LEAKAGE =  1151770377.9266        STREAM LEAKAGE =     1140015.4819
+        MANAGED FLOW =    51865662.6621          MANAGED FLOW =       30385.5557
 
-           TOTAL OUT =  1204479672.8190             TOTAL OUT =     1170834.4724
+           TOTAL OUT =  1204479672.8188             TOTAL OUT =     1170834.4724
 
             IN - OUT =        -472.0406              IN - OUT =          -2.5802
 
@@ -1545,22 +1545,22 @@ REUSING STREAM NODES FROM LAST STRESS PERIOD
            IN:                                      IN:
            ---                                      ---
              STORAGE =    20849947.9487               STORAGE =          42.8099
-       CONSTANT HEAD =  1265132084.8471         CONSTANT HEAD =     1158247.6519
+       CONSTANT HEAD =  1265132084.8470         CONSTANT HEAD =     1158247.6519
             RECHARGE =    26413200.0000              RECHARGE =       27600.0000
       STREAM LEAKAGE =           0.0000        STREAM LEAKAGE =           0.0000
         MANAGED FLOW =           0.0000          MANAGED FLOW =           0.0000
 
-            TOTAL IN =  1312395232.7958              TOTAL IN =     1185890.4617
+            TOTAL IN =  1312395232.7957              TOTAL IN =     1185890.4617
 
           OUT:                                     OUT:
           ----                                     ----
              STORAGE =      945734.1421               STORAGE =        1121.9990
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =  1256099639.7728        STREAM LEAKAGE =     1146475.4049
-        MANAGED FLOW =    55350170.9454          MANAGED FLOW =       38291.2998
+      STREAM LEAKAGE =  1256099639.7737        STREAM LEAKAGE =     1146475.4049
+        MANAGED FLOW =    55350170.9443          MANAGED FLOW =       38291.2998
 
-           TOTAL OUT =  1312395544.8602             TOTAL OUT =     1185888.7038
+           TOTAL OUT =  1312395544.8601             TOTAL OUT =     1185888.7038
 
             IN - OUT =        -312.0645              IN - OUT =           1.7580
 

@@ -56,9 +56,9 @@ C
       CONTAINS
 C***********************************************************************
       SUBROUTINE GWM1SIMPLEX1(M,NV,NDV,AMAT,COST,BNDS,RHS,OBJ,
-     &                        IFLG,LPITMAX)
+     &                        IFLG,LPITMAX,IPRT)
 C***********************************************************************
-C    VERSION: 20FEB2005
+C    VERSION: 25JUL2006
 C    PURPOSE: SOLVE LINEAR PROGRAMS OF THE FORM
 C
 C                  MINIMIZE CX
@@ -95,6 +95,7 @@ C             RHS(M)   - RIGHT HAND SIDE VECTOR
 C             LPITMAX  - MAXIMUM NUMBER OF ITERATIONS ALLOWED
 C             BIGINF   - VALUE OF MACHINE INFINITY; USED BY RATEST IN UNBOUNDED
 C                          TO DETERMINE IF AN UPPER BOUND VALUE IS SET TO INFINITY
+C             IPRT     - PRINT FLAG (1=PRINT PROGRESS, 0=NO PRINT)
 C
 C        OUTPUT
 C             COST(NV) - VALUE OF X SOLUTION VECTOR (VALID ONLY IF IFLG=0)
@@ -107,7 +108,8 @@ C                        1 = PROBLEM IS INFEASIBLE
 C                        2 = PROBLEM IS UNBOUNDED
 C-----------------------------------------------------------------------
       USE GWM1BAS1, ONLY : ONE,ZERO,BIGINF,GWMOUT
-      INTEGER(I4B),INTENT(IN)::M,NV,NDV,LPITMAX
+      USE GWM1BAS1, ONLY : GWM1BAS1PS
+      INTEGER(I4B),INTENT(IN)::M,NV,NDV,LPITMAX,IPRT
       INTEGER(I4B),INTENT(OUT)::IFLG
       REAL(DP),INTENT(IN)::AMAT(M,NDV)
       REAL(DP),INTENT(OUT)::OBJ,RHS(M),COST(NV)
@@ -147,12 +149,13 @@ C-----DEFINE SIZE AND ALLOCATE WORK SPACE FOR LINEAR PROGRAM
       IF(ISTAT.NE.0)GOTO 992
 C
 C-----PERFORM PHASE 1 - SOLVE FROM AN ALL ARTIFICIAL START
-	CALL FNDFES(AMAT,COST,BNDS,RHS,M,NV,NDV,LPITMAX,IFLG)
+	CALL FNDFES(AMAT,COST,BNDS,RHS,M,NV,NDV,LPITMAX,IFLG,IPRT)
       IF(IFLG.EQ.0)THEN
 C-------SOLUTION FOUND TO PHASE 1.
+        IF(IPRT.EQ.1)CALL GWM1BAS1PS('    Feasible Solution Found',0)   
 C
 C-------PERFORM PHASE 2 - SOLVE FROM THE CURRENT FEASIBLE POINT
-        CALL SLVLP (RHS,BNDS,M,NV,LPITMAX,IFLG)
+        CALL SLVLP (RHS,BNDS,M,NV,LPITMAX,IFLG,IPRT)
 C
         IF(IFLG.EQ.0)THEN
 C-------SOLUTION FOUND TO PHASE 2 - COMPUTE SOLUTION VECTOR AND OBJECTIVE  
@@ -187,14 +190,14 @@ C
 C
 C
 C***********************************************************************
-      SUBROUTINE FNDFES(AMAT,COST,BNDS,RHS,M,NV,NDV,LPITMAX,IFLG)
+      SUBROUTINE FNDFES(AMAT,COST,BNDS,RHS,M,NV,NDV,LPITMAX,IFLG,IPRT)
 C***********************************************************************
 C     VERSION: 20FEB2005
 C     PURPOSE - PHASE 1 OF PHASE 1/PHASE 2 METHOD:
 C               FIND A FEASIBLE SOLUTION USING ARTIFICIAL VARIABLES
 C-----------------------------------------------------------------------
       USE GWM1BAS1, ONLY : ONE,ZERO
-      INTEGER(I4B),INTENT(IN)::M,NV,NDV,LPITMAX
+      INTEGER(I4B),INTENT(IN)::M,NV,NDV,LPITMAX,IPRT
       INTEGER(I4B),INTENT(OUT)::IFLG
       REAL(DP),INTENT(IN)::AMAT(M,NDV),COST(NV),BNDS(NV),RHS(M)
       INTERFACE 
@@ -269,7 +272,7 @@ C-----ALL ARTIFICIAL VARIABLES HAVE COST OF ONE AND ARE INITIALLY BASIC
  500  ENDDO
 C
 C-----SOLVE THE ALL-ARTIFICIAL PROBLEM TO GET THE INITIAL FEASIBLE SOLUTION
-      CALL SLVLP (RHS,BNDS,M,NV,LPITMAX,IFLG)
+      CALL SLVLP (RHS,BNDS,M,NV,LPITMAX,IFLG,IPRT)
 C-----IF SOLUTION FAILED THEN RETURN
       IF(IFLG.NE.0)RETURN
 C
@@ -331,13 +334,14 @@ C
 C
 C
 C***********************************************************************
-      SUBROUTINE SLVLP (RHS,BNDS,M,NV,LPITMAX,IFLG)
+      SUBROUTINE SLVLP (RHS,BNDS,M,NV,LPITMAX,IFLG,IPRT)
 C***********************************************************************
-C     VERSION: 20FEB2005
+C     VERSION: 25JUL2006
 C     PURPOSE - SOLVE A LINEAR PROGRAM FROM THE CURRENT FEASIBLE BASIS
 C               USING THE REVISED SIMPLEX METHOD WITH UPPER BOUNDING
 C-----------------------------------------------------------------------
-      INTEGER(I4B),INTENT(IN)::M,NV,LPITMAX
+      USE GWM1BAS1, ONLY : GWM1BAS1PS
+      INTEGER(I4B),INTENT(IN)::M,NV,LPITMAX,IPRT
       INTEGER(I4B),INTENT(OUT)::IFLG
       REAL(DP),INTENT(IN)::RHS(M),BNDS(NV)
       INTERFACE 
@@ -358,6 +362,9 @@ C
 C-----TEST FOR ITERATION LIMIT
       IF(IT.GT.LPITMAX)THEN
         CALL USTOP('PROGRAM STOPPED: LPITMAX REACHED')
+      ENDIF
+	IF(MOD(IT,100).EQ.0)THEN  ! PRINT MESSAGE TO SCREEN 
+	  IF(IPRT.EQ.1)CALL GWM1BAS1PS('      Begin LP Iteration',IT)   
       ENDIF
 C
 C-----FACTORIZE BASIS MATRIX 
@@ -482,14 +489,14 @@ C
 C***********************************************************************
       SUBROUTINE REDCST(CB,M,I,PRICEV)
 C***********************************************************************
-C   VERSION: 20FEB2005
+C   VERSION: 14AUG2006
 C   PURPOSE - COMPUTE THE REDUCED COST
 C-----------------------------------------------------------------------
       USE GWM1BAS1, ONLY : ZERO,SMALLEPS
       INTEGER(I4B),INTENT(IN)::M,I
       REAL(DP),INTENT(IN)::CB(M)
       REAL(DP),INTENT(OUT)::PRICEV
-      REAL(DP)::CBN,TEMP
+      REAL(DP)::CBN
       INTEGER(I4B)::II
 C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 C
@@ -508,8 +515,6 @@ C-------IF DIFFERENCE LESS THAN ROUND-OFF PORTION OF A TERM, ASSUME IT IS ZERO
 C-------IF DIFFERENCE LESS THAN ROUND-OFF, ASSUME IT IS ZERO
         IF(ABS(PRICEV).LT.SMALLEPS)PRICEV=ZERO
       ENDIF
-	TEMP = SMALLEPS
-	TEMP = PRECISION(ZERO)
 C
       RETURN
       END SUBROUTINE REDCST
@@ -940,7 +945,7 @@ C
 C***********************************************************************
       SUBROUTINE RHSRNG(RHS,COST,BNDS,DUALS,M,NV)
 C***********************************************************************
-C   VERSION: 20FEB2005
+C   VERSION: 14AUG2006
 C   PURPOSE - COMPUTE THE RIGHT HAND SIDE RANGES
 C-----------------------------------------------------------------------
       USE GWM1BAS1, ONLY : ONE,ZERO,SMALLEPS,BIGINF
@@ -1080,11 +1085,7 @@ C---------PERFORM RATIO TEST ON ALL NONBASICS
             DO 440 L=JAAO(J),JAAO(J+1)-1
               ARJ = ARJ + AAO(L)*W1(IAAO(L))
  440        ENDDO
-C
-C-------CHECK IF NONBASIC HITS ITS OTHER BOUND FIRST
-C        SET IENT = 0 TO IDENTIFY NONBASIC HITTING ITS OTHER BOUND
-c           CALL MINXI(CKU, BNDS(J), IENT, 0)
-C        TEST IS DIFFERENT FOR BASIC LEAVING AT UPPER VS. LOWER BOUND
+C-----------TEST IS DIFFERENT FOR BASIC LEAVING AT UPPER VS. LOWER BOUND
             IF(.NOT. UPRBND) THEN
 C---------- BASIC LEAVES AT LOWER BOUND
               IF(ARJ .LT. -SMALLEPS .AND. LBNB(J) .EQ. 1) THEN
@@ -1092,9 +1093,8 @@ C---------- BASIC LEAVES AT LOWER BOUND
               ELSEIF(ARJ .GT. SMALLEPS .AND. LBNB(J) .EQ. -1) THEN
                 CALL MINXI(CKU, -RJ/ARJ, IENT, J)
               ENDIF
-C
-C-----------TEST IF BASIC LEAVES AT UPPER BOUND
             ELSEIF(UPRBND) THEN
+C-----------BASIC LEAVES AT UPPER BOUND
               IF(ARJ .GT. SMALLEPS .AND. LBNB(J) .EQ. 1) THEN
                 CALL MINXI(CKU, RJ/ARJ, IENT, J)
               ELSEIF(ARJ .LT. -SMALLEPS .AND. LBNB(J) .EQ. -1) THEN
@@ -1272,7 +1272,7 @@ C
 C-------SOLVE THE LINEAR PROGRAM FOR THIS SUBPROBLEM
         LASTLP = .FALSE.
         CALL GWM1PSIMPLEX1(IBIN,J,M,NV,NDV,AMAT,CST,BNDS,RHS,
-     1              OBJ,IFLG,LPITMAX)
+     1              OBJ,IFLG,LPITMAX,BBITPRT)
 C
 C-------PERFORM FATHOMING TEST ON THIS SUBPROBLEM
         CALL FATHOM(J,IFLG,OBJ,INC,OBJS,IRLX,IBIN,CST,NV)
@@ -1310,7 +1310,7 @@ C
 C---------SOLVE THE LINEAR PROGRAM ONE LAST TIME
           LASTLP = .TRUE.
           CALL GWM1PSIMPLEX1(IBIN,J,M,NV,NDV,AMAT,CST,BNDS,RHS,
-     1              OBJ,IFLG,LPITMAX)
+     1              OBJ,IFLG,LPITMAX,BBITPRT)
         ENDIF
       ENDIF
 C
@@ -1663,7 +1663,7 @@ C
 C
 C***********************************************************************
       SUBROUTINE GWM1PSIMPLEX1(IBIN,J,M,NV,NDV,AMAT,CST,BNDS,RHS,
-     1                         OBJ,IFLG,LPITMAX)
+     1                         OBJ,IFLG,LPITMAX,IPRT)
 C***********************************************************************
 C  VERSION: 13JULY2005
 C  PURPOSE - BUILD A TEMPORARY LP PROBLEM THAT ELIMINATES BINARY 
@@ -1678,7 +1678,7 @@ C---------------------------------------------------------------------------
      &                     RHSIN,RHSINF,RANGENAME,RANGENAMEF,LASTLP
       INTEGER(I4B),INTENT(IN)::IBIN(NBVAR,BBITMAX)
       INTEGER(I4B),INTENT(INOUT)::J
-      INTEGER(I4B),INTENT(IN)::M,NV,NDV,LPITMAX
+      INTEGER(I4B),INTENT(IN)::M,NV,NDV,LPITMAX,IPRT
       INTEGER(I4B),INTENT(OUT)::IFLG
       REAL(DP),INTENT(IN)::AMAT(M,NDV)
       REAL(DP),INTENT(OUT)::OBJ
@@ -1849,7 +1849,7 @@ C-------EMPTY CONSTRAINTS ROWS ARE PRESENT AND MET; REARRANGE MATRIX
         NVTMP = NVTMP-ROWEMPTY                   ! ONE LESS SLACK FOR EACH EMPTY ROW
 C-------SOLVE THE LINEAR PROGRAM 
         CALL GWM1SIMPLEX1(MTMP,NVTMP,NDVTMP,TAMAT2,TCST,
-     &                TBNDS,TRHS,OBJ,IFLG,LPITMAX)
+     &                TBNDS,TRHS,OBJ,IFLG,LPITMAX,IPRT)
 C
       ELSEIF(ROWEMPTY.GT.0.AND.IINF.EQ.1)THEN
 C-------ONE OR MORE EMPTY CONSTRAINT ROWS ARE INFEASIBLE; DON'T BOTHER SOLVING
@@ -1858,7 +1858,7 @@ C
       ELSEIF(ROWEMPTY.EQ.0)THEN
 C-------SOLVE THE LINEAR PROGRAM 
         CALL GWM1SIMPLEX1(MTMP,NVTMP,NDVTMP,TAMAT,TCST,
-     &                    TBNDS,TRHS,OBJ,IFLG,LPITMAX)
+     &                    TBNDS,TRHS,OBJ,IFLG,LPITMAX,IPRT)
       ENDIF
 C
       IF(IFLG.EQ.0)THEN                          ! SOLUTION IS AVAILABLE                     
@@ -1933,10 +1933,10 @@ C
 C***********************************************************************
       SUBROUTINE SLVBAS(N,BL)
 C***********************************************************************
-C   VERSION: 20FEB2005
-C   PURPOSE - FACTOR OR SOLVE THE A SYSTEM OF EQUATIONS DEFINED BY BASIS
+C   VERSION: 14AUG2006
+C   PURPOSE - FACTOR OR SOLVE THE SYSTEM OF EQUATIONS DEFINED BY BASIS
 C-----------------------------------------------------------------------
-      USE GWM1BAS1, ONLY : GWMOUT
+      USE GWM1BAS1, ONLY : GWMOUT,ZERO
       INTEGER(I4B),INTENT(IN)::N
       REAL(DP),INTENT(INOUT)::BL(N)
       INTERFACE 
@@ -1960,14 +1960,11 @@ C-----LOCAL VARIABLE
       INTEGER(I4B)::I,INFO
 C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 C
-      work = 0.0
-	iwork = 0
-	x=0.0
-	if(fact.ne.'F')then
-	af=0.0
-	ipiv=0
-	endif
-
+C-----IF MATRIX HAS NO ROWS RETURN
+      IF(N.EQ.0)RETURN
+      X = ZERO                                   ! BLANK WORK ARRAYS
+      WORK = ZERO
+      IWORK = 0
 C-----LOAD RIGHT HAND SIDE INTO LAPACK STORAGE
       DO 100 I=1,N
         BLA(I,1) = BL(I)
@@ -1975,6 +1972,8 @@ C-----LOAD RIGHT HAND SIDE INTO LAPACK STORAGE
 C
       IF(FACT.EQ.'N' .OR. FACT.EQ.'E')THEN
 C-----FACTORIZE THE MATRIX USING LU DECOMPOSITION
+        AF = ZERO                                ! BLANK WORK ARRAYS
+        IPIV = 0
         CALL DGESVX( FACT, TRANS, N, NRHS, A, LDA, AF, LDAF, IPIV,
      1             EQUED, R, C, BLA, LDB, X, LDX, RCOND, FERR, BERR,
      2             WORK, IWORK, INFO )
@@ -2005,7 +2004,10 @@ C
 C
       STOP
 C
- 1000 FORMAT('LAPACK FAILURE: UPPER DIAGONAL IS EXACTLY ZERO IN ROW',I6)
+ 1000 FORMAT('LAPACK FAILURE: UPPER DIAGONAL IS EXACTLY ZERO IN ROW',I6
+     &    ,/,'  LP BASIS MATRIX IS APPARENTLY SINGULAR.'
+     &    ,/,'  CHECK THAT CONSTRAINTS ARE NOT REDUNDANT.'
+     &    ,/,'  TRY REMOVING SELECTED CONSTRAINTS.')
  2000 FORMAT('LAPACK FAILURE: NONSINGULAR TO MACHINE PRECISION')
  3000 FORMAT('LAPACK FAILURE: ILLEGAL VALUE IN DGESVX ARGUMENT',I6)
 C
@@ -2034,7 +2036,7 @@ C
       PRIVATE
       PUBLIC::GWM1RMS1AR,GWM1RMS1PL,GWM1RMS1PP,GWM1RMS1FP,GWM1RMS1FM,
      1        GWM1RMS1AP,GWM1RMS1MPS,GWM1RMS1SLP,GWM1RMS1LP_CHKSOL,
-     2        GWM1RMS1OT,GWM1RMS1OS1,GWM1RMS1OS2
+     2        GWM1RMS1OT,GWM1RMS1OS
 C
       INTEGER, PARAMETER :: I4B = SELECTED_INT_KIND(9)
       INTEGER, PARAMETER :: I2B = SELECTED_INT_KIND(4)
@@ -2052,10 +2054,10 @@ C
 C***********************************************************************
       SUBROUTINE GWM1RMS1AR(FNAME,IOUT,NFVAR,NEVAR,NBVAR,NDV,NV,NCON)
 C***********************************************************************
-C   VERSION: 22JULY2005
+C   VERSION: 26JULY2006
 C   PURPOSE: READ INPUT FROM THE SOLUTION AND OUTPUT-CONTROL FILE
 C-----------------------------------------------------------------------
-      USE GWM1BAS1, ONLY : ZERO,RMFILE,MPSFILE
+      USE GWM1BAS1, ONLY : ZERO,RMFILE,RMFILEF,MPSFILE
       USE GWM1DCV1, ONLY : FVINI,FVDIR,FVNAME,FVBASE,EVNAME,EVBASE,
      &                     BVNAME,BVBASE
       USE GWM1OBJ1, ONLY : SOLNTYP    
@@ -2097,9 +2099,10 @@ C-----LOCAL VARIABLES
       CHARACTER(LEN=10)::TFVNAME
       INTEGER(I4B)::LLOC,INMS,INMF,IKEYS,IKEYF,ISTART,ISTOP,BYTES
       INTEGER(I4B)::LOCAT,I,J
-      CHARACTER(LEN=200)::LINE,RMNAME,MPSNAME
+      CHARACTER(LEN=200)::LINE,RMNAME,RMNAMEF,MPSNAME
       LOGICAL(LGT)::NFOUND
       INTEGER(I4B)::NUNOPN=99
+      INCLUDE 'openspec.inc' ! USE FORM TO DEFINE OPENING OF NON-FORMATTED FILES
 C-----------------------------------------------------------------------
 C
 C1----OPEN FILE
@@ -2180,24 +2183,66 @@ C-----IF SOLNTYP IS LP (LINEAR), READ IRM, LPITMAX, AND PERTI:
         READ(LOCAT,*,ERR=991)BBITPRT,RANGEFLG
 C
 C-------PROCESS IRM, THE RESPONSE MATRIX CALCULATION FLAG
-        IF(IRM.EQ.0. .OR. IRM.EQ.1)THEN
-          READ(LOCAT,'(A)',ERR=991)LINE          ! READ RESPONSE-MATRIX FILENAME  
-          LLOC=1
+        IF(IRM.EQ.0)THEN               ! READ EXISTING RM FILE
+          WRITE(IOUT,3060,ERR=990)
+          READ(LOCAT,'(A)',ERR=991)LINE  
+		LLOC=1        
           CALL URWORD(LINE,LLOC,INMS,INMF,0,NDUM,RDUM,IOUT,LOCAT)
           RMNAME=LINE(INMS:INMF)
           RMFILE=IGETUNIT(7,95)
+          OPEN(RMFILE,FILE=RMNAME,STATUS='OLD',FORM=FORM,ERR=997)
+          WRITE(IOUT,3012,ERR=990) RMFILE,RMNAME
+        ELSEIF(IRM.EQ.1)THEN           ! COMPUTE RM AND SAVE TO FILE  
+          WRITE(IOUT,3070,ERR=990)
+          READ(LOCAT,'(A)',ERR=991)LINE   
+		LLOC=1        
+          CALL URWORD(LINE,LLOC,INMS,INMF,0,NDUM,RDUM,IOUT,LOCAT)
+          RMNAME=LINE(INMS:INMF)
+          RMFILE=IGETUNIT(7,95)
+          OPEN(RMFILE,FILE=RMNAME,STATUS='NEW',FORM=FORM,ERR=998)
           WRITE(IOUT,3010,ERR=990) RMFILE,RMNAME
-          IF(IRM.EQ.0)THEN                       ! READ FROM AN EXISTING FILE
-            WRITE(IOUT,3060,ERR=990)
-            OPEN(RMFILE,FILE=RMNAME,STATUS='OLD',
-     &                  FORM='UNFORMATTED',ERR=997)
-          ELSEIF(IRM.EQ.1)THEN                   ! WRITE TO A NEW FILE
-            WRITE(IOUT,3070,ERR=990)
-            OPEN(RMFILE,FILE=RMNAME,STATUS='NEW',
-     &                  FORM='UNFORMATTED',ERR=998)
-          ENDIF
-        ELSEIF(IRM.EQ.2) THEN
+        ELSEIF(IRM.EQ.2) THEN          ! COMPUTE RM FILE - DON'T RECORD IT    
           WRITE(IOUT,3080,ERR=990)
+        ELSEIF(IRM.EQ.3)THEN           ! COMPUTE RM AND PRINT TO FILE   
+          WRITE(IOUT,3082,ERR=990)
+          READ(LOCAT,'(A)',ERR=991)LINE   
+		LLOC=1        
+          CALL URWORD(LINE,LLOC,INMS,INMF,0,NDUM,RDUM,IOUT,LOCAT)
+          RMNAMEF=LINE(INMS:INMF)
+          RMFILEF=IGETUNIT(7,95)
+          OPEN(RMFILEF,FILE=RMNAMEF,STATUS='NEW',
+     &         FORM='FORMATTED',ERR=998)
+          WRITE(IOUT,3014,ERR=990) RMFILEF,RMNAMEF
+        ELSEIF(IRM.EQ.4)THEN           ! COMPUTE RM, SAVE AND PRINT IT
+          WRITE(IOUT,3084,ERR=990)
+          READ(LOCAT,'(A)',ERR=991)LINE    
+		LLOC=1        
+          CALL URWORD(LINE,LLOC,INMS,INMF,0,NDUM,RDUM,IOUT,LOCAT)
+          RMNAME=LINE(INMS:INMF)
+          RMFILE=IGETUNIT(7,95)
+          OPEN(RMFILE,FILE=RMNAME,STATUS='NEW',FORM=FORM,ERR=998)
+          WRITE(IOUT,3010,ERR=990) RMFILE,RMNAME
+          CALL URWORD(LINE,LLOC,INMS,INMF,0,NDUM,RDUM,IOUT,LOCAT)
+          RMNAMEF=LINE(INMS:INMF)
+          RMFILEF=IGETUNIT(7,95)
+          OPEN(RMFILEF,FILE=RMNAMEF,STATUS='NEW',
+     &         FORM='FORMATTED',ERR=998)
+          WRITE(IOUT,3014,ERR=990) RMFILEF,RMNAMEF
+        ELSEIF(IRM.EQ.5)THEN           ! READ EXISTING RM FILE AND PRINT IT
+          WRITE(IOUT,3086,ERR=990)
+          READ(LOCAT,'(A)',ERR=991)LINE      
+		LLOC=1        
+          CALL URWORD(LINE,LLOC,INMS,INMF,0,NDUM,RDUM,IOUT,LOCAT)
+          RMNAME=LINE(INMS:INMF)
+          RMFILE=IGETUNIT(7,95)
+          OPEN(RMFILE,FILE=RMNAME,STATUS='OLD',FORM=FORM,ERR=998)
+          WRITE(IOUT,3012,ERR=990) RMFILE,RMNAME
+          CALL URWORD(LINE,LLOC,INMS,INMF,0,NDUM,RDUM,IOUT,LOCAT)
+          RMNAMEF=LINE(INMS:INMF)
+          RMFILEF=IGETUNIT(7,95)
+          OPEN(RMFILEF,FILE=RMNAMEF,STATUS='NEW',
+     &         FORM='FORMATTED',ERR=998)
+          WRITE(IOUT,3014,ERR=990) RMFILEF,RMNAMEF
         ELSE
           WRITE(IOUT,3090,ERR=990)IRM            ! INVALID VALUE OF IRM
           CALL USTOP(' ')
@@ -2265,7 +2310,8 @@ C-------PROCESS NPGNMX,AFACT,PGFACT, THE PERTURBATION ATTEMPT PARAMETERS
 C
 C-------PROCESS SLPITPRT
         IF(SLPITPRT.EQ.0)WRITE(IOUT,3210,ERR=990)
-        IF(SLPITPRT.EQ.1)WRITE(IOUT,3220,ERR=990)
+        IF(SLPITPRT.GE.1)WRITE(IOUT,3220,ERR=990)
+        IF(SLPITPRT.EQ.2)WRITE(IOUT,3225,ERR=990)
 C
 C-------PROCESS BBITPRT
         IF(NBVAR.EQ.0)BBITPRT=0                  ! SET TO ZERO IF NO BINARIES
@@ -2382,8 +2428,12 @@ C
  3000 FORMAT(1X,/1X,'NO SOLUTION TO THE FORMULATION WILL BE FOUND.',
      1  ' GWM WILL',/,' CALCULATE THE RESPONSE MATRIX AND WRITE IT',
      2  ' TO THE RMNAME',/,' FILE AND THEN WILL STOP.') 
- 3010 FORMAT(1X,/1X,'OPENING RESPONSE-MATRIX FILE ON UNIT ',I4,':',
-     1  /1X,A200)
+ 3010 FORMAT(1X,/1X,'OPENING RESPONSE-MATRIX FILE FOR SAVING ON UNIT '
+     1  ,I4,':',/1X,A200)
+ 3012 FORMAT(1X,/1X,'OPENING RESPONSE-MATRIX FILE FOR READING ON UNIT '
+     1  ,I4,':',/1X,A200)
+ 3014 FORMAT(1X,/1X,'OPENING RESPONSE-MATRIX FILE FOR PRINTING ON UNIT '
+     1  ,I4,':',/1X,A200)
  3020 FORMAT (1X,/1X,' WARNING:',/,
      1     'PERTURBATION PARAMETERS MAY BE TOO LARGE OR TOO SMALL',/,
      2     'COMPARED TO MAXIMUM PUMPING RATE.')
@@ -2394,14 +2444,18 @@ C
  3050 FORMAT(1X,/1X,'SOLNTYP IS LP: GWM WILL COMPLETE A SINGLE',
      1  ' ITERATION OF THE LINEAR PROBLEM.')
  3060 FORMAT(1X,/1X,'IRM EQUALS 0: RESPONSE MATRIX WILL BE READ',
-     1  ' FROM FILE',/,' SPECIFIED FOR RMNAME.')
+     1  ' FROM FILE')
  3070 FORMAT(1X,/1X,'IRM EQUALS 1: RESPONSE MATRIX WILL BE',
-     1  ' CALCULATED BY GWM',/,' AND WRITTEN TO FILE SPECIFIED',
-     2  ' FOR RMNAME.')
+     1  ' CALCULATED BY GWM',/,' AND SAVED TO FILE') 
  3080 FORMAT(1X,/1X,'IRM EQUALS 2: RESPONSE MATRIX WILL BE',
-     1  ' CALCULATED BY GWM',/,' BUT NOT WRITTEN TO THE RESPONSE',
-     2  ' FILE.')
- 3090 FORMAT(1X,/1X,'PROGRAM STOPPED. IRM MUST EQUAL 0, 1, OR 2,',
+     1  ' CALCULATED BY GWM',/,' BUT NOT WRITTEN TO FILE')
+ 3082 FORMAT(1X,/1X,'IRM EQUALS 3: RESPONSE MATRIX WILL BE',
+     1  ' CALCULATED BY GWM',/,' AND PRINTED TO FILE ')
+ 3084 FORMAT(1X,/1X,'IRM EQUALS 4: RESPONSE MATRIX WILL BE',
+     1  ' CALCULATED BY GWM',/,' AND PRINTED AND SAVED')
+ 3086 FORMAT(1X,/1X,'IRM EQUALS 5: RESPONSE MATRIX WILL BE',
+     1  ' READ FROM FILE',/,' AND PRINTED TO ANOTHER FILE')
+ 3090 FORMAT(1X,/1X,'PROGRAM STOPPED. IRM MUST BE BETWEEN 0 AND 5,',
      1  ' BUT WAS SET AT: ',I5)
  3100 FORMAT(1X,/1X,'MAXIMUM NUMBER OF LP ITERATIONS: ',T45,I8,/,
      &   1X,'MAXIMUM NUMBER OF BRANCH AND BOUND ITER: ',T45,I8)
@@ -2431,7 +2485,8 @@ C
      &   1X,'BASE FLOW RATE RELAXATION PARAMETER (AFACT): ',T45,F8.5,/,
      &   1X,'PERTURBATION ADJUSTMENT FACTOR (PGFACT): ',T45,F8.5)
  3210 FORMAT(1X,/1X,'SLPITPRT=0: DO NOT PRINT SLP ITERATIONS.')
- 3220 FORMAT(1X,/1X,'SLPITPRT=1: PRINT SLP ITERATIONS.')
+ 3220 FORMAT(1X,/1X,'SLPITPRT>=1: PRINT SLP ITERATIONS.')
+ 3225 FORMAT(1X,/1X,'SLPITPRT=2: PRINT INTERMEDIATE LP SOLUTIONS.')
  4000 FORMAT(/,T2,'BASE PUMPING RATES TAKEN FROM FVREF SPECIFIED IN',
      1  ' VARCON INPUT FILE')
  4010 FORMAT(1X,/1X,'PROGRAM STOPPED. ',A10,' WAS NOT DEFINED AS A', 
@@ -2539,7 +2594,7 @@ C-------THIS IS THE FIRST TIME THROUGH THIS SUBROUTINE
            NRESET=0                              ! BASE RESET COUNTER
            OBJOLD  = SQRT(BIGINF)                ! CONVERGENCE COMPARISON
         ENDIF
-        IF(IRM.EQ.1 .OR. IRM.EQ.2)THEN           ! RESPONSE MATRIX NEEDED
+        IF(IRM.GE.1 .AND. IRM.LE.4)THEN          ! RESPONSE MATRIX NEEDED
           DO 100 I = 1,NFVAR                     ! CREATE INITIAL PERTURBATIONS
             DELINC(I) = DELTA*FVMAX(I)           ! SCALE EACH BY UPPER BOUND
             IF(FVDIR(I).EQ.2)DELINC(I)=-DELINC(I)! SWITCH FOR WITHDRAWAL VARIABLE
@@ -2551,7 +2606,7 @@ C-------THIS IS THE FIRST TIME THROUGH THIS SUBROUTINE
           ENDIF                                  !   SAME AS BASE FLOWS
           NPERT = NFVAR                          ! SET TERMINAL VALUE TO 
 C                                                !   NUMBER OF VARIABLES
-        ELSEIF(IRM.EQ.0)THEN                     ! RESPONSE MATRIX READ FROM FILE
+        ELSEIF(IRM.EQ.0 .OR. IRM.EQ.5)THEN       ! RESPONSE MATRIX READ FROM FILE
           CALL SGWM1RMS1PL
           IPERT = 0                              ! SET IPERT AND NPERT  
           NPERT = -1                             ! SO LOOP IS NOT EXECUTED
@@ -2707,13 +2762,13 @@ C
 C***********************************************************************
       SUBROUTINE GWM1RMS1PP(IOUT,MFCNVRG,IPERT,FIRSTSIM,LASTSIM)
 C***********************************************************************
-C  VERSION: 18JAN2006
+C  VERSION: 12AUG2006
 C  PURPOSE - SET OUTPUT FLAGS AT BEGINNING OF SIMULATION,
 C            PERTURB THE PUMPING RATE FOR RESPONSE MATRIX GENERATION
 C-----------------------------------------------------------------------
       USE GWM1RMS1, ONLY : NONLIN,NCON,NDV,FVOLD,AFACT,DEWATER,IPGNA,
      1                     DELINC,SLPITCNT,VARBASE,PGFACT,IBASE,IREF,
-     2                     DEWATERQ
+     2                     DEWATERQ,NPGNMX
       USE GWM1DCV1, ONLY : NFVAR,FVBASE,FVINI,FVMAX,FVNAME
       USE GWM1BAS1, ONLY : ZERO,GWMOUT
       USE GWM1OBJ1, ONLY : SOLNTYP
@@ -2743,10 +2798,11 @@ C-------THIS IS A BASE OR REFERENCE SIMULATION
      &               AND..NOT.DEWATERQ)THEN      ! FLOW PROCESS SUCCESSFUL
             CALL SGWM1RMS1PP(2)
           ELSE                                   ! FLOW PROCESS FAILED 
-            IF(SLPITCNT.GT.0)THEN                ! MUST BE AN SLP BASE SIMULATION
-              CALL SGWM1RMS1PP(3)
+            IF(SLPITCNT.GT.0                     ! MUST BE AN SLP BASE SIMULATION
+     &        .AND.NPGNMX.GT.0)THEN              ! AND RESETTING IS ALLOWED
+	        CALL SGWM1RMS1PP(3)
               CALL GWM1RMS1PP_RESETBASE
-            ELSE                                 ! MUST BE FIRST SIMULATION
+            ELSE                                 ! EITHER FIRST SIMULATION OR NO RESET
               IF(.NOT.MFCNVRG)THEN
                 CALL GWM1BAS1PF
      &           ('FLOW PROCESS FAILED TO CONVERGE ON FIRST SIMULATION'
@@ -2816,28 +2872,39 @@ C
         CALL GWM1BAS1PS('  Begin Solution Algorithm',0)
         IF(IPERT.LT.0)THEN                       ! THIS IS A REFERENCE RUN
           CALL GWM1BAS1PS('    Running Reference Simulation',0)
-          WRITE(IOUT,1000,ERR=990)
+          WRITE(IOUT,1005,ERR=990)
      &      'REFERENCE FLOW PROCESS SIMULATION FOR GWM'
         ELSEIF(IPERT.EQ.0 .AND. IREF.EQ.1)THEN   ! THIS IS A BASE AND REF RUN
           CALL GWM1BAS1PS('    Running Flow Process Simulation',0)
           CALL GWM1BAS1PS('      for both Reference and Base ',0)
-          WRITE(IOUT,1000,ERR=990)
+          WRITE(IOUT,1005,ERR=990)
      &     'FLOW PROCESS SIMULATION FOR GWM FOR BOTH REFERENCE AND BASE'
         ELSEIF(IPERT.EQ.0 .AND. IREF.EQ.0)THEN   ! THIS IS JUST A BASE RUN
           CALL GWM1BAS1PS('    Running Base Flow Process Simulation',0)
-          WRITE(IOUT,1000,ERR=990)'BASE FLOW PROCESS SIMULATION FOR GWM'
+          WRITE(IOUT,1005,ERR=990)'BASE FLOW PROCESS SIMULATION FOR GWM'
         ENDIF
       ELSEIF(IFLG.EQ.2)THEN
+        IF(NONLIN)CALL GWM1BAS1PS(' ',0)
         IF(NONLIN)
      &    CALL GWM1BAS1PS('  SLP Algorithm: Begin Iteration ',
      &                  SLPITCNT+1)
         CALL GWM1BAS1PS('    Running Base Flow Process Simulation',0)
-        WRITE(IOUT,1000,ERR=990)
+        WRITE(IOUT,1005,ERR=990)
      &                            'BASE FLOW PROCESS SIMULATION FOR GWM'
       ELSEIF(IFLG.EQ.3)THEN
         CALL GWM1BAS1PS('      Flow Process Failed: Reset Base',0)
       ELSEIF(IFLG.EQ.4)THEN
-        WRITE(IOUT,1000,ERR=990)
+        CALL GWM1BAS1PF(
+     &'---------------------------------------------------------------'
+     &                    ,0,ZERO)
+        CALL GWM1BAS1PF('         Final Flow Process Simulation',0,ZERO)
+        CALL GWM1BAS1PF(
+     &'---------------------------------------------------------------'
+     &                    ,0,ZERO)
+        CALL GWM1BAS1PS('  Running Final Flow Process Simulation',0)
+        CALL GWM1BAS1PS('    using Optimal Flow Variable Rates ',0)
+        CALL GWM1BAS1PS('    ',0)
+        WRITE(IOUT,1005,ERR=990)
      &                      'FINAL FLOW PROCESS SIMULATION FOR GWM'
       ELSEIF(IFLG.EQ.5)THEN
         CALL GWM1BAS1PS('    ',0)
@@ -2849,7 +2916,7 @@ C
      &            'FLOW PROCESS SIMULATION FOR GWM PERTURBATION',IPERT
       ENDIF
 C
- 1000 FORMAT(/,T20,A,/,T20,38('-'))
+ 1005 FORMAT(/,T20,A,/,T20,38('-'))
  1010 FORMAT(/,T20,A,I5,/,T20,50('-'))
 C
       RETURN
@@ -2909,38 +2976,9 @@ C
       END SUBROUTINE GWM1RMS1PP
 C
 C***********************************************************************
-      SUBROUTINE GWM1RMS1OS1(NWELLS,MXWELL,WELL,
-     1        NCOL,NROW,NLAY,NWELVL,HNEW,HDRY)
+      SUBROUTINE GWM1RMS1OS(NCOL,NROW,NLAY,KPER,HNEW,HDRY)
 C***********************************************************************
-C     VERSION: 17JAN2006
-C     PURPOSE: CHECK THAT NO UNMANAGED WELL CELL HAS BEEN DEWATERED
-C-----------------------------------------------------------------------
-      USE GWM1RMS1, ONLY : DEWATERQ
-      INTEGER(I4B),INTENT(IN):: NWELLS,MXWELL,NWELVL,NCOL,NROW,NLAY
-      REAL(DP),INTENT(IN)::HNEW(NCOL,NROW,NLAY)
-      REAL(SP),INTENT(IN)::HDRY
-      REAL(SP),INTENT(IN)::WELL(NWELVL,MXWELL)
-C-----LOCAL VARIABLES
-      REAL(DP)::STATE
-      INTEGER(I4B)::L,IL,IR,IC
-C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-C
-C-----EXAMINE UNMANAGED WELLS
-      DO 100 L=1,NWELLS
-        IR=WELL(2,L)
-        IC=WELL(3,L)
-        IL=WELL(1,L)
-        STATE = HNEW(IC,IR,IL)
-        IF(REAL(STATE,SP).EQ.HDRY)DEWATERQ=.TRUE.         ! CELL HAS DEWATERED
-  100 CONTINUE
-C
-      RETURN
-      END SUBROUTINE GWM1RMS1OS1
-C
-C***********************************************************************
-      SUBROUTINE GWM1RMS1OS2(NCOL,NROW,NLAY,KPER,HNEW,HDRY)
-C***********************************************************************
-C     VERSION: 17JAN2006
+C     VERSION: 7JULY2006
 C     PURPOSE: CHECK THAT NO MANAGED WELL CELL HAS BEEN DEWATERED
 C-----------------------------------------------------------------------
       USE GWM1RMS1, ONLY : DEWATERQ
@@ -2967,12 +3005,12 @@ C-----EXAMINE MANAGED WELLS
   200 ENDDO
 C
       RETURN
-      END SUBROUTINE GWM1RMS1OS2
+      END SUBROUTINE GWM1RMS1OS
 C
 C***********************************************************************
       SUBROUTINE GWM1RMS1FP(MFCNVRG,IPERT,NPERT,FIRSTSIM,LASTSIM)
 C***********************************************************************
-C  VERSION: 19JAN2005
+C  VERSION: 14AUG2006
 C  PURPOSE - USE SIMULATION RESULTS TO COMPUTE RESPONSE MATRIX AND 
 C            AUGMENTED RIGHT HAND SIDE; INCREMENT THE PERTURBATION INDEX
 C-----------------------------------------------------------------------
@@ -3016,10 +3054,10 @@ C-----TEST FOR PROBLEMS IN THE SIMULATION RESULTS
      &   (.NOT.MFCNVRG                     ! SIMULATION AND FLOW PROCESS
      &     .OR.DEWATER.OR.DEWATERQ))THEN   ! FAILED TO CONVERGE OR DEWATERED
         NRESET = NRESET + 1                ! INCREMENT BASE RESET COUNTER 
-        IF(NRESET.GT.NPGNMX)THEN           ! TOO MANY ATTEMPTS; STOP PROGRAM 
+        IF(NRESET.GT.NPGNMX.AND.NPGNMX.GT.0)THEN ! TOO MANY ATTEMPTS 
           CALL GWM1BAS1PF('BASE RESET ATTEMPTS EXCEED MAXIMUM'
      &                     ,0,ZERO)
-          CALL USTOP('BASE RESET ATTEMPTS EXCEED MAXIMUM')
+          CALL USTOP('BASE RESET ATTEMPTS EXCEED MAXIMUM') ! STOP PROGRAM
         ENDIF
         RETURN                           
 C
@@ -3031,20 +3069,29 @@ C
         NRESET = 0                         ! REZERO BASE RESET COUNTER
 C
       ELSEIF(IPERT.GT.0)THEN               ! THIS IS A PERTURBATION SIMULATION
-        CALL SGWM1RMS1FP                   ! TEST IT FOR GOOD RESPONSE
-C
-        IF(IPGNA.EQ.0)THEN                 ! PERTURBATION GENERATION SUCCEEDED
-          NPGNA = 0                        ! RESET PERTURBATION ATTEMPT COUNTER
-C
-        ELSEIF(IPGNA.GT.0) THEN            ! PERTURBATION GENERATION FAILED
-          NPGNA = NPGNA + 1                ! INCREMENT PERTURBATION COUNTER 
-          IF(NPGNA.GT.NPGNMX)THEN          ! TOO MANY ATTEMPTS; STOP PROGRAM 
-            CALL GWM1BAS1PF('PERTURBATION ATTEMPTS EXCEED MAXIMUM'
-     &                       ,0,ZERO)
-            CALL USTOP('PERTURBATION ATTEMPTS EXCEED MAXIMUM')
+        IF(NPGNMX.EQ.0)THEN                ! DO NOT PERFORM FULL TESTS
+          IF(.NOT.MFCNVRG)THEN             ! JUST TEST MF CONVERGENCE
+            CALL GWM1BAS1PF  
+     &       ('FLOW PROCESS FAILED TO CONVERGE ON PERTURBATION RUN'
+     &         ,0,ZERO)
+            CALL USTOP                     ! STOP THE RUN
+     &       ('FLOW PROCESS FAILED TO CONVERGE ON PERTURBATION RUN')
           ENDIF
-          FVBASE(IPERT) = VARBASE          ! RESTORE ORIGINAL FLOW RATE 
-          RETURN                           ! TRY PERTURBATION AGAIN
+        ELSEIF(NPGNMX.GT.0)THEN            ! TEST FOR GOOD RESPONSE
+          CALL SGWM1RMS1FP                
+          IF(IPGNA.EQ.0)THEN               ! PERTURBATION GENERATION SUCCEEDED
+            NPGNA = 0                      ! RESET PERTURBATION ATTEMPT COUNTER
+C
+          ELSEIF(IPGNA.GT.0) THEN          ! PERTURBATION GENERATION FAILED
+            NPGNA = NPGNA + 1              ! INCREMENT PERTURBATION COUNTER 
+            IF(NPGNA.GT.NPGNMX)THEN        ! TOO MANY ATTEMPTS; STOP PROGRAM 
+              CALL GWM1BAS1PF('PERTURBATION ATTEMPTS EXCEED MAXIMUM'
+     &                       ,0,ZERO)
+              CALL USTOP('PERTURBATION ATTEMPTS EXCEED MAXIMUM')
+            ENDIF
+            FVBASE(IPERT) = VARBASE          ! RESTORE ORIGINAL FLOW RATE 
+            RETURN                           ! TRY PERTURBATION AGAIN
+          ENDIF
         ENDIF
       ENDIF
 C
@@ -3054,7 +3101,7 @@ C-----RESTORE ORIGINAL FLOW RATE FOR PERTURBATION SIMULATION
       ENDIF
 C
 C-----WRITE RESPONSE MATRIX OUTPUT HEADER FOR FIRST SIMULATION
-      IF(IRM.EQ.1.AND.FIRSTSIM)THEN
+      IF((IRM.EQ.1.OR.IRM.EQ.4).AND.FIRSTSIM)THEN
         WRITE(RMFILE)NFVAR,NEVAR,NBVAR,IBASE ! WRITE HEADER FOR TEST
       ENDIF
 C
@@ -3069,7 +3116,7 @@ C-----FORMULATE THE STREAM CONSTRAINT COEFFICIENTS FOR THE PERTURBED VARIABLE
 C
 C-----WRITE OUTPUT FOR BASE SIMULATIONS
       IF(IPERT.EQ.0)THEN                   ! THIS IS A BASE SIMULATION
-        IF(SOLNTYP.EQ.'LP' .OR. SLPITCNT.EQ.0 .OR. SLPITPRT.EQ.1)THEN
+        IF(SOLNTYP.EQ.'LP' .OR. SLPITCNT.EQ.0 .OR. SLPITPRT.GE.1)THEN
           CALL GWM1RMS1OT(1)               ! WRITE CONSTRAINTS STATUS
         ENDIF
       ENDIF
@@ -3108,7 +3155,7 @@ C-----------------------------------------------------------------------
       INTEGER IPERT
 C-----LOCAL VARIABLES
       REAL(DP)::XNUM
-      INTEGER(I4B)::IROW,LNUM,LNUMMAX
+      INTEGER(I4B)::IROW,LNUM,LNUMMAX,COLZ
 C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 C  
 C-----CHECK IF MODFLOW FAILED TO CONVERGE
@@ -3122,12 +3169,14 @@ C
 C-----CHECK IF RESPONSE COEFFICIENTS HAVE SUFFICIENT PRECISION
       IF(HDCNUM.GT.0 .OR. STCNUM.GT.0)THEN       ! CHECK RESPONSE PRECISION
         LNUMMAX = 0
+        COLZ = 1                                 ! FLAG FOR PRESENCE OF COEFF.
         DO 100 IROW = 1,HDCNUM                   ! LOOP OVER HDC ROWS
           XNUM = HDCSTATE(IROW)-HDCSTATE0(IROW)  ! FIND STATE VALUE DIFFERENCE
           IF(XNUM.NE.ZERO)THEN                   ! DETERMINE THE MAGNITUDE 
             XNUM = XNUM/HCLOSEG                  ! RELATIVE TO MODFLOW CONVERGENCE
             LNUM = IDINT(DLOG10(DABS(XNUM))) + 1 ! FIND ORDER OF MAGNITUDE 
             LNUMMAX = MAX(LNUM,LNUMMAX)          ! COMPARE WITH CURRENT MAXIMUM
+            COLZ = 0                             ! RESPONSE COEFF IS PRESENT
           ENDIF
   100   ENDDO
         DO 200 IROW = 1,STCNUM                   ! LOOP OVER STC ROWS
@@ -3136,9 +3185,10 @@ C-----CHECK IF RESPONSE COEFFICIENTS HAVE SUFFICIENT PRECISION
             XNUM = XNUM/HCLOSEG                  ! RELATIVE TO MODFLOW CONVERGENCE
             LNUM = IDINT(DLOG10(DABS(XNUM))) + 1 ! FIND ORDER OF MAGNITUDE 
             LNUMMAX = MAX(LNUM,LNUMMAX)          ! COMPARE WITH CURRENT MAXIMUM
+            COLZ = 0                             ! RESPONSE COEFF IS PRESENT
           ENDIF
   200   ENDDO
-        IF(LNUMMAX.LT.NSIGDIG)THEN               ! INSUFFICIENT PRECISION
+        IF(COLZ.EQ.0.AND.LNUMMAX.LT.NSIGDIG)THEN ! INSUFFICIENT PRECISION
           CALL GWM1BAS1PS('        Perturbation Failed: ',0)
           CALL GWM1BAS1PS('          Response Precision Inadequate',0)
           IPGNA = 2                              ! SET PERTURBATION INSTRUCTION
@@ -3156,13 +3206,13 @@ C-----CHECK IF ANY HEAD CELLS HAVE BECOME DEWATERED
         RETURN
       ENDIF
 C
-C-----CHECK IF ANY HEAD CELLS HAVE BECOME DEWATERED
+C-----CHECK IF ANY WELL CELLS HAVE BECOME DEWATERED
       IF(DEWATERQ)THEN                           ! AN ACTIVE WELL DEWATERED
         CALL GWM1BAS1PS('        Perturbation Failed: ',0)
         CALL GWM1BAS1PS(
      &             '          At Least One Active Well is Dry',0)
         IPGNA = 3                                ! SET PERTURBATION INSTRUCTION
-        DEWATERQ = .FALSE.                        ! RESET DEWATER FLAG
+        DEWATERQ = .FALSE.                       ! RESET DEWATER FLAG
         RETURN
       ENDIF
 C
@@ -3178,7 +3228,7 @@ C
 C***********************************************************************
       SUBROUTINE GWM1RMS1FM 
 C***********************************************************************
-C  VERSION: 20FEB2005
+C  VERSION: 26JUL2006
 C  PURPOSE - ASSEMBLE THE COEFFICIENT MATRIX, COST COEFFICIENT, UPPER BOUNDS
 C              AND RIGHT HAND SIDE FOR THE LINEAR PROGRAM
 C    INPUT:
@@ -3251,9 +3301,20 @@ C***********************************************************************
 C
 C  PURPOSE - DETERMINE SIGNIFICANT DIGITS IN RESPONSE MATRIX ELEMENT
 C-----------------------------------------------------------------------
-      USE GWM1BAS1, ONLY : GWM1BAS1PF
+      USE GWM1BAS1, ONLY : GWM1BAS1PF,RMFILEF
 C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 C
+C-----WRITE RESPONSE MATRIX TO FORMATTED FILE
+      IF(IRM.GE.3)THEN
+        WRITE(RMFILEF,9000)
+        CALL UCOLNO(1,NFVAR,5,5,14,RMFILEF)
+        DO 300 IROW = 1,NRMC 
+          WRITE(RMFILEF,9010) IROW,(AMAT(IROW,IPERT),IPERT=1,NFVAR)
+  300   ENDDO
+      ENDIF
+C
+      IF(IRM.EQ.5)RETURN ! THIS IS AN EXISTING RESPONSE MATRIX
+
       ISIG = 0
       NSIG = 0
 C
@@ -3289,8 +3350,15 @@ C
      &   '      Average Number of Sig. Digits in Matrix Less Than 1',
      &                0,ZERO)
       ENDIF
-C
+
       RETURN
+ 9000 FORMAT('  GWM RESPONSE MATRIX ',/,
+     &   '    ROWS IN READ-ORDER FOR SIMULATION-BASED CONSTRAINTS',/,
+     &   '       HEAD CONSTRAINTS IN ORDER READ FROM HEDCON',/,
+     &   '       STREAM CONSTRAINTS IN ORDER READ FROM STRMCON',/,
+     &   '    COLUMNS IN READ-ORDER FOR FLOW RATE VARIABLES',/,
+     &   '-------------------------------------------------------')
+ 9010 FORMAT((I5,1X,5G14.6):/(6X,5G14.6))
       END SUBROUTINE SGWM1RMS1FM
 C
       END SUBROUTINE GWM1RMS1FM   
@@ -3299,7 +3367,7 @@ C
 C***********************************************************************
       SUBROUTINE GWM1RMS1AP(GWMCNVRG)
 C***********************************************************************
-C  VERSION: 21SEPT2005
+C  VERSION: 09AUG2006
 C  PURPOSE - CALL THE APPROPRIATE SOLVER FOR THE OPTIMIZATION PROBLEM
 C              AND RETURN THE SOLUTION WITH SIGN GIVEN TO PUMPING RATES
 C-----------------------------------------------------------------------
@@ -3318,8 +3386,7 @@ C-----------------------------------------------------------------------
         END
       END INTERFACE
 C-----LOCAL VARIABLES
-      INTEGER(I4B)::IFLG
-      INTEGER(I4B)::I
+      INTEGER(I4B)::I,IFLG
 C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 C
       IF(SOLNTYP.EQ.'NS')THEN
@@ -3337,7 +3404,6 @@ C
         LASTLP = .TRUE.
         CALL SGWM1RMS1AP                    ! SOLVE LP
         CALL GWM1RMS1LP_CHKSOL(IFLG,GWMCNVRG)! CHECK STATUS OF SOLUTION
-
       ELSEIF(SOLNTYP.EQ.'SLP')THEN
         SLPITCNT = SLPITCNT + 1             ! INCREMENT ITERATION COUNTER
         IF(SLPITCNT.GT.SLPITMAX)THEN        ! TERMINATE PROGRAM IF ITERATIONS EXCEEDED
@@ -3412,7 +3478,7 @@ C-----CALL SOLVER
       CALL GWM1BAS1PS('    Solving Linear Program',0)
       IF(NBVAR.EQ.0) THEN                        ! CALL SIMPLEX LP SOLVER DIRECTLY 
         CALL GWM1SIMPLEX1(NCON,NV,NDV,AMAT,CST,BNDS,RHS,OBJ,
-     &                    IFLG,LPITMAX) 
+     &                    IFLG,LPITMAX,1) 
         NCONF = NCON
         NVF   = NDV-1
       ELSE                                       ! CALL BRANCH AND BOUND SOLVER 
@@ -3673,7 +3739,7 @@ C-------TEST FOR CONVERGENCE
           GWMCNVRG = .TRUE.                      ! CRITERIA PASSED                    
         ENDIF
         OBJOLD = OBJ                             ! RESET STORED OBJECTIVE VALUE
-        IF(SLPITPRT.EQ.1)THEN                    ! WRITE ITERATION STATUS
+        IF(SLPITPRT.GE.1)THEN                    ! WRITE ITERATION STATUS
           CALL GWM1BAS1PS('    Optimal Solution Found',0)
           CALL GWM1BAS1PF('    Objective Value',1,OBJ)
           IF(NFVAR.GT.0)
@@ -3687,7 +3753,7 @@ C-------TEST FOR CONVERGENCE
           CALL GWM1BAS1PS('  SLP Algorithm: End Iteration',SLPITCNT)
         ENDIF
         IF(GWMCNVRG)THEN                          ! CONVERGENCE ACHIEVED
-          IF(SLPITPRT.EQ.1)
+          IF(SLPITPRT.GE.1)
      &    CALL GWM1BAS1PS('  Iterations have converged',0)
         ELSE                                     ! CONVERGENCE NOT ACHIEVED
           SLPINFCNT = 0
@@ -3695,7 +3761,7 @@ C-------TEST FOR CONVERGENCE
       ELSE
 C-------LP SOLUTION FAILED
         GWMCNVRG = .FALSE.
-        IF(SLPITPRT.EQ.1) THEN                   ! WRITE ITERATION STATUS
+        IF(SLPITPRT.GE.1) THEN                   ! WRITE ITERATION STATUS
           IF(IFLG.EQ.1)THEN
             CALL GWM1BAS1PS
      &           ('    Problem Is Infeasible At Iteration',SLPITCNT)
@@ -3754,16 +3820,17 @@ C
 C***********************************************************************
       SUBROUTINE GWM1RMS1OT(IFLG)
 C***********************************************************************
-C  VERSION: 18JAN2006
+C  VERSION: 09AUG2006
 C  PURPOSE - WRITE OUTPUT FOR GWM SOLUTION  
 C-----------------------------------------------------------------------
-      USE GWM1BAS1, ONLY : ZERO,ONE,BIGINF,GWMOUT
+      USE GWM1BAS1, ONLY : ZERO,ONE,BIGINF,GWMOUT,NSTRESS,GWMWFILE
       USE GWM1RMS1, ONLY : CST,RHS,BNDS,NRMC,NCON,NV,NDV,NONLIN,RHSIN,
      1                     RHSINF,RANGENAME,RANGENAMEF,RANGEFLG,NCONF,
-     2                     IRM,NVF,RHSREL,RHSRLL,RHSREU,RHSRLU,CSTREL,
+     2                     NVF,RHSREL,RHSRLL,RHSREU,RHSRLU,CSTREL,
      3                     CSTRLL,CSTREU,CSTRLU,RHSRLB,RHSRUB,RHSROR,
-     4                     CSTROR,CSTRLB,CSTRUB,CONTYP
-      USE GWM1DCV1, ONLY : NFVAR,NBVAR,FVBASE
+     4                     CSTROR,CSTRLB,CSTRUB,CONTYP,SLPITPRT
+      USE GWM1DCV1, ONLY : NFVAR,NBVAR,FVBASE,FVSP,FVNCELL,FVKLOC,
+     1                     FVILOC,FVJLOC,FVRATIO,FVNAME
       USE GWM1OBJ1, ONLY : OBJTYP,GWM1OBJ1OT
       USE GWM1BAS1, ONLY : GWM1BAS1PF
       USE GWM1HDC1, ONLY : GWM1HDC1OT
@@ -3779,12 +3846,29 @@ C-----------------------------------------------------------------------
 C-----LOCAL VARIABLES
       CHARACTER(LEN=10)::NAME,ENTER,LEAVE
       REAL(DP)::RHSDIFF,SLACK,RHSUB,RHSLB
-      INTEGER(I4B)::I,II,K,RSTRT,INDEX,NCON2
+      REAL(SP)::Q
+      INTEGER(I4B)::I,II,K,KPER,RSTRT,INDEX,NCON2,OFLG
       INTEGER(I4B)::LRHSREU,LRHSRLU,LRHSREL,LRHSRLL
 C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 C
+C-----ADJUST VALUE OF IFLG AS NECESSARY
+      IF((IFLG.EQ.-1.AND.                   ! THIS IS CALL AFTER A SUCCESSFUL LP
+     &    SLPITPRT.EQ.2)                    ! AND SOLUTION AT EACH SLP REQUESTED
+     &    .OR.(IFLG.EQ.0))THEN              ! OR THIS IS CALL AFTER GWMCNVRG=TRUE
+	  IF(GWMWFILE.GT.0)THEN               ! A 'WELL' FILE IS REQUESTED
+          REWIND(GWMWFILE)                  ! IF ALREADY WRITTEN TO, REWIND
+          OFLG=6                            ! WRITE TO GLOBAL AND 'WELL' FILE
+        ELSE
+          OFLG=2                            ! WRITE SOLUTION TO GLOBAL ONLY
+        ENDIF
+      ELSEIF(IFLG.GT.0.AND.IFLG.LE.6)THEN
+        OFLG=IFLG                           ! JUST SET TO ASSIGNED VALUE
+	ELSE
+        RETURN
+	ENDIF
+C
 C-----WRITE CONSTRAINT STATUS FOR A FLOW PROCESS SIMULATION
-      IF(IFLG.EQ.1)THEN     
+      IF(OFLG.EQ.1)THEN     
         CALL GWM1BAS1PF('      Status of Simulation-Based Constraints '
      &       ,0,ZERO)
         CALL GWM1BAS1PF(
@@ -3794,13 +3878,20 @@ C-----WRITE CONSTRAINT STATUS FOR A FLOW PROCESS SIMULATION
      &'      ---------------        ----     ------     ---------------'
      &       ,0,ZERO)
 C
-        RSTRT = 0                               ! RSTRT IS A DUMMY ARGUMENT HERE
-        CALL GWM1HDC1OT(RSTRT,1)                ! WRITE HEAD CONSTRAINT STATUS
-        CALL GWM1STC1OT(RSTRT,1)                ! WRITE STREAM CONSTRAINT STATUS
+        RSTRT = 0                           ! RSTRT IS A DUMMY ARGUMENT HERE
+        CALL GWM1HDC1OT(RSTRT,1)            ! WRITE HEAD CONSTRAINT STATUS
+        CALL GWM1STC1OT(RSTRT,1)            ! WRITE STREAM CONSTRAINT STATUS
+        CALL GWM1SMC1OT(RSTRT,1)            ! WRITE SUMMATION CONSTRAINT STATUS
+        WRITE(GWMOUT,7005,ERR=990)
 C
 C-----WRITE LINEAR PROGRAM OUTPUT
-      ELSEIF(IFLG.EQ.2)THEN    
-        WRITE(GWMOUT,1000,ERR=990)'Ground-Water Management Solution'
+      ELSEIF(OFLG.EQ.2.OR.OFLG.EQ.6)THEN    
+        IF(IFLG.EQ.-1)THEN                  ! THIS IS AN SLP ITERATION
+	    WRITE(GWMOUT,1000,ERR=990)'Solution at This Iteration of SLP'
+	  ELSE
+	    WRITE(GWMOUT,1000,ERR=990)'Ground-Water Management Solution'
+          WRITE(GWMOUT,1010,ERR=990)
+        ENDIF
         CALL GWM1OBJ1OT                     ! WRITE OBJECTIVE FUNCTION INFO
         RSTRT = 1                           ! SET LOCATION FOR NEXT CONSTRAINT
 C
@@ -3814,7 +3905,7 @@ C-------WRITE CONSTRAINTS INFORMATION
      &       ,0,ZERO)
         CALL GWM1HDC1OT(RSTRT,2)            ! WRITE HEAD CONSTRAINT INFO
         CALL GWM1STC1OT(RSTRT,2)            ! WRITE STREAM CONSTRAINT INFO
-        CALL GWM1SMC1OT(RSTRT)              ! WRITE SUMMATION CONSTRAINT INFO
+        CALL GWM1SMC1OT(RSTRT,2)            ! WRITE SUMMATION CONSTRAINT INFO
         CALL GWM1DCC1OT(RSTRT)              ! WRITE VARIABLE CONSTRAINT INFO
 C
 C-------WRITE RANGE ANALYSIS INFORMATION
@@ -3965,14 +4056,13 @@ C-------------WRITE THE UPPER BOUND RANGE INFORMATION
  200      ENDDO
 C
         ELSE
-          WRITE(GWMOUT,6000,ERR=990)
+          WRITE(GWMOUT,5030,ERR=990)
           CALL GWM1BAS1PF(' ',0,ZERO)
-          CALL GWM1BAS1PF('       RANGE ANALYSIS NOT REPORTED ',0,ZERO)
+          CALL GWM1BAS1PF('       Range Analysis Not Reported ',0,ZERO)
         ENDIF
 C
 C-----WRITE FINAL CONSTRAINT STATUS
-      ELSEIF(IFLG.EQ.3 .OR. IFLG.EQ.4)THEN          
-        WRITE(GWMOUT,1000,ERR=990)'Final Flow Process Simulation'
+      ELSEIF(OFLG.EQ.3 .OR. OFLG.EQ.4)THEN          
         CALL GWM1BAS1PF('      Status of Simulation-Based Constraints '
      &       ,0,ZERO)
         CALL GWM1BAS1PF(
@@ -3987,16 +4077,44 @@ C-----WRITE FINAL CONSTRAINT STATUS
         RSTRT = 0                                 ! RSTRT IS A DUMMY ARGUMENT HERE
         CALL GWM1HDC1OT(RSTRT,1)                  ! WRITE HEAD CONSTRAINT STATUS
         CALL GWM1STC1OT(RSTRT,1)                  ! WRITE STREAM CONSTRAINT STATUS
+        CALL GWM1SMC1OT(RSTRT,3)                  ! WRITE SUMMATION CONSTRAINT STATUS
+	  WRITE(GWMOUT,7005,ERR=990)
 	  WRITE(GWMOUT,7000,ERR=990)
-        IF(IFLG.EQ.4)WRITE(GWMOUT,7010,ERR=990)   ! DEWATERING IN HEADS OR WELLS
+        IF(OFLG.EQ.4)WRITE(GWMOUT,7010,ERR=990)   ! DEWATERING IN HEADS OR WELLS
 C
 C-----WRITE WARNING MESSAGE: FINAL FLOW PROCESS FAILED TO CONVERGE
-      ELSEIF(IFLG.EQ.5)THEN          
-        WRITE(GWMOUT,1000,ERR=990)'Final Flow Process Simulation'
+      ELSEIF(OFLG.EQ.5)THEN          
         WRITE(GWMOUT,7020,ERR=990)
       ENDIF
 C
+C-----WRITE OPTIMAL SOLUTION WITH A FORMAT SIMILAR TO THE MODFLOW WELL FILE
+      IF(OFLG.EQ.6)THEN  
+        DO 630 KPER=1,NSTRESS
+          II=0                                  ! COUNT THE NUMBER OF WELLS 
+          DO 600 I=1,NFVAR                      ! LOOP OVER FLOW VARIABLES
+            IF(CST(I).NE.ZERO.AND.FVSP(I,KPER))THEN ! FLOW VARIABLE ACTIVE
+              II=II+FVNCELL(I)                  ! COUNT NUMBER OF CELLS
+            ENDIF
+  600     ENDDO
+          WRITE(GWMWFILE,6000)II,0,KPER       ! WRITE THE NUMBER OF WELLS
+          IF(II.GT.0)THEN                       ! CHECK THAT YOU HAVE SOME WELLS
+            DO 620 I=1,NFVAR                    ! LOOP OVER GWM FLOW VARIABLES
+              IF(CST(I).NE.ZERO.AND.FVSP(I,KPER))THEN ! FLOW VARIABLE ACTIVE
+                DO 610 K=1,FVNCELL(I)           ! LOOP OVER CELLS FOR THIS VARIABLE
+                  Q=REAL(CST(I),KIND=4)*FVRATIO(I,K)! ASSIGN FLOW RATE 
+                  WRITE(GWMWFILE,6010)FVKLOC(I,K),FVILOC(I,K),
+     &                                FVJLOC(I,K),Q,FVNAME(I),K
+  610           ENDDO
+              ENDIF
+  620       ENDDO
+          ENDIF
+  630   ENDDO
+      ENDIF
+ 6000 FORMAT(2I10,T50,'Stress Period:',I5)
+ 6010 FORMAT(3I10,E15.7,T50,'Flow Variable:',A10,' NC=',I3)
+C
  1000 FORMAT(/,70('-'),/,T16,A,/,70('-'))
+ 1010 FORMAT(1P,/,T8,'OPTIMAL SOLUTION FOUND ',/)
  2000 FORMAT(/,
      &'  Binding constraint and range analysis values are ',
      &'determined from the linear',/,'    program and based on the',
@@ -4040,16 +4158,21 @@ C
  5010 FORMAT(1P,T1,A,T11,ES12.4,T24,ES13.4,T42,' Infinity',
      &                                   T58,'----- No Change -----')
  5020 FORMAT(1P,T1,A,T11,ES12.4,T24,ES13.4,             T64,'UNBOUNDED')
- 6000 FORMAT(/,
+ 5030 FORMAT(/,
      &  '  Binding constraint values are ',
      &  'determined from the linear program',/,'    and based on the',
      &  ' response matrix approximation of the flow-process.')
- 7000 FORMAT(/,
+ 7000 FORMAT(
      &  '  Because of precision limitations and possible ',
      &  'nonlinear behavior, ',/,'    the status of binding ',
      &  'constraints computed directly by the flow process ',/,
      &  '    may differ slightly from those computed using ',
      &  'the linear program.  ')
+ 7005 FORMAT(/,
+     &'  Distance to RHS is the absolute value of the difference ',
+     &'between the',/,'    the right hand side of the constraint and ',
+     &'the left side of the',/,'    constraint evaluated using the ',
+     &'current set of decision variable values.')    
  7010 FORMAT(/,
      &  '    WARNING: At least one constrained head or active',
      &  ' well dewatered',/,

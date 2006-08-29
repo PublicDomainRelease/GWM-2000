@@ -447,7 +447,7 @@ C
 C***********************************************************************
       SUBROUTINE GWM1OBJ1OT
 C***********************************************************************
-C     VERSION: 20FEB2005
+C     VERSION: 12AUG2006
 C     PURPOSE: WRITE OUTPUT FOR OBJECTIVE FUNCTION
 C-----------------------------------------------------------------------
       USE GWM1BAS1, ONLY : ZERO,GWMOUT
@@ -462,9 +462,6 @@ C-----------------------------------------------------------------------
       INTEGER(I4B)::I,ICST
       REAL(DP)::SUMI,SUME,SUMC,SUMCT,OBJC
 C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-C
-C-----PRINT OPTIMAL OBJECTIVE VALUE AND PUMPING RATES
-      WRITE(GWMOUT,1000,ERR=990)
 C
 C-----WRITE OPTIMAL FLOW VARIABLES
       SUMI = ZERO
@@ -535,7 +532,6 @@ C-----WRITE OPTIMAL BINARY VARIABLES
       ENDIF
       WRITE(GWMOUT,8000,ERR=990)SUMCT
 C
- 1000 FORMAT(1P,/,T8,'OPTIMAL SOLUTION FOUND ',/)
  2000 FORMAT(T8,'OPTIMAL RATES FOR EACH FLOW VARIABLE ',
      &     /,  T8,39('-'),
      &     /,  T1,'Variable',T20,'Withdrawal',

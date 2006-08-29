@@ -1,6 +1,6 @@
                                   MODFLOW-2000
       U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE GROUND-WATER FLOW MODEL
-                VERSION MF2K_GWM 1.0.3 012106,FROM MF2K V1.13.00
+                 VERSION MF2K_GWM 1.1 083006,FROM MF2K V1.13.00
 
 
  This model run produced both GLOBAL and LIST files.  This is the LIST file.
@@ -26,6 +26,9 @@
 
  REWOUND ..\data\seawater.gwm
  FILE TYPE:GWM   UNIT   18
+
+ REWOUND ..\data\seawater.gwmw
+ FILE TYPE:DATA   UNIT   20
  
  #Seawater sample problem for GWM                                                
  THE FREE FORMAT OPTION HAS BEEN SELECTED

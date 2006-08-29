@@ -1,5 +1,5 @@
       MODULE GWM1SMC1
-C     VERSION: 20FEB2005
+C     VERSION: 17AUG2006
       IMPLICIT NONE
       PRIVATE
       PUBLIC::GWM1SMC1AR,GWM1SMC1FM,GWM1SMC1OT
@@ -24,7 +24,8 @@ C      SMCNTERMS-number of terms in the ith summation constraint
 C      SMCCLOC(I,J)-index of jth variable in ith constraint
 C      SMCDIR   -flag to determine direction of inequality for this constraint
 C                 1 => left hand side < right hand side
-C                 2 => left hand side > right hand side
+C                -1 => left hand side > right hand side
+C                 0 => left hand side = right hand side
 C      SMCNUM   -total number of summation constraints
 C
 C-----FOR ERROR HANDLING
@@ -402,41 +403,101 @@ C
 C
 C
 C***********************************************************************
-      SUBROUTINE GWM1SMC1OT(RSTRT)
+      SUBROUTINE GWM1SMC1OT(RSTRT,IFLG)
 C***********************************************************************
-C  VERSION: 20FEB2005
+C  VERSION: 24JUL2006
 C  PURPOSE - WRITE STATUS OF CONSTRAINT
 C-----------------------------------------------------------------------
-      USE GWM1BAS1, ONLY : ZERO,BIGINF,SMALLEPS
+      USE GWM1BAS1, ONLY : ZERO,ONE,BIGINF,SMALLEPS
       USE GWM1RMS1, ONLY : CST,RHS,RHSIN,RANGENAME,NDV
       USE GWM1BAS1, ONLY : GWM1BAS1CS
+      USE GWM1DCV1, ONLY : NFVAR,FVBASE,FVDIR
       INTEGER(I4B),INTENT(INOUT)::RSTRT
+      INTEGER(I4B),INTENT(IN)::IFLG
 C-----LOCAL VARIABLES
       CHARACTER(LEN=25)::CTYPE
-      INTEGER(I4B)::J,ISMC,ROW
-	REAL(DP)::LHS
+      INTEGER(I4B)::J,ISMC,ROW,DIRR,JLOC
+	REAL(DP)::LHS,DIFF
 C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-      ISMC = 0
-      DO 110 ROW=RSTRT,RSTRT+SMCNUM-1
-        ISMC = ISMC + 1
-        IF(RHS(ROW).EQ.BIGINF*2.0D0)THEN         ! THIS CONSTRAINT WAS NOT IN LP
+C
+C-----WRITE STATUS FOR BASE FLOW PROCESS SIMULATION
+C     EXTERNAL AND BINARY VARIABLES ARE ASSUMED TO HAVE ZERO VALUE
+      IF(IFLG.EQ.1)THEN 
+        CTYPE = 'Summation'
+        DO 110 ISMC=1,SMCNUM
           LHS = ZERO
           DO 100 J=1,SMCNTERMS(ISMC)             ! COMPUTE CONSTRAINT LEFT SIDE
-            LHS = LHS + REAL(SMCCOEF(ISMC,J),DP)*CST(SMCCLOC(ISMC,J))  
+            JLOC = SMCCLOC(ISMC,J)
+            IF(JLOC.LE.NFVAR)THEN                ! THIS IS A FLOW VARIABLE
+	        IF(FVDIR(JLOC).EQ.1)THEN           ! THIS IS INJECTION
+                LHS = LHS + REAL(SMCCOEF(ISMC,J),DP)*FVBASE(JLOC) 
+	        ELSEIF(FVDIR(JLOC).EQ.2)THEN       ! WITHDRAWAL - SWITCH SIGN
+                LHS = LHS - REAL(SMCCOEF(ISMC,J),DP)*FVBASE(JLOC) 
+              ENDIF
+            ENDIF
   100     ENDDO
-          IF(ABS(LHS-RHSIN(ROW)).LT.SMALLEPS)THEN ! CONSTRAINT IS BINDING
-            CTYPE = 'Summation'
-            CALL GWM1BAS1CS(CTYPE,SMCNAME(ISMC),ZERO,0,0) 
+          DIFF = SMCRHS(ISMC) - LHS
+          IF(ABS(DIFF).LT. 1.0D-06*(ONE+SMCRHS(ISMC)))THEN
+            DIRR = 0                        ! CONSTRAINT IS NEAR BINDING
+          ELSE
+            IF(SMCDIR(ISMC).EQ. 1)DIRR=1     ! NON-BINDING LESS THAN CONSTRAINT
+            IF(SMCDIR(ISMC).EQ.-1)DIRR=2     ! NON-BINDING GREATER THAN CONSTRAINT
+            IF(SMCDIR(ISMC).EQ. 0)DIRR=3     ! NON-BINDING EQUALITY CONSTRAINT
           ENDIF
-        ELSEIF(ABS(RHS(ROW)).GT.ZERO)THEN        ! DUAL VARIABLE IS NON-ZERO 
-C                                                ! CONSTRAINT IS BINDING         
-          CTYPE = 'Summation'
-          CALL GWM1BAS1CS(CTYPE,SMCNAME(ISMC),RHS(ROW),0,0) 
-        ENDIF
-  110 ENDDO
+          CALL GWM1BAS1CS(CTYPE,SMCNAME(ISMC),DIFF,DIRR,1) 
+  110   ENDDO
 C
-C-----SET NEXT STARTING LOCATION
-      RSTRT = RSTRT+SMCNUM
+C-----WRITE STATUS FOR LINEAR PROGRAM OUTPUT
+      ELSEIF(IFLG.EQ.2)THEN
+        ISMC = 0
+        DO 210 ROW=RSTRT,RSTRT+SMCNUM-1
+          ISMC = ISMC + 1
+          IF(RHS(ROW).EQ.BIGINF*2.0D0)THEN         ! THIS CONSTRAINT WAS NOT IN LP
+            LHS = ZERO
+            DO 200 J=1,SMCNTERMS(ISMC)             ! COMPUTE CONSTRAINT LEFT SIDE
+              LHS = LHS + REAL(SMCCOEF(ISMC,J),DP)*CST(SMCCLOC(ISMC,J))  
+  200       ENDDO
+            IF(ABS(LHS-RHSIN(ROW)).LT.SMALLEPS)THEN ! CONSTRAINT IS BINDING
+              CTYPE = 'Summation'
+              CALL GWM1BAS1CS(CTYPE,SMCNAME(ISMC),ZERO,0,0) 
+            ENDIF
+          ELSEIF(ABS(RHS(ROW)).GT.ZERO)THEN        ! DUAL VARIABLE IS NON-ZERO 
+C                                                  ! CONSTRAINT IS BINDING         
+            CTYPE = 'Summation'
+            CALL GWM1BAS1CS(CTYPE,SMCNAME(ISMC),RHS(ROW),0,0) 
+          ENDIF
+  210   ENDDO
+        RSTRT = RSTRT+SMCNUM                       ! SET NEXT STARTING LOCATION
+C
+C-----WRITE STATUS FOR OPTIMAL FLOW PROCESS SIMULATION
+      ELSEIF(IFLG.EQ.3)THEN 
+        CTYPE = 'Summation'
+        DO 310 ISMC=1,SMCNUM
+          LHS = ZERO
+          DO 300 J=1,SMCNTERMS(ISMC)             ! COMPUTE CONSTRAINT LEFT SIDE
+            JLOC = SMCCLOC(ISMC,J)
+            IF(JLOC.LE.NFVAR)THEN                ! THIS IS A FLOW VARIABLE
+	        IF(FVDIR(JLOC).EQ.1)THEN           ! THIS IS INJECTION
+                LHS = LHS + REAL(SMCCOEF(ISMC,J),DP)*FVBASE(JLOC) 
+	        ELSEIF(FVDIR(JLOC).EQ.2)THEN       ! WITHDRAWAL - SWITCH SIGN
+                LHS = LHS - REAL(SMCCOEF(ISMC,J),DP)*FVBASE(JLOC) 
+              ENDIF
+            ELSE                                 ! THIS IS EXTERNAL OR BINARY
+              LHS = LHS + REAL(SMCCOEF(ISMC,J),DP)*CST(JLOC) 
+            ENDIF
+  300     ENDDO
+          DIFF = SMCRHS(ISMC) - LHS
+          IF(ABS(DIFF).LT. 1.0D-06*(ONE+SMCRHS(ISMC)))THEN
+            DIRR = 0                        ! CONSTRAINT IS NEAR BINDING
+          ELSE
+            IF(SMCDIR(ISMC).EQ. 1)DIRR=1     ! NON-BINDING LESS THAN CONSTRAINT
+            IF(SMCDIR(ISMC).EQ.-1)DIRR=2     ! NON-BINDING GREATER THAN CONSTRAINT
+            IF(SMCDIR(ISMC).EQ. 0)DIRR=3     ! NON-BINDING EQUALITY CONSTRAINT
+          ENDIF
+          CALL GWM1BAS1CS(CTYPE,SMCNAME(ISMC),DIFF,DIRR,1) 
+  310   ENDDO
+	ENDIF
+
       RETURN
       END SUBROUTINE GWM1SMC1OT
 C

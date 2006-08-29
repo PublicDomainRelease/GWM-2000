@@ -1,9 +1,9 @@
       MODULE GWM1BAS1
-C     VERSION: 22SEPT2005
+C     VERSION: 09AUG2006
       IMPLICIT NONE
       PRIVATE
-      PUBLIC::GWMOUT,MPSFILE,RMFILE,ZERO,ONE,
-     &        SMALLEPS,BIGINF
+      PUBLIC::GWMOUT,MPSFILE,RMFILE,RMFILEF,GWMWFILE,ZERO,ONE,
+     &        SMALLEPS,BIGINF,NSTRESS
       PUBLIC:: GWM1BAS1PS, GWM1BAS1PF, GWM1BAS1CS
 C
       INTEGER, PARAMETER :: I2B = SELECTED_INT_KIND(4)
@@ -15,7 +15,7 @@ C-----DEFINE NUMERIC CONSTANTS AND UNIT NAMES
       REAL(DP),PARAMETER::ZERO=0.0D0, ONE=1.0D0
       REAL(DP),PARAMETER::SMALLEPS = 10.0D0**(-1*PRECISION(ONE) + 1)
       REAL(DP),PARAMETER::BIGINF   = 10.0D0**(RANGE(ONE)/2)
-      INTEGER(I4B),SAVE::GWMOUT,MPSFILE,RMFILE
+      INTEGER(I4B),SAVE::GWMOUT,MPSFILE,RMFILE,RMFILEF,NSTRESS,GWMWFILE
 C
 C      SMALLEPS -value used to represent machine precision. SMALLEPS is used to 
 C                 estimate round-off error.  If the linear programming solution
@@ -28,7 +28,11 @@ C                 starting objective value in the branch and bound algorithm and
 C                 as a flag in range analysis and computation of shadow prices.
 C      GWMOUT   -unit number for writing GWM output
 C      MPSFILE  -unit number for writing the MPS file
-C      RMFILE   -unit number for writing or reading the response matrix
+C      RMFILE   -unit number for saving the response matrix (unformatted)
+C      RMFILEF  -unit number for printing the response matrix (formatted)
+C      GWMWFILE -unit number for a printing the optimal flow values as a well file
+C      NSTRESS  -takes the value of MF2K variable NPER. Needed so that number of 
+C                 stress periods can be accessed through Modules
 C
 C-----FOR ERROR HANDLING
       CHARACTER(LEN=200)::FLNM 

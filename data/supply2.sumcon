@@ -1,7 +1,7 @@
-#SUPPLY Sample Problem, SUMCON file
-#February 20, 2005
+#SUPPLY2 Sample Problem, SUMCON file
+#August 14, 2006
  1                     #1-IPRN
- 24                    #2-SMCNUM
+ 16                    #2-SMCNUM
  p01u 2 le 80000.      #3a-SMCNAME NTERMS TYPE RHS
   Q1  1.0              #3b-GVNAME GVCOEFF
   Q2a 1.0
@@ -29,42 +29,6 @@
  p04l 3 ge 30000.
   Q1  1.0
   Q2d 1.0
-  Q4b 1.0
- p05u 3 le 80000.
-  Q1  1.0
-  Q2a 1.0
-  Q3  1.0
- p05l 3 ge 25000.
-  Q1  1.0
-  Q2a 1.0
-  Q3  1.0
- p06u 4 le 80000.
-  Q1  1.0
-  Q2b 1.0
-  Q3  1.0
-  Q4a 1.0
- p06l 4 ge 25000.
-  Q1  1.0
-  Q2b 1.0
-  Q3  1.0
-  Q4a 1.0
- p07u 3 le 80000.
-  Q1  1.0
-  Q2c 1.0
-  Q3  1.0
- p07l 3 ge 25000.
-  Q1  1.0
-  Q2c 1.0
-  Q3  1.0
- p08u 4 le 80000.
-  Q1  1.0
-  Q2d 1.0
-  Q3  1.0
-  Q4b 1.0
- p08l 4 ge 25000.
-  Q1  1.0
-  Q2d 1.0
-  Q3  1.0
   Q4b 1.0
  p09u 3 le 80000.
   Q1  1.0

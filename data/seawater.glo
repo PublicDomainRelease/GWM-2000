@@ -1,6 +1,6 @@
                                   MODFLOW-2000
       U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE GROUND-WATER FLOW MODEL
-                VERSION MF2K_GWM 1.0.3 012106,FROM MF2K V1.13.00
+                 VERSION MF2K_GWM 1.1 083006,FROM MF2K V1.13.00
 
 
  This model run produced both GLOBAL and LIST files.  This is the GLOBAL file.
@@ -42,6 +42,10 @@
 
  OPENING ..\data\seawater.gwm
  FILE TYPE:GWM   UNIT   18   STATUS:OLD    
+ FORMAT:FORMATTED              ACCESS:SEQUENTIAL          
+
+ OPENING ..\data\seawater.gwmw
+ FILE TYPE:DATA   UNIT   20   STATUS:UNKNOWN
  FORMAT:FORMATTED              ACCESS:SEQUENTIAL          
 
  THE FREE FORMAT OPTION HAS BEEN SELECTED
@@ -144,7 +148,7 @@
 
 
 
- GWM1 -- GROUND-WATER MANAGEMENT PROCESS, VERSION 1.0.3 012106
+ GWM1 -- GROUND-WATER MANAGEMENT PROCESS, VERSION 1.1 083006
  INPUT READ FROM UNIT  18
 
 
@@ -157,7 +161,9 @@
  OPENING DECISION-VARIABLE FILE ON UNIT   99:
  ..\data\seawater.decvar                                                                                                                                                                                 
  #SEAWATER Sample Problem, DECVAR file
- #February 20, 2005
+ #August 14, 2006
+
+ OPTIMAL FLOW VARIABLE VALUES WILL BE WRITTEN TO UNIT NUMBER:  20
 
  NO. OF FLOW-RATE DECISION VARIABLES (NFVAR)       8
  NO. OF EXTERNAL DECISION VARIABLES (NEVAR):       0
@@ -349,7 +355,7 @@
  BASE FLOW RATE RELAXATION PARAMETER (AFACT) 0.50000
  PERTURBATION ADJUSTMENT FACTOR (PGFACT):    0.50000
 
- SLPITPRT=1: PRINT SLP ITERATIONS.
+ SLPITPRT>=1: PRINT SLP ITERATIONS.
 
  OUTPUT FROM BRANCH-AND-BOUND ALGORITHM WILL NOT BE PRINTED.
 
@@ -421,6 +427,11 @@
       Head Gradient          gd-18    Satisfied       7.9262E-01
       Head Gradient          gd-19    Satisfied       8.5287E-01
       Head Gradient          gd-20    Satisfied       8.0298E-01
+      Summation              rech-a   Near-Binding    0.0000E+00
+
+  Distance to RHS is the absolute value of the difference between the
+    the right hand side of the constraint and the left side of the
+    constraint evaluated using the current set of decision variable values.
     
     Calculating Response Matrix
       Perturb Flow Variable    1
@@ -443,10 +454,12 @@
       Average Number of Significant Digits in Matrix  6.393939E+00
     
     Solving Linear Program
+    Feasible Solution Found
     Optimal Solution Found
     Objective Value -1.412443E+04
     Maximum Relative Change in Flow Variable  9.999000E-01
   SLP Algorithm: End Iteration    1
+ 
   SLP Algorithm: Begin Iteration     2
     Running Base Flow Process Simulation
       Status of Simulation-Based Constraints 
@@ -485,6 +498,11 @@
       Head Gradient          gd-18    Not Met         1.9924E-03
       Head Gradient          gd-19    Satisfied       4.0902E-02
       Head Gradient          gd-20    Not Met         2.0380E-03
+      Summation              rech-a   Satisfied       1.4124E+04
+
+  Distance to RHS is the absolute value of the difference between the
+    the right hand side of the constraint and the left side of the
+    constraint evaluated using the current set of decision variable values.
     
     Calculating Response Matrix
       Perturb Flow Variable    1
@@ -507,10 +525,12 @@
       Average Number of Significant Digits in Matrix  5.742424E+00
     
     Solving Linear Program
+    Feasible Solution Found
     Optimal Solution Found
     Objective Value -1.408782E+04
     Maximum Relative Change in Flow Variable  7.213245E-03
   SLP Algorithm: End Iteration    2
+ 
   SLP Algorithm: Begin Iteration     3
     Running Base Flow Process Simulation
       Status of Simulation-Based Constraints 
@@ -549,6 +569,11 @@
       Head Gradient          gd-18    Near-Binding    1.4009E-08
       Head Gradient          gd-19    Satisfied       4.2954E-02
       Head Gradient          gd-20    Near-Binding    8.0249E-09
+      Summation              rech-a   Satisfied       1.4088E+04
+
+  Distance to RHS is the absolute value of the difference between the
+    the right hand side of the constraint and the left side of the
+    constraint evaluated using the current set of decision variable values.
     
     Calculating Response Matrix
       Perturb Flow Variable    1
@@ -571,6 +596,7 @@
       Average Number of Significant Digits in Matrix  5.234848E+00
     
     Solving Linear Program
+    Feasible Solution Found
     Optimal Solution Found
     Objective Value -1.408782E+04
     Maximum Relative Change in Flow Variable  4.443988E-08
@@ -769,10 +795,12 @@ I2          0.0000E+00   -1.0000E+00   -1.0083E+00       gd-18       gd-10
 I3          0.0000E+00   -1.0000E+00   -1.1114E+00       gd-20       gd-16     
                                        -9.9345E-01       gd-18       gd-10     
 
-
-----------------------------------------------------------------------
-               Final Flow Process Simulation
-----------------------------------------------------------------------
+---------------------------------------------------------------
+         Final Flow Process Simulation
+---------------------------------------------------------------
+  Running Final Flow Process Simulation
+    using Optimal Flow Variable Rates 
+    
       Status of Simulation-Based Constraints 
         Using Optimal Flow Rate Variable Values
       Constraint Type        Name     Status     Distance To RHS
@@ -810,7 +838,11 @@ I3          0.0000E+00   -1.0000E+00   -1.1114E+00       gd-20       gd-16
       Head Gradient          gd-18    Near-Binding    1.2746E-08
       Head Gradient          gd-19    Satisfied       4.2954E-02
       Head Gradient          gd-20    Near-Binding    1.2570E-08
+      Summation              rech-a   Satisfied       1.4088E+04
 
+  Distance to RHS is the absolute value of the difference between the
+    the right hand side of the constraint and the left side of the
+    constraint evaluated using the current set of decision variable values.
   Because of precision limitations and possible nonlinear behavior, 
     the status of binding constraints computed directly by the flow process 
     may differ slightly from those computed using the linear program.  

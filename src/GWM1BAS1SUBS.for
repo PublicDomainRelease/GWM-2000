@@ -24,10 +24,10 @@ C***********************************************************************
       SUBROUTINE GWM1BAS1AR(IN,IOUT,IOUTG,NROW,NCOL,NLAY,NPER,
      1                      PERLEN,HCLOSE)
 C***********************************************************************
-C     VERSION: 24SEPT2005
+C     VERSION: 09AUG2006
 C     PURPOSE: READ AND PREPARE ALL INFORMATION FOR GWM
 C-----------------------------------------------------------------------
-      USE GWM1BAS1, ONLY : GWMOUT,SMALLEPS
+      USE GWM1BAS1, ONLY : GWMOUT,SMALLEPS,NSTRESS
       USE GWM1DCV1, ONLY : NFVAR,NEVAR,NBVAR,GWM1DCV1AR
       USE GWM1OBJ1, ONLY : GWM1OBJ1AR
       USE GWM1RMS1, ONLY : NRMC,NCON,NV,NDV,HCLOSEG
@@ -77,6 +77,9 @@ C-----DEFINE THE INTERNAL HCLOSE VALUE
       ELSE
         HCLOSEG = SMALLEPS
       ENDIF
+C
+C-----ASSIGN NPER TO NSTRESS; NSTRESS CAN BE OBTAINED THROUGH MODULES; NEEDED FOR MF2K
+      NSTRESS=NPER      
 C
 C-----WRITE HEADER
       WRITE(GWMOUT,1020,ERR=990)'Reading GWM Input'
@@ -164,7 +167,7 @@ C
  1000 FORMAT('PROGRAM STOPPED: GWM REQUIRES SEPARATE LIST',
      &       ' AND GLOBAL FILES')
  1010 FORMAT(/,/,1X,/1X,'GWM1 -- GROUND-WATER MANAGEMENT PROCESS,',
-     1  ' VERSION 1.0.3 012106',/,' INPUT READ FROM UNIT',I4,/)
+     1  ' VERSION 1.1 083006',/,' INPUT READ FROM UNIT',I4,/)
  1020 FORMAT(/,70('-'),/,T16,A,/,70('-'))
  1030 FORMAT(1X,/1X,'PROGRAM STOPPED. USER MUST SPECIFY A',
      1  ' DECISION VARIABLE FILE')
@@ -345,7 +348,7 @@ C***********************************************************************
 C
 C-----GWM1BAS1RPP CREATED FROM GWF1BAS6RPP VERSION 11JAN2000
 C     ******************************************************************
-C     VERSION: 20FEB2005
+C     VERSION: 07JUL2006
 C     PREPARE BAS DATA FOR NEXT FLOW PROCESS SIMULATION
 C     ******************************************************************
 C
@@ -448,11 +451,12 @@ C4------READ INITIAL HEADS.
         END IF
 C
 C5------COPY INITIAL HEADS FROM STRT TO HNEW.
-        WHERE(IBOUND.EQ.0)
-          HNEW=HNF
-        ELSEWHERE
-          HNEW=STRT
-        ENDWHERE
+        DO 400 K=1,NLAY
+        DO 400 I=1,NROW
+        DO 400 J=1,NCOL
+          HNEW(J,I,K)=STRT(J,I,K)
+          IF(IBOUND(J,I,K).EQ.0) HNEW(J,I,K)=HNF
+  400   CONTINUE
       ENDIF
 C
 C7------INITIALIZE VOLUMETRIC BUDGET ACCUMULATORS TO ZERO.

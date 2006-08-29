@@ -1,8 +1,0 @@
-#SUPPLY Sample Problem, GWM file
-#February 20, 2005
-DECVAR  ..\data\supply.decvar
-OBJFNC  ..\data\supply.objfnc
-VARCON  ..\data\supply.varcon
-SUMCON  ..\data\supply.sumcon
-STRMCON ..\data\supply.strmcon
-SOLN    ..\data\supply.soln
