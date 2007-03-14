@@ -1,3 +1,4 @@
+! Time of File Save by ERB: 12/20/2005 2:02PM
 C     Last change:  ERB  30 Sep 2002    1:40 pm
       SUBROUTINE GWF1LPF1ALG(ISUM,LCHK,LCVKA,LCSC1,LCSC2,LCHANI,
      1  LCVKCB,IN,NCOL,NROW,NLAY,IOUT,ILPFCB,LCWETD,
@@ -13,8 +14,8 @@ C     ------------------------------------------------------------------
       INTEGER LAYHDT(NLAY)
       CHARACTER*14 LAYPRN(5),AVGNAM(3),TYPNAM(2),VKANAM(2),WETNAM(2),
      1            HANNAM
-      COMMON /LPFCOM/LAYTYP(200),LAYAVG(200),CHANI(200),LAYVKA(200),
-     1               LAYWET(200)
+      COMMON /LPFCOM/LAYTYP(999),LAYAVG(999),CHANI(999),LAYVKA(999),
+     1               LAYWET(999)
 C
       DATA AVGNAM/'      HARMONIC','   LOGARITHMIC','     LOG-ARITH'/
       DATA TYPNAM/'      CONFINED','   CONVERTIBLE'/
@@ -189,9 +190,9 @@ C
      4    BOTM(NCOL,NROW,0:NBOTM),DELR(NCOL),DELC(NROW)
       DIMENSION ISENS(NPLIST)
 C
-      COMMON /DISCOM/LBOTM(200),LAYCBD(200)
-      COMMON /LPFCOM/LAYTYP(200),LAYAVG(200),CHANI(200),LAYVKA(200),
-     1               LAYWET(200)
+      COMMON /DISCOM/LBOTM(999),LAYCBD(999)
+      COMMON /LPFCOM/LAYTYP(999),LAYAVG(999),CHANI(999),LAYVKA(999),
+     1               LAYWET(999)
 C
       DATA ANAME(1) /'   HYD. COND. ALONG ROWS'/
       DATA ANAME(2) /'  HORIZ. ANI. (COL./ROW)'/
@@ -276,7 +277,8 @@ C  Make the parameter active for all stress periods
 C
 C        SENSITIVITY FOR HK AND HANI PARAMETERS IS NOT SUPPORTED FOR
 C        AVERAGING METHOD OTHER THAN HARMONIC MEAN -- CHECK FOR CONFLICT
-         IF (ISEN.NE.0 .AND. (PTYP.EQ.'HK' .OR. PTYP.EQ.'HANI')) THEN
+         IF (ISEN.NE.0 .AND. (PTYP.EQ.'HK' .OR. PTYP.EQ.'HANI') .AND.
+     &       N.LE.NPLIST) THEN
            IF (ISENS(N).GT.0) THEN
 C            CYCLE THROUGH CLUSTERS INCLUDED IN THIS PARAMETER
              DO 19 ICLUSTER=IPLOC(1,N),IPLOC(2,N)
@@ -413,9 +415,9 @@ C
      8    LAYFLG(6,NLAY),BUFF(NCOL,NROW)
 C
       INCLUDE 'param.inc'
-      COMMON /DISCOM/LBOTM(200),LAYCBD(200)
-      COMMON /LPFCOM/LAYTYP(200),LAYAVG(200),CHANI(200),LAYVKA(200),
-     1               LAYWET(200)
+      COMMON /DISCOM/LBOTM(999),LAYCBD(999)
+      COMMON /LPFCOM/LAYTYP(999),LAYAVG(999),CHANI(999),LAYVKA(999),
+     1               LAYWET(999)
 C
       DATA ANAME(1) /'   HYD. COND. ALONG ROWS'/
       DATA ANAME(2) /'  HORIZ. ANI. (COL./ROW)'/
@@ -569,9 +571,9 @@ C
       DIMENSION IBOUND(NCOL,NROW,NLAY),HOLD(NCOL,NROW,NLAY),
      1          BOTM(NCOL,NROW,0:NBOTM),WETDRY(NCOL,NROW,NLAY)
 C
-      COMMON /DISCOM/LBOTM(200),LAYCBD(200)
-      COMMON /LPFCOM/LAYTYP(200),LAYAVG(200),CHANI(200),LAYVKA(200),
-     1               LAYWET(200)
+      COMMON /DISCOM/LBOTM(999),LAYCBD(999)
+      COMMON /LPFCOM/LAYTYP(999),LAYAVG(999),CHANI(999),LAYVKA(999),
+     1               LAYWET(999)
 C     ------------------------------------------------------------------
 C
 C1------RETURN IF STEADY STATE.
@@ -619,9 +621,9 @@ C
      4    BOTM(NCOL,NROW,0:NBOTM),SC2(NCOL,NROW,NLAY),DELR(NCOL),
      5    DELC(NROW),WETDRY(NCOL,NROW,NLAY),VKCB(NCOL,NROW,NLAY)
 C
-      COMMON /DISCOM/LBOTM(200),LAYCBD(200)
-      COMMON /LPFCOM/LAYTYP(200),LAYAVG(200),CHANI(200),LAYVKA(200),
-     1               LAYWET(200)
+      COMMON /DISCOM/LBOTM(999),LAYCBD(999)
+      COMMON /LPFCOM/LAYTYP(999),LAYAVG(999),CHANI(999),LAYVKA(999),
+     1               LAYWET(999)
 C     ------------------------------------------------------------------
       ONE=1.
 C
@@ -757,9 +759,9 @@ C
      4    DELR(NCOL),DELC(NROW),WETDRY(NCOL,NROW,NLAY),
      5    BOTM(NCOL,NROW,0:NBOTM)
 C
-      COMMON /DISCOM/LBOTM(200),LAYCBD(200)
-      COMMON /LPFCOM/LAYTYP(200),LAYAVG(200),CHANI(200),LAYVKA(200),
-     1               LAYWET(200)
+      COMMON /DISCOM/LBOTM(999),LAYCBD(999)
+      COMMON /LPFCOM/LAYTYP(999),LAYAVG(999),CHANI(999),LAYVKA(999),
+     1               LAYWET(999)
 C     ------------------------------------------------------------------
       ZERO=0.
       HCNV=888.88
@@ -782,11 +784,23 @@ C2B-----CHECK VERTICAL HYDRAULIC CONDUCTIVITY AND CONFINING BED
 C2B-----VERTICAL HYDRAULIC CONDUCTIVITY.
          IF(NLAY.GT.1) THEN
             IF(VKA(J,I,K).NE.ZERO) THEN
-               IF(K.NE.NLAY .AND. LAYCBD(K).NE.0) THEN
-                  IF(VKCB(J,I,LAYCBD(K)).NE.ZERO) GO TO 40
+               IF(K.NE.NLAY) THEN
+                  IF (VKA(J,I,K+1).NE.ZERO) THEN
+                     IF(LAYCBD(K).NE.0) THEN
+                        IF(VKCB(J,I,LAYCBD(K)).NE.ZERO) GO TO 40
+                     ELSE
+                        GO TO 40
+                     END IF
+                  END IF
                END IF
-               IF(K.NE.1 .AND. LAYCBD(K-1).NE.0) THEN
-                  IF(VKCB(J,I,LAYCBD(K-1)).NE.ZERO) GO TO 40
+               IF(K.NE.1) THEN
+                  IF (VKA(J,I,K-1).NE.ZERO) THEN
+                     IF (LAYCBD(K-1).NE.0) THEN
+                        IF(VKCB(J,I,LAYCBD(K-1)).NE.ZERO) GO TO 40
+                     ELSE
+                        GO TO 40
+                     END IF
+                  ENDIF
                END IF
             END IF
          END IF
@@ -812,11 +826,23 @@ C3B-----CHECK VERTICAL HYDRAULIC CONDUCTIVITY AND CONFINING BED
 C3B-----VERTICAL HYDRAULIC CONDUCTIVITY.
          IF(NLAY.GT.1) THEN
             IF(VKA(J,I,K).NE.ZERO) THEN
-               IF(K.NE.NLAY .AND. LAYCBD(K).NE.0) THEN
-                  IF(VKCB(J,I,LAYCBD(K)).NE.ZERO) GO TO 50
+               IF(K.NE.NLAY) THEN
+                  IF (VKA(J,I,K+1).NE.ZERO) THEN
+                     IF(LAYCBD(K).NE.0) THEN
+                        IF(VKCB(J,I,LAYCBD(K)).NE.ZERO) GO TO 50
+                     ELSE
+                        GO TO 50
+                     END IF
+                  END IF
                END IF
-               IF(K.NE.1 .AND. LAYCBD(K-1).NE.0) THEN
-                  IF(VKCB(J,I,LAYCBD(K-1)).NE.ZERO) GO TO 50
+               IF(K.NE.1) THEN
+                  IF (VKA(J,I,K-1).NE.ZERO) THEN
+                     IF (LAYCBD(K-1).NE.0) THEN
+                        IF(VKCB(J,I,LAYCBD(K-1)).NE.ZERO) GO TO 50
+                     ELSE
+                        GO TO 50
+                     END IF
+                  ENDIF
                END IF
             END IF
          END IF
@@ -874,9 +900,9 @@ C
      2     CV(NCOL,NROW,NLAY), BOTM(NCOL,NROW,0:NBOTM),
      3     BUFF(NCOL,NROW,NLAY)
 C
-      COMMON /DISCOM/LBOTM(200),LAYCBD(200)
-      COMMON /LPFCOM/LAYTYP(200),LAYAVG(200),CHANI(200),LAYVKA(200),
-     1               LAYWET(200)
+      COMMON /DISCOM/LBOTM(999),LAYCBD(999)
+      COMMON /LPFCOM/LAYTYP(999),LAYAVG(999),CHANI(999),LAYVKA(999),
+     1               LAYWET(999)
 C
       DATA TEXT(1),TEXT(2),TEXT(3)
      1 /'FLOW RIGHT FACE ','FLOW FRONT FACE ','FLOW LOWER FACE '/
@@ -1053,9 +1079,9 @@ C
      2   SC2(NCOL,NROW,NLAY),BOTM(NCOL,NROW,0:NBOTM),
      3   BUFF(NCOL,NROW,NLAY)
 C
-      COMMON /DISCOM/LBOTM(200),LAYCBD(200)
-      COMMON /LPFCOM/LAYTYP(200),LAYAVG(200),CHANI(200),LAYVKA(200),
-     1               LAYWET(200)
+      COMMON /DISCOM/LBOTM(999),LAYCBD(999)
+      COMMON /LPFCOM/LAYTYP(999),LAYAVG(999),CHANI(999),LAYVKA(999),
+     1               LAYWET(999)
 C
       DATA TEXT /'         STORAGE'/
 C     ------------------------------------------------------------------
@@ -1159,9 +1185,9 @@ C
      2     CV(NCOL,NROW,NLAY), VBVL(4,MSUM),
      3     BOTM(NCOL,NROW,0:NBOTM),BUFF(NCOL,NROW,NLAY)
 C
-      COMMON /DISCOM/LBOTM(200),LAYCBD(200)
-      COMMON /LPFCOM/LAYTYP(200),LAYAVG(200),CHANI(200),LAYVKA(200),
-     1               LAYWET(200)
+      COMMON /DISCOM/LBOTM(999),LAYCBD(999)
+      COMMON /LPFCOM/LAYTYP(999),LAYAVG(999),CHANI(999),LAYVKA(999),
+     1               LAYWET(999)
 C
       DATA TEXT /'   CONSTANT HEAD'/
 C     ------------------------------------------------------------------
@@ -1372,7 +1398,7 @@ C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
       DIMENSION SC(NCOL,NROW),BOTM(NCOL,NROW,0:NBOTM),
      1          DELR(NCOL),DELC(NROW)
-      COMMON /DISCOM/LBOTM(200),LAYCBD(200)
+      COMMON /DISCOM/LBOTM(999),LAYCBD(999)
 C     ------------------------------------------------------------------
 C
 C6A-----MULTIPLY SPECIFIC STORAGE BY THICKNESS, DELR, AND DELC TO GET
@@ -1414,9 +1440,9 @@ C
       CHARACTER*3 ACNVRT
       DIMENSION ICNVRT(5),JCNVRT(5),ACNVRT(5)
 C
-      COMMON /DISCOM/LBOTM(200),LAYCBD(200)
-      COMMON /LPFCOM/LAYTYP(200),LAYAVG(200),CHANI(200),LAYVKA(200),
-     1               LAYWET(200)
+      COMMON /DISCOM/LBOTM(999),LAYCBD(999)
+      COMMON /LPFCOM/LAYTYP(999),LAYAVG(999),CHANI(999),LAYVKA(999),
+     1               LAYWET(999)
 C     ------------------------------------------------------------------
 C1------INITIALIZE DATA.
       ZERO=0.
@@ -1527,9 +1553,9 @@ C
       CHARACTER*3 ACNVRT
       DIMENSION ICNVRT(5),JCNVRT(5),ACNVRT(5)
 C
-      COMMON /DISCOM/LBOTM(200),LAYCBD(200)
-      COMMON /LPFCOM/LAYTYP(200),LAYAVG(200),CHANI(200),LAYVKA(200),
-     1               LAYWET(200)
+      COMMON /DISCOM/LBOTM(999),LAYCBD(999)
+      COMMON /LPFCOM/LAYTYP(999),LAYAVG(999),CHANI(999),LAYVKA(999),
+     1               LAYWET(999)
 C     ------------------------------------------------------------------
       ZERO=0.0
 C
@@ -1658,8 +1684,8 @@ C     ------------------------------------------------------------------
      1          HK(NCOL,NROW,NLAY),HANI(NCOL,NROW,NLAY),
      2          IBOUND(NCOL,NROW,NLAY),DELR(NCOL),DELC(NROW)
 C
-      COMMON /LPFCOM/LAYTYP(200),LAYAVG(200),CHANI(200),LAYVKA(200),
-     1               LAYWET(200)
+      COMMON /LPFCOM/LAYTYP(999),LAYAVG(999),CHANI(999),LAYVKA(999),
+     1               LAYWET(999)
 C
 C     ------------------------------------------------------------------
       ZERO=0.
@@ -1737,8 +1763,8 @@ C
      1    HK(NCOL,NROW,NLAY),HANI(NCOL,NROW,NLAY),
      2    IBOUND(NCOL,NROW,NLAY),DELR(NCOL),DELC(NROW)
 C
-      COMMON /LPFCOM/LAYTYP(200),LAYAVG(200),CHANI(200),LAYVKA(200),
-     1               LAYWET(200)
+      COMMON /LPFCOM/LAYTYP(999),LAYAVG(999),CHANI(999),LAYVKA(999),
+     1               LAYWET(999)
 C     ------------------------------------------------------------------
       ZERO=0.
       TWO=2.
@@ -1830,8 +1856,8 @@ C
      1   HK(NCOL,NROW,NLAY),HANI(NCOL,NROW,NLAY),
      2   IBOUND(NCOL,NROW,NLAY),DELR(NCOL),DELC(NROW)
 C
-      COMMON /LPFCOM/LAYTYP(200),LAYAVG(200),CHANI(200),LAYVKA(200),
-     1               LAYWET(200)
+      COMMON /LPFCOM/LAYTYP(999),LAYAVG(999),CHANI(999),LAYVKA(999),
+     1               LAYWET(999)
 C     ------------------------------------------------------------------
       ZERO=0.
       HALF=0.5
@@ -1927,9 +1953,9 @@ C
      2      BOTM(NCOL,NROW,0:NBOTM),HNEW(NCOL,NROW,NLAY),
      3      VKCB(NCOL,NROW,NLAY),DELR(NCOL),DELC(NROW)
 C
-      COMMON /DISCOM/LBOTM(200),LAYCBD(200)
-      COMMON /LPFCOM/LAYTYP(200),LAYAVG(200),CHANI(200),LAYVKA(200),
-     1               LAYWET(200)
+      COMMON /DISCOM/LBOTM(999),LAYCBD(999)
+      COMMON /LPFCOM/LAYTYP(999),LAYAVG(999),CHANI(999),LAYVKA(999),
+     1               LAYWET(999)
 C
 C     ------------------------------------------------------------------
       IF(K.EQ.NLAY) RETURN
@@ -2017,8 +2043,8 @@ C      SPECIFICATIONS:
 C     ------------------------------------------------------------------
       CHARACTER*4 PTYP
       INCLUDE 'param.inc'
-      COMMON /LPFCOM/LAYTYP(200),LAYAVG(200),CHANI(200),LAYVKA(200),
-     1               LAYWET(200)
+      COMMON /LPFCOM/LAYTYP(999),LAYAVG(999),CHANI(999),LAYVKA(999),
+     1               LAYWET(999)
 C     ------------------------------------------------------------------
   590 FORMAT(/,
      &1X,'LAYVKA entered for layer ',i3,' is: ',i3,'; however,',

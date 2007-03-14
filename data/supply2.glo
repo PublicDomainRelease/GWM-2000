@@ -1,6 +1,6 @@
                                   MODFLOW-2000
       U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE GROUND-WATER FLOW MODEL
-                 VERSION MF2K_GWM 1.1 083006,FROM MF2K V1.13.00
+                VERSION MF2K_GWM 1.1.1 031507,FROM MF2K V1.17.02
 
 
  This model run produced both GLOBAL and LIST files.  This is the GLOBAL file.
@@ -124,7 +124,7 @@
 
 
 
- GWM1 -- GROUND-WATER MANAGEMENT PROCESS, VERSION 1.1 083006
+ GWM1 -- GROUND-WATER MANAGEMENT PROCESS, VERSION 1.1.1 031507
  INPUT READ FROM UNIT  19
 
 
@@ -612,7 +612,7 @@
     Optimal Solution Found
     Objective Value -5.302168E+04
     Maximum Relative Change in Flow Variable  7.157553E-08
-    Max Relative External Variable Change  3.980415E-08
+    Max Relative External Variable Change  3.980419E-08
   SLP Algorithm: End Iteration    3
   Iterations have converged
 
@@ -707,7 +707,7 @@ Maximum Flow Rate      Q2a      Binding    Not Available
       Summation              p11u     Satisfied       3.5000E+04
       Summation              p11l     Near-Binding    0.0000E+00
       Summation              p12u     Satisfied       3.5000E+04
-      Summation              p12l     Near-Binding    0.0000E+00
+      Summation              p12l     Near-Binding    7.2760E-12
 
   Distance to RHS is the absolute value of the difference between the
     the right hand side of the constraint and the left side of the

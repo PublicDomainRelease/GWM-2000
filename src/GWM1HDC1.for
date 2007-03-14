@@ -517,7 +517,7 @@ C***********************************************************************
       SUBROUTINE GWM1HDC1OS(HNEW,NCOL,NROW,NLAY,KPER,HDRY)
 C***********************************************************************
 C     VERSION: 20FEB2005
-C     PURPOSE: ASSIGN COMPUTED HEAD STATE TO MODOFC STATE ARRAY
+C     PURPOSE: ASSIGN COMPUTED HEAD STATE TO STATE ARRAY
 C-----------------------------------------------------------------------
       USE GWM1RMS1, ONLY :  DEWATER
       INTEGER(I4B),INTENT(IN)::NCOL,NROW,NLAY,KPER
@@ -668,9 +668,9 @@ C
 C
 C
 C***********************************************************************
-      SUBROUTINE GWM1HDC1FPR(RSTRT,IREAD)
+      SUBROUTINE GWM1HDC1FPR(RSTRT,IREAD,COL)
 C***********************************************************************
-C     VERSION: 20JAN2006
+C     VERSION: 25DEC2006
 C     PURPOSE - READ RESPONSE MATRIX AND AUGMENTED RIGHT HAND SIDE
 C-----------------------------------------------------------------------
       USE GWM1BAS1, ONLY : RMFILE
@@ -681,26 +681,24 @@ C-----AMAT HAS LOCAL NAME RESMAT
       USE GWM1RMS1, ONLY : RHS
       INTEGER(I4B),INTENT(INOUT)::RSTRT
       INTEGER(I4B),INTENT(IN)::IREAD
+      INTEGER(I4B),INTENT(IN)::COL
 C-----LOCAL VARIABLES
-      INTEGER(I4B)::IHDC,ROW,COL,I
+      INTEGER(I4B)::IHDC,ROW,I
 C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 C
-      IF(IREAD.EQ.-1)THEN                        ! READ THE REFERENCE STATE  
-        CALL SGWM1HDC1FPR                   
-      ELSEIF(IREAD.EQ.0)THEN                     ! READ THE BASE STATE
+      IF(IREAD.EQ.0)THEN          
+        CALL SGWM1HDC1FPR                        ! READ THE REFERENCE STATE             
         IHDC = 0
         DO 100 ROW=RSTRT,RSTRT+HDCNUM-1 
           IHDC = IHDC+1
-          READ(RMFILE)HDCSTATE0(IHDC)            ! READ THE INITIAL STATE FROM A FILE
+          READ(RMFILE)HDCSTATE0(IHDC)            ! READ THE BASE STATE FROM A FILE
           RHS(ROW) = HDCRHS(IHDC) - HDCSTATE0(IHDC)
           HDCSTATE(IHDC) = HDCSTATE0(IHDC)       ! ASSIGN BASE STATE FOR OUTPUT
   100   ENDDO
       ELSEIF(IREAD.EQ.1)THEN                     ! READ RESPONSE MATRIX
-        DO 200 COL=1,NFVAR
-          DO 210 ROW=RSTRT,RSTRT+HDCNUM-1
-            READ(RMFILE)RESMAT(ROW,COL)          ! READ EACH RESPONSE COEFFICIENT
-            RHS(ROW) = RHS(ROW) + RESMAT(ROW,COL)*FVBASE(COL)
-  210     ENDDO
+        DO 200 ROW=RSTRT,RSTRT+HDCNUM-1
+          READ(RMFILE)RESMAT(ROW,COL)            ! READ EACH RESPONSE COEFFICIENT
+          RHS(ROW) = RHS(ROW) + RESMAT(ROW,COL)*FVBASE(COL)
   200   ENDDO
       ENDIF
       RSTRT = RSTRT+HDCNUM                       ! SET NEXT STARTING LOCATION

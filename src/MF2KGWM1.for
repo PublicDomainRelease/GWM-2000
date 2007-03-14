@@ -1,6 +1,28 @@
 C     ******************************************************************
 C     MAIN CODE FOR U.S. GEOLOGICAL SURVEY MODULAR MODEL -- MODFLOW
-C         Ground-Water Management version
+C           BY MICHAEL G. MCDONALD AND ARLEN W. HARBAUGH
+C     MODFLOW-88 documented in:
+C        McDonald, M.G. and Harbaugh, A.W., 1988, A modular three-
+C           dimensional finite-difference ground-water flow model:
+C           U.S. Geological Survey Techniques of Water Resources
+C           Investigations, Book 6, Chapter A1, 586 p.
+C     MODFLOW-96 documented in:
+C        Harbaugh, A.W. and McDonald, M.G., 1996, User's documentation
+C           for the U.S. Geological Survey modular finite-difference
+C           ground-water flow model: U.S. Geological Survey Open-File
+C           Report 96-485
+C     MODFLOW-2000 documented in:
+C        Harbaugh, A.W., Banta, E.R., Hill, M.C., and McDonald, M.G.,
+C           2000, MODFLOW-2000, the U.S. Geological Survey modular
+C           ground-water model--User guide to modularization concepts
+C           and the Ground-Water Flow Process: U.S. Geological Survey
+C           Open-File Report 00-92
+C        Hill, M.C., Banta, E.R., Harbaugh, A.W., and Anderman, E.R.,
+C           2000, MODFLOW-2000, the U.S. Geological Survey modular
+C           ground-water model--User guide to the Observation,
+C           Sensitivity, and Parameter-Estimation Processes and three
+C           post-processing programs: U.S. Geological Survey Open-
+C           File Report 00-184
 C     ******************************************************************
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
@@ -15,11 +37,12 @@ C GWM: List all GWM subroutines to be called in this program
 C
 C-------ASSIGN VERSION NUMBER AND DATE
       CHARACTER*40 VERSION
-      PARAMETER (VERSION='MF2K_GWM 1.1 083006,FROM MF2K V1.13.00')
+      PARAMETER (VERSION='MF2K_GWM 1.1.1 031507,FROM MF2K V1.17.02')
 C
 C-----DECLARE ARRAY TYPES
       REAL GX, X, RX
-      DOUBLE PRECISION GZ, VAR, Z
+cgzh mnw dp
+      DOUBLE PRECISION GZ, VAR, Z, RZ
       INTEGER IG, IX, IR
       CHARACTER*10 EQNAM, NIPRNAM
       CHARACTER*12 NAMES, OBSNAM
@@ -31,13 +54,19 @@ C *** AN ARRAY, CHANGE THE VALUE OF THE CORRESPONDING (FORTRAN)
 C *** PARAMETER AND RECOMPILE
 C      PARAMETER (LENGX=1000000, LENIG=1000000, LENGZ=1000000,
 C     &           LENX=2000000, LENIX=1500000, LENZ=1000000,
-C     &           LENRX=1000000, LENIR=1000000)
+C     &           LENRX=1000000, LENIR=1000000, LENXHS=1000000,
+C     &           NDD=10000, MPRD=100, IPRD=100)
 C      DIMENSION GX(LENGX), IG(LENIG), X(LENX), IX(LENIX), RX(LENRX),
-C     &          IR(LENIR), GZ(LENGZ), Z(LENZ)
+C     &          IR(LENIR), GZ(LENGZ), Z(LENZ), XHS(LENXHS),
+C     &          EQNAM(MPRD), NIPRNAM(IPRD), NAMES(NDD+MPRD+IPRD),
+C     &          OBSNAM(NDD)
 C
 C *** FOR STATIC MEMORY ALLOCATION, THE FOLLOWING ALLOCATABLE
 C *** STATEMENT MUST BE COMMENTED OUT
-      ALLOCATABLE GX(:), IG(:), X(:), IX(:), RX(:), IR(:), GZ(:), Z(:)
+      ALLOCATABLE GX(:), IG(:), X(:), IX(:), RX(:), IR(:), GZ(:), Z(:),
+cgzh mnw dp
+     &            RZ(:), XHS(:), NIPRNAM(:), EQNAM(:), NAMES(:),
+     &            OBSNAM(:)
 C
       ALLOCATABLE MNWSITE(:)
 C
@@ -63,11 +92,11 @@ C-------LENXHS MAY EQUAL 1.  IF IUHEAD IS LESS THAN OR EQUAL TO ZERO,
 C-------LENXHS MUST BE AT LEAST:
 C-------NLAY*NCOL*NROW*(NUMBER OF PARAMETERS TO BE ESTIMATED).
 C
-      COMMON /BCFCOM/LAYCON(200)
-      COMMON /DISCOM/LBOTM(200),LAYCBD(200)
-      COMMON /LPFCOM/LAYTYP(200),LAYAVG(200),CHANI(200),LAYVKA(200),
-     1               LAYWET(200)
-      INTEGER LAYHDT(200)
+      COMMON /BCFCOM/LAYCON(999)
+      COMMON /DISCOM/LBOTM(999),LAYCBD(999)
+      COMMON /LPFCOM/LAYTYP(999),LAYAVG(999),CHANI(999),LAYVKA(999),
+     1               LAYWET(999)
+      INTEGER LAYHDT(999)
 C
       CHARACTER*4 PIDTMP
       CHARACTER*20 CHEDFM,CDDNFM,CBOUFM
@@ -78,6 +107,7 @@ C
       INTEGER NPEVT, NPGHB, NPDRN, NPHFB, NPRIV, NPSTR, NPWEL, NPRCH
       INTEGER IUBE(2), IBDT(8)
       INTEGER IOWELL2(3)  ! FOR MNW1 PACKAGE
+      DOUBLE PRECISION SMALL  ! FOR MNW1 PACKAGE
       LOGICAL FIRSTSIM,LASTSIM,FINISH,MFCNVRG,GWMCNVRG  ! FOR GWM PROCESS
       INTEGER IPERT,NPERT              ! FOR GWM PROCESS
       CHARACTER*4 CUNIT(NIUNIT)
@@ -87,16 +117,18 @@ C
      &           'gwt ', 'FHB ', 'RES ', 'STR ', 'IBS ', 'CHD ', 'HFB6',  ! 21
      &           'LAK ', 'LPF ', 'DIS ', 'SEN ', 'PES ', 'OBS ', 'HOB ',  ! 28
      &           'ADV2', 'COB ', 'ZONE', 'MULT', 'DROB', 'RVOB', 'GBOB',  ! 35
-     &           'STOB', 'HUF2', 'CHOB', 'ETS ', 'DRT ', 'DTOB', '    ',  ! 42
-     &           'HYD ', 'sfr ', 'SFOB', 'GAGE', 'LVDA', '    ', 'LMT6',  ! 49
+     &           'STOB', 'HUF2', 'CHOB', 'ETS ', 'DRT ', 'DTOB', 'GMG ',  ! 42
+     &           'HYD ', 'SFR ', 'sfob', 'GAGE', 'LVDA', '    ', 'LMT6',  ! 49
      &           'MNW1', 'DAF ', 'DAFG', 'KDEP', 'SUB ', 'GWM ', '    ',  ! 56
-     &           44*'    '/
+     &           '    ', '    ', '    ', 'unc ', '    ', '    ', '    ',  ! 63
+     &           37*'    '/
 C     ------------------------------------------------------------------
 cc      open(78,file='mf2k.dbg')
 cc      write(*,*)' Opened file mf2k.dbg for debugging'
 cc      write(78,2005)
 cc 2005 format(' File mf2k.dbg',/)
-      WRITE (*,1) VERSION
+      CALL PLL1IN
+      IF (MYID.EQ.MPROC) WRITE (*,1) VERSION
     1 FORMAT (/,34X,'MODFLOW-2000',/,
      &4X,'U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE',
      &' GROUND-WATER FLOW MODEL',/,29X,'Version ',A/)
@@ -183,9 +215,12 @@ C          CALL GETCL(COMLIN)
    15 CONTINUE
   480 FORMAT(1X,'Can''t find name file ',A,' or ',A)
 C
+C     BROADCAST FNAME AND OPEN FILE FOR WARNINGS AND ERROR MESSAGES
+      CALL PLL1FN(FNAME)
       IF (FNAME.EQ.' ') GOTO 120
+      CALL PLL1OP(IERRU,IERR)
       OPEN (UNIT=INUNIT,FILE=FNAME,STATUS='OLD',ACTION=ACTION(1))
-      WRITE(*,490)' Using NAME file: ',FNAME
+      IF (MYID.EQ.MPROC) WRITE(*,490)' Using NAME file: ',FNAME
   490 FORMAT(A,A)
 C
 C  DEFINE (DF) PROCEDURE
@@ -194,15 +229,38 @@ C  DEFINE (DF) PROCEDURE
      &                MXPER,ISUMIG,ISUMGZ,INBAS,LENUNI,ISUMX,ISUMZ,
      &                ISUMIX,LAYHDT,24,IFREFM,INAMLOC,IPRTIM,IBDT,
      &                SHOWPROG,NOTICECOUNT)
+      CALL GWF1HUF2DF(IOHUFHDS,IOHUFFLWS)
+Cdep replaced SFR1 with SFR2
+      CALL GWF1SFR2DF(NLAKES,NLAKESAR,LKACC7,LCSTAG,LSLAKE,LSTGLD,
+     &                LCRNF,ISTRIN,IDSTRT,ISTROT,ISTGNW,LSCOUT,LSCONQ,
+     &                LSCNRN,LSCPPT,LSCNTB,LSSLIN,LSCQIN,LSCGW,LSSIN,
+     &                LSSOUT,LSCOTO,ISUZN,NUZST,NSTOTRL,NSTRMSQD,
+     &                NUMCELL,NUZROW,NUZCOL,NSSLK)
+Cdep end of change
+      CALL GWF1LAK3DF(NSS,IDSTRT,ISTRIN,ISTROT,LSLAKE,LSAUG,LSPPT,
+     &                LSRNF,LSCGWL,LSSLAK,LSSWIN,LSSWOT,LSSPPT,LSCDRW,
+     &                LSSRUN,LSGWIN,LSGWOT,LSOVOL,LSKLK,LSDONE,LSLKSM,
+     &                LSFLOB,LSRTCO,LSCLKO,LSALKI,LSALKO,NSSAR,LCSEG,
+     &                NSSLK,ISLKOTFLW,IDLKOTFLW,IDLKSTAGE)
+Cdep  revised GAG5 to include SFR2
+      CALL GWF1GAG5DF(NUMGAGE,LSGAGE,NSTRM,ICSTRM,NLAKES,LKACC7,
+     &                LCSTAG,LSLAKE,NLAKESAR,NSTRMAR,NSS,NSSAR,LCIVAR,
+     &                NUZST,NUMAVE)
+Cdep  end of change
       CALL GWF1MNW1DF(LCHANI,LCHK,LCHKCC,LCHUFTHK,LCHY,LCSSHMN,LCTRPY,
      &                NHUFAR)
 C
 C  GLOBAL ALLOCATE (AL) PROCEDURE
 C  Initialize some variables that are not initialized because OBS, SEN, and PES are removed
       IOBS=0
-c      ISEN=0
+      ISEN=0
       IPES=0
+C GWM: ZERO VARIABLES USED WHEN PARAMETERS ARE READ FROM SENSITIVITY PROCESS FILES
       NPLIST=0
+      NPHUF =0
+      NPLPF =0
+      NPLVDA=0
+      NPKDEP=0
       LCISEN=1
       CALL GLO1BAS6AL(IUNIT(24),NCNFBD,NBOTM,NCOL,NROW,NLAY,LCBOTM,
      &                LCDELR,LCDELC,ISUMGX,IOUTG,LCHNEW,LCIBOU,LCCR,
@@ -217,10 +275,18 @@ C  STATEMENTS MUST BE COMMENTED OUT
       LENGX = ISUMGX - 1
       LENGZ = ISUMGZ - 1
       LENIG = ISUMIG - 1
-      ALLOCATE (GX(LENGX),GZ(LENGZ),IG(LENIG))
+      ALLOCATE (GX(LENGX),GZ(LENGZ),IG(LENIG),STAT=ISTAT)
+C
+      IF (ISTAT.NE.0) THEN
+        WRITE(*,700)ISTAT
+  700   FORMAT(1X,'ALLOCATION OF ARRAYS GX, GZ, AND IG FAILED,',
+     &  ' RETURNED ERROR MESSAGE NUMBER: ',I6)
+        CALL USTOP(' ')
+      ENDIF
 C
       CALL MEMCHKG(ISUMGX,ISUMIG,ISUMGZ,LENGX,LENIG,LENGZ,IOUTG,IERR,
      &             IERRU)
+      IF (IERR.GT.0) CALL PLL1SD(IERR,IERRU,IOUT,IOUTG)
 C
 C  GLOBAL READ AND PREPARE (RP) PROCEDURE
       CALL GLO1BAS6RP(IUNIT(24),NCOL,NROW,NLAY,GX(LCBOTM),NBOTM,IOUTG,
@@ -270,6 +336,10 @@ C-----NO rewind AL and RP for Ground-Water Flow Process
      1    CALL LMG1ALG(ISUMZ,ISUMIX,LCA,LCIA,LCJA,LCU1,LCFRHS,
      2                 LCIG,ISIZ1,ISIZ2,ISIZ3,ISIZ4,ICG,NCOL,NROW,NLAY,
      3                 IUNIT(14),IOUTG,1)
+      IF(IUNIT(42).GT.0)
+     1    CALL GMG1ALG(NCOL,NROW,NLAY,MXITER,IITER,RCLOSE,HCLOSE,DAMP,
+     2                 IADAMP,IOUTGMG,IUNIT(42),IOUTG)
+C
 C GWM: ADD CALL TO READ SENSITIVITY PROCESS INPUT FILE
 C-----ALLOCATE SPACE FOR SENSITIVITY CALCULATIONS
       IF (IUNIT(25).GT.0)
@@ -279,7 +349,6 @@ C-----ALLOCATE SPACE FOR SENSITIVITY CALCULATIONS
      &                    IREWND(25),LCSNEW,LCSOLD,ISUMZ,ISEN,ISENSU,
      &                    ISENPU,ISENFM,IPES,MXSEN,LCBSCA,ITMXP,MAXUNIT,
      &                    MINRSV,MAXRSV,NSTP,NPER,NTIMES,LCSEND,LCSNDT)
-C
 C
 C------DYNAMICALLY ALLOCATE X, Z, IX, XHS, NIPRNAM, EQNAM, NAMES, AND
 C      OBSNAM ARRAYS FOR OBS, SEN, AND PES PROCESSES; SOLVERS; AND
@@ -292,11 +361,18 @@ C      MUST BE COMMENTED OUT
       IF(LENZ.LT.1) LENZ=1
       LENIX = ISUMIX - 1
       IF(LENIX.LT.1) LENIX=1
-      ALLOCATE (X(LENX),Z(LENZ),IX(LENIX))
+      ALLOCATE (X(LENX),Z(LENZ),IX(LENIX),STAT=ISTAT)
+      IF (ISTAT.NE.0) THEN
+        WRITE(*,701)ISTAT
+  701   FORMAT(1X,'ALLOCATION OF ARRAYS X, Z, AND IX FAILED,',/,
+     &  ' RETURNED ERROR MESSAGE NUMBER: ',I6)
+        CALL USTOP(' ')
+      ENDIF
 C
 C------IF THE ARRAYS ARE NOT BIG ENOUGH THEN STOP.
       CALL MEMCHK(ISUMX,ISUMIX,ISUMZ,LENX,LENIX,LENZ,IOUTG,
      &                IERR,IERRU)
+      IF (IERR.GT.0) CALL PLL1SD(IERR,IERRU,IOUT,IOUTG)
 C
 C GWM: ADD CALL TO READ SENSITIVITY PROCESS INPUT FILE
       IF (IUNIT(25).GT.0)
@@ -319,8 +395,8 @@ C---------SOLVER PACKAGE
       IF(IUNIT(14).GT.0)
      1    CALL LMG1RPG(IUNIT(14),MXITER,MXCYC,BCLOSE,DAMP,IOUTAMG,IOUTG,
      2                1,ICG,IADAMP,DUP,DLOW,HCLOSE)
-C
-C-----READ AND PREPARE FOR PACKAGES WITH NO REWIND 
+
+C-----READ AND PREPARE FOR PACKAGES WITH NO REWIND
 C GWM: LPF USES NNPLIST AS DIMENSION, SO IT MUST BE AT LEAST ONE
       IF(IUNIT(23).GT.0)THEN
           NNPLIST = MAX(1,NPLIST)      
@@ -331,6 +407,7 @@ C GWM: LPF USES NNPLIST AS DIMENSION, SO IT MUST BE AT LEAST ONE
      5                      GX(LCDELR),GX(LCDELC),1,INAMLOC,
      6                      IX(LCISEN),ISEN,NNPLIST)
 	ENDIF
+C	
 	IF(IUNIT(37).GT.0)
      &    CALL GWF1HUF2RPGD(IUNIT(37),NCOL,NROW,NLAY,IOUTG,X(LCWETD),
      &                    WETFCT,IWETIT,IHDWET,IX(LCHGUF),
@@ -342,11 +419,13 @@ C GWM: LPF USES NNPLIST AS DIMENSION, SO IT MUST BE AT LEAST ONE
       IF(IUNIT(53).GT.0)
      &    CALL GWF1HUF2KDEP1RPGD(IUNIT(53),IOUTG,1,NPKDEP,IFKDEP,NROW,
      &                           NCOL,X(LCGS),GX(LCBOTM),NHUF)
+C
 C  GWM VERSION OF MODFLOW-2000 HAS THE PARAMETER ESTIMATION LOOP
 C  REMOVED, BUT STILL NEED TO SET ITERP AND ITERPK TO 1 TO CONTROL
 C  SEVERAL OTHER PROCESSES
       ITERPK=1
       ITERP=1
+
 C-----INSERT GWM LOOPING PARAMETERS
       FIRSTSIM = .TRUE.
       GWMCNVRG = .FALSE.
@@ -404,8 +483,9 @@ C-----END GWM INSERTION OF LOOPING CONTROLS
 C
 C4------ALLOCATE SPACE IN RX AND IR ARRAYS.
         CALL GWF1BAS6ALP(HEADNG,NPER,TOTIM,NCOL,NROW,NLAY,NODES,INBAS,
-     1                   IOUT,IXSEC,ICHFLG,IFREFM,ISUMRX,ISUMIR,LCIOFL,
-     2                   ISTRT,IAPART)
+cgzh mnw dp
+     1                   IOUT,IXSEC,ICHFLG,IFREFM,ISUMRX,ISUMIR,ISUMRZ,
+     2                   LCIOFL,ISTRT,IAPART)
         IF(IUNIT(1).GT.0)
      1      CALL GWF1BCF6ALP(ISUMRX,LCSC1,LCHY,LCSC2,LCTRPY,ITRSS,ISS,
      2                       IUNIT(1),NCOL,NROW,NLAY,IOUT,IBCFCB,LCWETD,
@@ -464,6 +544,32 @@ C4------ALLOCATE SPACE IN RX AND IR ARRAYS.
         IF (IUNIT(21).GT.0)
      &      CALL GWF1HFB6ALP(IUNIT(21),IOUT,ISUMRX,LCHFB,MXACTFB,NHFBNP,
      &                       NPHFB,MXHFB,IHFB,NOPRHB)
+Cdep  Changed SFR1 call to SFR2 call
+Cdep   ADDED 3 NEW ARGUMENTS TO END OF SFR2ALP CALL STATEMENT FOR
+Cdep   REVISIONS TO THE CALCULATION OF LAKE OUTFLOW
+Cdep   June 6, 2006
+        IF(IUNIT(44).GT.0) THEN
+            CALL GWF1SFR2ALP(ISUMRX,ISUMIR,ISUMRZ,LCSTRM,ICSTRM,
+     2             NSTRM,IUNIT(44),IOUT,ISTCB1,ISTCB2,NSS,CONST,MAXPTS,
+     3             DLEAK,LCSEG,ICSEG,LCOTSG,LCXSEC,LCIVAR,LCQSTG,
+     4             IUNIT(22),ISTRIN,ISTROT,LCOTFLW,LCDVFLW,IUNIT(15),
+     5             NSOL,LSCOUT,LSCONQ,LSCNRN,LSCNTB,LSSLIN,LSCQIN,
+     6             LSCGW,ISTGLD,IDSTRT,LSSIN,LSSOUT,LSCOTO,LKACC7,
+     7             LCSTAG,LSLAKE,ISTGNW,LSCPPT,LCNSEG,NSFRPAR,
+     8             NSEGDIM,LCSFRQ,NSTRMAR,NSSAR,LCSUZDPIT,LCSUZDPST,
+     9             LCSUZTHIT,LCSUZTHST,LCSUZSPIT,LCSUZSPST,LCSUZFLIT,
+     &             LCSUZFLST,LCSUZFLWT,LCSUZSTOR,LCSDELSTR,LCSUZWDTH,
+     &             ICSLTRLIT,ICSLTRLST,ICSITRLIT,ICSITRLST,ICSTRLHLD,
+     &             ICSNWAVST,ISFROPT,IUZT,ISUZN,NSTRAIL,NSTOTRL,NUZST,
+     &             LCSOLSFLX,ICSLOOP,LCSTHTS,LCSTHTR,LCSTHTI,LCSEPS,
+     &             NCOL,NROW,ICELEV,LCDPTH,LCWETP,NSFRSETS,LCSUZSEEP,
+     &             LCOLDFLBT,NUMCELL,NUZROW,NUZCOL,LCAVWAT,LCWAT1,
+     &             NUMAVE,LCAVDPT,LCUHC,LCSFRUZBD,NSSLK,ISLKOTFLW,
+     &             IDLKOTFLW,IDLKSTAGE)
+        ENDIF
+Cdep   ADDED 4 NEW ARGUMENTS TO END OF LAK3ALP CALL STATEMENT FOR
+Cdep   REVISIONS TO THE CALCULATION OF  LAKE STAGE AND OUTFLOW
+Cdep   June 6, 2006
 CLAK
         IF(IUNIT(22).GT.0)
      1               CALL GWF1LAK3ALP(ISUMRX,ISUMIR,LCCOND,ICLAKE,
@@ -475,16 +581,18 @@ CLAK
      7     LKJCLS,THETA,LCRNF,ITRSS,NSSITR,SSCNCR,LKSSMN,LKSSMX,LKNCN,
      8     LKDSR,LKCNN,LKCHN,IAREN,IUNIT(44),LSOVOL,NSS,IUNIT(15),
      9     LSLAKE,LSPPT,LSRNF,LSAUG,NSOL,IMSUB,IMSUB1,LSCGWL,LSSLAK,
-     *     LSSWIN,LSSWOT,LSSPPT,LSCDRW,LSSRUN,
-     *     LSGWIN,LSGWOT,LSLKSM,LSKLK,LSDONE,LSFLOB,LSRTCO,LSCLKO,
-     *     LSALKI,LSALKO,ISTRIN,ISTROT,LKLMRR,IDSTRT,
-     *     LKVI,ISTGLD2,LKCLKI,
-     *     LKCUM1,LKCUM2,LKCUM3,LKCUM4,LKCUM5,
-     *     LKCUM6,LKCUM7,LKCUM8,LKCUM9)
+     *     LSSWIN,LSSWOT,LSSPPT,LSCDRW,LSSRUN,LSGWIN,LSGWOT,LSLKSM,
+     *     LSKLK,LSDONE,LSFLOB,LSRTCO,LSCLKO,LSALKI,LSALKO,ISTRIN,
+     *     ISTROT,LKLMRR,IDSTRT,LKVI,ISTGLD2,LKCLKI,LKCUM1,LKCUM2,
+     *     LKCUM3,LKCUM4,LKCUM5,LKCUM6,LKCUM7,LKCUM8,LKCUM9,NSSAR,
+     *     NLAKESAR,IUNIT(46),ISTGITR,LKSEP3,IAREATAB,IDPTHTAB,LCSEG,
+     *     ISUMRZ,NSSLK,ISLKOTFLW,IDLKOTFLW,IDLKSTAGE,LCEVAPO,
+     *     LCFLWIN,LCFLWIT,LCWITDW,LCGWRAT)
 CLAK
-        CALL GWF1GAG5ALP(IUNIT(46),ISUMIR,LSGAGE,NUMGAGE,IOUT,IUNIT(44),
-     &                   IUNIT(22),LKACC7,LCSTAG,LSLAKE,ICSTRM,
-     &                   NSTRM,NLAKES)
+        IF(IUNIT(46).GT.0)
+     &      CALL GWF1GAG5ALP(IUNIT(46),ISUMIR,ISUMRX,LSGAGE,NUMGAGE,
+     &                       IOUT,IUNIT(44),IUNIT(22),LKACC7,LCSTAG,
+     &                       LSLAKE,ICSTRM,LCIVAR)
         IF(IUNIT(39).GT.0)
      &      CALL GWF1ETS1ALP(ISUMRX,ISUMIR,LCIETS,LCETSR,LCETSX,LCETSS,
      &                       NCOL,NROW,NETSOP,IUNIT(39),IOUT,IETSCB,
@@ -496,33 +604,53 @@ CLAK
      &                       NDRTNP,IDRTFL,NOPRDT)
         IF (IUNIT(43).GT.0)
      &      CALL GWF1HYD1ALP(ISUMRX,LCHYDM,NHYDM,IHYDMUN,HYDNOH,
-     &                      IUNIT(43),IOUT)
+     &                       IUNIT(43),IOUT)
         IF(IUNIT(51).GT.0)
      1      CALL GWF1DAF1ALP(IERR,IUNIT(52)+1,IUNIT(52),IUNIT(51),IOUT,
-     2                      IDAFCB,IDAFBK)
+     2                       IDAFCB,IDAFBK)
         IF(IUNIT(50).GT.0) THEN
-          CALL GWF1MNW1AL(ISUMRX,LCWEL2,MXWEL2,NWELL2,LCHREF,NODES,
-     &                     KSPREF,IUNIT(50),IOUT,IWL2CB,IOWELL2,
-     &                     NOMOITER,PLOSSMNW,MNWNAME,FNAME)
+          CALL GWF1MNW1AL(ISUMRZ,LCWEL2,MXWEL2,NWELL2,LCHREF,NODES,
+     &                    KSPREF,IUNIT(50),IOUT,IWL2CB,IOWELL2,
+     &                    NOMOITER,MNWNAME,FNAME)
 C
 C         Allocate array for MNW1 site IDs
-          IF (ITERPK.EQ.1) ALLOCATE (MNWSITE(MXWEL2))
+          IF (ITERPK.EQ.1) THEN
+            ALLOCATE (MNWSITE(MXWEL2+1),STAT=ISTAT)
+            IF (ISTAT.NE.0) THEN
+              WRITE(*,703)ISTAT
+  703         FORMAT(1X,'ALLOCATION OF ARRAY MNWSITE FAILED,',/,
+     &        ' RETURNED ERROR MESSAGE NUMBER: ',I6)
+              CALL USTOP(' ')
+            ENDIF
+          ENDIF
         ENDIF
 C
 C------DYNAMICALLY ALLOCATE RX AND IR ARRAYS FOR PACKAGES THAT DO
 C      ALLOCATION EVERY PARAMETER-ESTIMATION ITERATION.  FOR STATIC
 C      MEMORY ALLOCATION, THE FOLLOWING IF...THEN BLOCK MUST BE
 C      COMMENTED OUT
-       IF (ITERPK.EQ.1) THEN
-         LENRX = ISUMRX - 1
-         IF(LENRX.LE.0) LENRX=1
-         LENIR = ISUMIR - 1
-         IF(LENIR.LE.0) LENIR=1
-         ALLOCATE (RX(LENRX),IR(LENIR))
-       ENDIF
+        IF (ITERPK.EQ.1) THEN
+          LENRX = ISUMRX - 1
+          IF(LENRX.LE.0) LENRX=1
+          LENIR = ISUMIR - 1
+          IF(LENIR.LE.0) LENIR=1
+cgzh mnw dp
+          LENRZ = ISUMRZ - 1
+          IF(LENRZ.LE.0) LENRZ=1
+cgzh mnw dp
+          ALLOCATE (RX(LENRX),IR(LENIR),RZ(LENRZ),STAT=ISTAT)
+          IF (ISTAT.NE.0) THEN
+            WRITE(*,704)ISTAT
+cgzh mnw dp
+  704       FORMAT(1X,'ALLOCATION OF ARRAYS RX, IR, RZ FAILED,',/,
+     &      ' RETURNED ERROR MESSAGE NUMBER: ',I6)
+            CALL USTOP(' ')
+          ENDIF
+        ENDIF
 C
 C5------IF THE ARRAYS ARE NOT BIG ENOUGH THEN STOP.
         CALL MEMCHKR(ISUMRX,ISUMIR,LENRX,LENIR,IOUT,IERR,IERRU)
+        IF (IERR.GT.0) CALL PLL1SD(IERR,IERRU,IOUT,IOUTG)
 C
 C6------READ AND PREPARE INFORMATION FOR ENTIRE SIMULATION.
 C---------BASIC PACKAGE
@@ -593,6 +721,51 @@ C---------FLOW-SIMULATION OPTIONS
      &                   RX(LCBDTM),NBDTIM,RX(LCFLRT),NFLW,NHED,
      &                   IR(LCHDLC),RX(LCSBHD),IUNIT(16),IOUT, NFHBX1,
      &                   NFHBX2,IFHBD3,IFHBD5,NHEDDIM,NFLWDIM)
+Cdep  Replaced SFR1 with SFR2-- Note either BCF or LPF used for SFR2
+Cdep  Added three new variables for computing lake outflow in Lake Package
+        IF(IUNIT(44).GT.0.AND.IUNIT(23).GT.0)THEN
+            CALL GWF1SFR2RPP(ITRSS,RX(LCSTRM),IR(ICSTRM),
+     2       NSTRM,IUNIT(44),IOUTG,RX(LCSEG),IR(ICSEG),NSS,
+     3       IR(LCIVAR),IR(LCOTSG),RX(LCOTFLW),RX(LCDVFLW),MAXPTS,
+     4       RX(LCXSEC),RX(LCQSTG),IUNIT(15),RX(LSCONQ),
+     5       RX(LSCNRN),RX(LSCPPT),NSOL,IOUTS,NSFRPAR,NSEGDIM,ITERPK,
+     &       INAMLOC,IG(LCIBOU),NCOL,NROW,NLAY,RZ(LCSUZDPIT),
+     &       RZ(LCSUZDPST),RZ(LCSUZTHIT),RZ(LCSUZTHST),RZ(LCSUZSPIT),
+     &       RZ(LCSUZSPST),RZ(LCSUZFLIT),RZ(LCSUZFLST),IR(ICSLTRLIT),
+     &       IR(ICSLTRLST),IR(ICSITRLIT),IR(ICSITRLST),IR(ICSTRLHLD),
+     &       RZ(LCSUZFLWT),RZ(LCSUZSTOR),RZ(LCSDELSTR),RZ(LCSUZWDTH),
+     &       IR(ICSNWAVST),NSTOTRL,ISFROPT,IUZT,ISUZN,NUZST,
+     &       RZ(LCSOLSFLX),X(LCSC2),RZ(LCSTHTS),RZ(LCSTHTR),
+     &       RZ(LCSTHTI),RZ(LCSEPS),GX(LCDELR),GX(LCDELC),
+     &       RZ(LCSUZSEEP),RZ(LCOLDFLBT),NUZROW,NUZCOL,RX(LCUHC),
+     &       IUNIT(1),X(LCSC1),GX(LCBOTM),NBOTM,GX(LCSTRT),
+     &       RX(LCSFRUZBD),ISSFLG(1),ITMP,IRDFLG,IPTFLG,NP,IR(LCNSEG),
+     &       IUNIT(22),NSSLK,RZ(ISLKOTFLW),RZ(IDLKOTFLW),RZ(IDLKSTAGE))
+            IF(ISFROPT.EQ.2.OR.ISFROPT.EQ.4) THEN
+              CALL GWF1SFR2UHC(IR(ICSTRM),NSTRM,RX(LCUHC),X(LCHK),
+     1              X(LCVKA),IG(LCIBOU),NROW,NCOL,NLAY,NUZST,IOUTG)
+            END IF
+        ELSEIF(IUNIT(44).GT.0.AND.IUNIT(1).GT.0)THEN
+Cdep  Added three new variables for computing lake outflow in Lake Package
+            CALL GWF1SFR2RPP(ITRSS,RX(LCSTRM),IR(ICSTRM),
+     2       NSTRM,IUNIT(44),IOUTG,RX(LCSEG),IR(ICSEG),NSS,
+     3       IR(LCIVAR),IR(LCOTSG),RX(LCOTFLW),RX(LCDVFLW),MAXPTS,
+     4       RX(LCXSEC),RX(LCQSTG),IUNIT(15),RX(LSCONQ),
+     5       RX(LSCNRN),RX(LSCPPT),NSOL,IOUTS,NSFRPAR,NSEGDIM,ITERPK,
+     &       INAMLOC,IG(LCIBOU),NCOL,NROW,NLAY,RZ(LCSUZDPIT),
+     &       RZ(LCSUZDPST),RZ(LCSUZTHIT),RZ(LCSUZTHST),RZ(LCSUZSPIT),
+     &       RZ(LCSUZSPST),RZ(LCSUZFLIT),RZ(LCSUZFLST),IR(ICSLTRLIT),
+     &       IR(ICSLTRLST),IR(ICSITRLIT),IR(ICSITRLST),IR(ICSTRLHLD),
+     &       RZ(LCSUZFLWT),RZ(LCSUZSTOR),RZ(LCSDELSTR),RZ(LCSUZWDTH),
+     &       IR(ICSNWAVST),NSTOTRL,ISFROPT,IUZT,ISUZN,NUZST,
+     &       RZ(LCSOLSFLX),RX(LCSC2),RZ(LCSTHTS),RZ(LCSTHTR),
+     &       RZ(LCSTHTI),RZ(LCSEPS),GX(LCDELR),GX(LCDELC),
+     &       RZ(LCSUZSEEP),RZ(LCOLDFLBT),NUZROW,NUZCOL,RX(LCUHC),
+     &       IUNIT(1),RX(LCSC1),GX(LCBOTM),NBOTM,GX(LCSTRT),
+     &       RX(LCSFRUZBD),ISSFLG(1),ITMP,IRDFLG,IPTFLG,NP,IR(LCNSEG),
+     &       IUNIT(22),NSSLK,RZ(ISLKOTFLW),RZ(IDLKOTFLW),RZ(IDLKSTAGE))
+        END IF
+Cdep  End change from SFR1 to SFR2
         IF(IUNIT(18).GT.0)
      1      CALL GWF1STR6RPPD(IUNIT(18),IOUTG,NCOL,NROW,NLAY,NPSTR,
      2                  RX(LCSTRM_),IR(ICSTRM_),ISTRPB,MXSTRM,ITERPK,
@@ -626,8 +799,7 @@ C
      &                        ITERPK,IDRTFL,INAMLOC,NOPRDT)
 CLAK
 C  REVISED IF STATEMENT
-C       IF(IUNIT(46).GT.0.AND.(IUNIT(44).GT.0.OR.IUNIT(22).GT.0))
-        IF(IUNIT(46).GT.0)
+        IF(IUNIT(46).GT.0.AND.NUMGAGE.GT.0)
      &      CALL GWF1GAG5RPP(IR(LSGAGE),NUMGAGE,IOUT,IUNIT(46))
 C
 C-------CHECK THAT PARAMETER DEFINITIONS ARE COMPLETE
@@ -690,7 +862,7 @@ C----------READ USING PACKAGE READ AND PREPARE MODULES.
      &                     RX(LCCRES),RX(LCBBRE),RX(LCHRSE),IG(LCIBOU),
      &                     GX(LCDELR),GX(LCDELC),NRES,NRESOP,NPTS,NCOL,
      &                     NROW,NLAY,PERLEN(KKPER),DELT,NSTP(KKPER),
-     &                     TSMULT(KKPER),IUNIT(17),IOUT)
+     &                     TSMULT(KKPER),IUNIT(17),IOUT,KKPER)
           IF (IUNIT(18).GT.0)
      &        CALL GWF1STR6RPSS(RX(LCSTRM_),IR(ICSTRM_),NSTREM,MXSTRM,
      &                    IUNIT(18),IOUT,IR(LCTBAR),NDIV,NSSSTR6,NTRIB,
@@ -700,6 +872,24 @@ C----------READ USING PACKAGE READ AND PREPARE MODULES.
      &        CALL GWF1CHD6RPSS(RX(LCCHDS),NCHDS,MXCHD,IG(LCIBOU),NCOL,
      &                          NROW,NLAY,IUNIT(20),IOUT,NCHDVL,IFREFM,
      &                          NNPCHD,NPCHD,IPCBEG,NOPRCH)
+Cdep  Changed SFR1 to SFR2
+Cdep  Added three new variables for computing lake outflow in Lake Package
+          IF(IUNIT(44).GT.0)
+     1        CALL GWF1SFR2RPS(RX(LCSTRM),IR(ICSTRM),KKPER,NSTRM,
+     2            IUNIT(44),IOUT,RX(LCSEG),IR(ICSEG),IR(LCNSEG),NSS,
+     3            IR(LCIVAR),IR(LCOTSG),MAXPTS,IPTFLG,RX(LCXSEC),
+     4            RX(LCQSTG),IUNIT(15),RX(LSCONQ),RX(LSCNRN),
+     5            RX(LSCPPT),NSOL,IOUTS,NSFRPAR,NSEGDIM,RZ(LCSUZTHST),
+     6            RZ(LCSUZFLST),RZ(LCSUZDPST),RZ(LCSUZSPST),
+     7            RZ(LCSOLSFLX),RZ(LCSTHTI),RZ(LCSTHTR),RZ(LCSTHTS),
+     3            RZ(LCSEPS),ISFROPT,IUZT,ISUZN,NCOL,NROW,NLAY,NUZST,
+     &            NSTOTRL,RZ(LCSUZSEEP),RZ(LCSUZSTOR),RX(LCUHC),
+     &            RX(LCDPTH),RZ(LCWETP),NUZROW,NUZCOL,IR(ICSNWAVST),
+     &            GZ(LCHNEW),IG(LCIBOU),ISSFLG,NPER,ITMP,IRDFLG,NP,
+     &            GX(LCBOTM),NBOTM,CONST,IUNIT(22),NLAKESAR,NSSLK,
+     &            RZ(ISLKOTFLW),RZ(IDLKOTFLW),RZ(IDLKSTAGE))
+Cdep  End of change
+Cdep  Added two new arguments to end of LAK3RPS call statement.
 CLAK
           IF(IUNIT(22).GT.0) THEN
             CALL GWF1LAK3RPS(IR(ICLAKE),LKNODE,MXLKND,
@@ -714,7 +904,7 @@ CLAK
      9        NSOL,IOUTS,RX(LKSSMN),RX(LKSSMX),ISSFLG(KKPER),RX(LKVI),
      *        RX(LKCLKI),RX(LKCUM1),RX(LKCUM2),RX(LKCUM3),RX(LKCUM4),
      &        RX(LKCUM5),RX(LKCUM6),RX(LKCUM7),RX(LKCUM8),
-     &        RX(LKCUM9),IG(LCIBOU))
+     &        RX(LKCUM9),IG(LCIBOU),NSSLK,RX(IAREATAB),RX(IDPTHTAB))
             IF (IUNIT(1).GT.0) THEN
               CALL GWF1LAK3BCF6RPS(IOUT,RX(LCCOND),IR(IBNLK),
      1             IR(ICLAKE),RX(LCCNDF),GX(LCDELR),GX(LCDELC),
@@ -734,17 +924,17 @@ CLAK
               WRITE(IOUT,*) 'LAK Package requires BCF, LPF, or HUF'
               CALL USTOP(' ')
             END IF
-cc  Uncomment following call when SFR is added -- ERB 7/9/01
-cc            IF (IUNIT(44).GT.0)
-cc     &          CALL GWF1LAK3SFR1RPS(NTRB,NDV,NLAKES,IR(INTRB),IR(INDV),
-cc     &                  NSS,IR(LCIVAR),IR(LCOTSG),IOUT,NODES,GX(LCBUFF))
+            IF (IUNIT(44).GT.0)
+     &          CALL GWF1LAK3SFR2RPS(NTRB,NDV,NLAKES,IR(INTRB),IR(INDV),
+     &                  NSS,NSSLK,IR(LCIVAR),IR(LCOTSG),RX(LCSEG),
+     &                  IR(ICSEG),IOUT,NODES,GX(LCBUFF))
           END IF
 CLAK
-          IF (IUNIT(46).GT.0.AND.
-     &           (IUNIT(44).GT.0.OR.IUNIT(22).GT.0).AND.KKPER.EQ.1)
+          IF (IUNIT(46).GT.0.AND.(NUMGAGE.GT.0).AND.KKPER.EQ.1)
      &        CALL GWF1GAG5I(IR(LSGAGE),NUMGAGE,IOUT,IUNIT(15),
      &                       RX(LCSTAG),RX(LSLAKE),NLAKES,IR(ICSTRM),
-     &                       NSTRM,DUM,NSOL,RX(LKACC7))
+     &                       NSTRM,IR(LCIVAR),DUM,NSOL,RX(LKACC7),
+     &                       NLAKESAR,NSTRMAR,NSSAR)
           IF(IUNIT(39).GT.0)
      &        CALL GWF1ETS1RPSS(NETSOP,IR(LCIETS),RX(LCETSR),RX(LCETSX),
      &                          RX(LCETSS),GX(LCDELR),GX(LCDELC),NCOL,
@@ -767,16 +957,16 @@ CLAK
      &                        NUMH,IHYDMUN,0.0,HYDNOH,NROW,NCOL,
      &                        ITMUNI,IOUT)
           IF(IUNIT(50).GT.0)
-     &        CALL GWF1MNW1RP(MNWSITE,RX(LCWEL2),NWELL2,MXWEL2,
-     &                         GX(LCHOLD),RX(LCHREF),IG(LCIBOU),
+cgzh mnw dp
+     &        CALL GWF1MNW1RP(MNWSITE,RZ(LCWEL2),NWELL2,MXWEL2,
+     &                         GX(LCHOLD),RZ(LCHREF),IG(LCIBOU),
      &                         GX(LCDELR),GX(LCDELC),GX(LCCR),GX(LCCC),
      &                         RX(LCHY),GZ(LCHNEW),HCLOSE,SMALL,HDRY,
      &                         NODES,NROW,NCOL,KPER,KSPREF,IUNIT(50),
      &                         IOUT,IOWELL2,TOTIM,LAYHDT,GX(LCBOTM),
      &                         NBOTM,X(LCHK),IUNIT(1),IUNIT(23),
-     &                         IUNIT(37),NLAY,PLOSSMNW,RX(LCTRPY),
+     &                         IUNIT(37),NLAY,RX(LCTRPY),
      &                         X(LCHKCC),X(LCHANI))
-C
 C
 C7C-----SIMULATE EACH TIME STEP.
           DO 90 KSTP = 1, NSTP(KKPER)
@@ -821,12 +1011,13 @@ CLAK
             IF(IUNIT(51).GT.0)
      1          CALL GWF1DAF1AD(DELT,IERR,ITMUNI,IUNIT(51),IOUT)
             IF(IUNIT(50).GT.0)
-     &          CALL GWF1MNW1AD(NWELL2,MXWEL2,RX(LCWEL2),IG(LCIBOU),
+cgzh mnw dp
+     &          CALL GWF1MNW1AD(NWELL2,MXWEL2,RZ(LCWEL2),IG(LCIBOU),
      &                          GX(LCDELR),GX(LCDELC),GX(LCCR),GX(LCCC),
      &                          RX(LCHY),SMALL,HDRY,GZ(LCHNEW),NCOL,
      &                          NROW,NODES,LAYHDT,GX(LCBOTM),NBOTM,
      &                          X(LCHK),IUNIT(1),IUNIT(23),IUNIT(37),
-     &                          NLAY,PLOSSMNW,RX(LCTRPY),X(LCHKCC),
+     &                          NLAY,RX(LCTRPY),X(LCHKCC),
      &                          X(LCHANI))
 C
 C---------INDICATE IN PRINTOUT THAT SOLUTION IS FOR HEADS
@@ -956,7 +1147,29 @@ CLAK
      4                            NODES,DELT,AC1,AC2,HCLOSE,KKITER,
      5                            ITMIN,NN,NND1,ND1,ND2,NDB,NNDB,NPZ,
      6                            ISSFLG(KKPER),IUNIT(9))
+Cdep  Changed SFR1 to SFR2
+              IF (IUNIT(44).GT.0)
+     1               CALL GWF1SFR2FM(RX(LCSTRM),IR(ICSTRM),
+     2        GZ(LCHNEW),GX(LCHOLD),GX(LCHCOF),GX(LCRHS),IG(LCIBOU),
+     3        NSTRM,NCOL,NROW,NLAY,IOUT,NSS,NSEGDIM,RX(LCSEG),IR(ICSEG),
+     4        IR(LCOTSG),RX(LCXSEC),IR(LCIVAR),RX(LCQSTG),CONST,MAXPTS,
+     5        DLEAK,RX(LCOTFLW),RX(LCDVFLW),NLAKESAR,RX(ISTGLD),
+     6        RX(ISTRIN),RX(ISTROT),RX(ISTGNW),THETA,RX(LKACC7),
+     7        ISSFLG(KKPER),RX(IDSTRT),RX(LCSFRQ),IUNIT(22),KKITER,
+     8        RZ(LCSUZDPIT),RZ(LCSUZTHIT),RZ(LCSUZSPIT),RZ(LCSUZFLIT),
+     9        RZ(LCSUZDPST),RZ(LCSUZTHST),RZ(LCSUZSPST),RZ(LCSUZFLST),
+     &        RZ(LCSEPS),RZ(LCSTHTS),RZ(LCSTHTR),IR(ICSLTRLIT),
+     &        IR(ICSITRLIT),IR(ICSLTRLST),IR(ICSITRLST),RZ(LCSUZFLWT),
+     &        IR(ICSNWAVST),NSTRAIL,NSTOTRL,IUZT,ISUZN,NUZST,DELT,
+     &        RZ(LCSUZWDTH),RZ(LCSOLSFLX),IR(ICSLOOP),RX(LCUHC),
+     &        TOTIM,IR(ICELEV),RX(LCDPTH),RZ(LCWETP),NSFRSETS,
+     &        RZ(LCSUZSEEP),RZ(LCOLDFLBT),KKPER,KKSTP,NUMCELL,
+     &        NUZROW,NUZCOL)
+
+Cdep  End of change
+Cdep  Added
 CLAK
+Cdep Revised Lake Package call statement  June 4, 2006
               IF (IUNIT(22).GT.0)
      *               CALL GWF1LAK3FM(LKNODE,MXLKND,IR(ICLAKE),
      1                      GZ(LCHNEW),GX(LCHCOF),GX(LCRHS),
@@ -965,13 +1178,18 @@ CLAK
      4                      IOUT,DELT,NSS,NTRB,NDV,IR(INTRB),IR(INDV),
      5                      RX(ISTRIN),RX(ISTROT),RX(ISTGNW),
      6                      RX(LCWTDR),RX(LCLKPR),RX(LCLKEV),
-     7                      GX(LCDELR),GX(LCDELC),RX(LKACC1),
-     8                      RX(LKACC2),RX(LKACC3),RX(LKACC4),
+     7                      GX(LCDELR),GX(LCDELC),RZ(LKACC1),
+     8                      RZ(LKACC2),RZ(LKACC3),RX(LKACC4),
      9                      RX(LKACC5),RX(LKACC6),THETA,RX(LCRNF),
      *                      KKSTP,KKITER,ISSFLG(KKPER),NSSITR,SSCNCR,
      *                      RX(LKSSMN),RX(LKSSMX),RX(IDSTRT),IR(LKNCN),
      *                      RX(LKDSR),RX(LKCNN),RX(LKCHN),RX(IAREN),
-     *                      IR(LKLMRR))
+     *                      IR(LKLMRR),NSSAR,IUNIT(44),RX(ISTGITR),
+     *                      RZ(LKSEP3),RX(IAREATAB),RX(IDPTHTAB),
+     *                      NSSLK,RZ(ISLKOTFLW),RZ(IDLKOTFLW),
+     *                      RZ(IDLKSTAGE),RX(IBTMS),RX(LCEVAPO),
+     *                      RX(LCFLWIN),RX(LCFLWIT),RX(LCWITDW),
+     *                      RX(LCGWRAT))
               IF (IUNIT(39).GT.0)
      &            CALL GWF1ETS1FM(NETSOP,IR(LCIETS),RX(LCETSR),
      &                            RX(LCETSX),RX(LCETSS),GX(LCRHS),
@@ -988,13 +1206,14 @@ CLAK
      3                            GX(LCRHS),NCOL,NROW,NLAY,KITER,
      4                            IDAFBK)
               IF (IUNIT(50).GT.0)
-     &            CALL GWF1MNW1FM(NWELL2,MXWEL2,RX(LCWEL2),IG(LCIBOU),
+cgzh mnw dp
+     &            CALL GWF1MNW1FM(NWELL2,MXWEL2,RZ(LCWEL2),IG(LCIBOU),
      &                            GX(LCDELR),GX(LCDELC),GX(LCCR),
      &                            GX(LCCC),RX(LCHY),SMALL,HDRY,
      &                            GX(LCHCOF),GX(LCRHS),GZ(LCHNEW),NCOL,
      &                            NROW,NODES,KITER,NOMOITER,LAYHDT,
      &                            GX(LCBOTM),NBOTM,X(LCHK),IUNIT(1),
-     &                            IUNIT(23),IUNIT(37),NLAY,PLOSSMNW,
+     &                            IUNIT(23),IUNIT(37),NLAY,
      &                            RX(LCTRPY),X(LCHKCC),X(LCHANI))
               IF (IUNIT(55).GT.0) ! ADD GWM MANAGED FLOWS
      &            CALL GWF1DCV1FM(GX(LCRHS),IG(LCIBOU),NCOL,NROW,
@@ -1051,6 +1270,11 @@ C7C2B---MAKE ONE CUT AT AN APPROXIMATE SOLUTION.
      &                        BCLOSE,DAMP,ICNVG,KKSTP,KKPER,MXITER,
      &                        MXCYC,NCOL,NROW,NLAY,NODES,HNOFLO,IOUT,
      &                        IOUTAMG,ICG,IADAMP,DUP,DLOW)
+              IF (IUNIT(42).GT.0)
+     &            CALL GMG1AP(GZ(LCHNEW),GX(LCRHS),GX(LCCR),GX(LCCC),
+     &                        GX(LCCV),GX(LCHCOF),HNOFLO,IG(LCIBOU),
+     &                        IITER,MXITER,RCLOSE,HCLOSE,KKITER,KKSTP,
+     &                        KKPER,ICNVG,DAMP,IADAMP,IOUTGMG,IOUT)
 C
 C7C2C---IF CONVERGENCE CRITERION HAS BEEN MET STOP ITERATING.
               IF (ICNVG.EQ.1) GOTO 33
@@ -1064,7 +1288,7 @@ C-----------IF GWM ACTIVE AND CONVERGENCE HAS FAILED SKIP TO PERTURBATION LOOP E
               FIRSTSIM = .FALSE. 
               GO TO 200
             ENDIF       
-C
+CC
    33       CONTINUE
 C
 C7C3----DETERMINE WHICH OUTPUT IS NEEDED.
@@ -1222,8 +1446,8 @@ C--Specified-Flow and Specified-Head Boundary
             IF(IUNIT(16).GT.0)
      &          CALL GWF1FHB1BD(IR(LCFLLC),RX(LCBDFV),NFLW,VBNM,VBVL,
      &                      MSUM,IG(LCIBOU),DELT,NCOL,NROW,NLAY,KKSTP,
-     &                      KKPER,IFHBCB,ICBCFL,GX(LCBUFF),IOUT,IFHBD4,
-     &                      NFLWDIM)
+     &                      KKPER,IFHBCB,ICBCFL,PERTIM,TOTIM,
+     &                      GX(LCBUFF),IOUT,IFHBD4,NFLWDIM)
 C--RESERVOIRS
             IF (IUNIT(17).GT.0)
      &          CALL GWF1RES1BD(IR(LCIRES),IR(LCIRSL),RX(LCBRES),
@@ -1254,30 +1478,56 @@ C--INTERBED STORAGE
      3                          VBNM,NN,NND1,ND1,ND2,NDB,NNDB,NPZ,NCOL,
      4                          NROW,NLAY,NODES,DELT,MSUM,NIUNIT,KKSTP,
      5                          KKPER,ISUBCB,ICBCFL,ISSFLG(KKPER),IOUT)
+C--STREAM-AQUIFER RELATIONS (SFR2 PACKAGE)
+C-----ADDED DELEAK MAY 12, 2004
+Cdep  Changed SFR1 to SFR2
+Cdep  Added new variable to end of list for specified lake outflow
+Cdep   June 6, 2006
+            IF (IUNIT(44).GT.0)
+     1          CALL GWF1SFR2BD(RX(LCSTRM),IR(ICSTRM),GZ(LCHNEW),
+     2       IG(LCIBOU),NSTRM,NCOL,NROW,NLAY,NSS,RX(LCSEG),IR(ICSEG),
+     3       IR(LCOTSG),RX(LCXSEC),IR(LCIVAR),CONST,MAXPTS,RX(LCQSTG),
+     4       RX(LCOTFLW),RX(LCDVFLW),NLAKESAR,RX(ISTGLD),RX(ISTGNW),
+     5       RX(LKACC7),RX(ISTRIN),RX(ISTROT),THETA,DELT,KKSTP,KKPER,
+     6       VBVL,VBNM,MSUM,ISTCB1,ISTCB2,ICBCFL,GX(LCBUFF),IOUT,IPTFLG,
+     7       IUNIT(15),IUNIT(46),IR(LSGAGE),NUMGAGE,PERTIM,TOTIM,
+     &       RX(LCSFRQ),NSEGDIM,IUNIT(22),DLEAK,GX(LCHOLD),
+     9       RZ(LCSUZDPST),RZ(LCSUZTHST),RZ(LCSUZSPST),RZ(LCSUZFLST),
+     &       RZ(LCSEPS),RZ(LCSTHTR),RZ(LCSTHTS),IR(ICSLTRLST),
+     &       IR(ICSITRLST),IR(ICSTRLHLD),RZ(LCSUZFLWT),RZ(LCSUZSTOR),
+     &       RZ(LCSDELSTR),IR(ICSNWAVST),NSTRAIL,NSTOTRL,IUZT,ISUZN,
+     &       NUZST,RZ(LCSOLSFLX),RZ(LCSUZWDTH),IR(ICSLOOP),RX(LCUHC),
+     &       IR(ICELEV),RX(LCDPTH),RZ(LCWETP),NSFRSETS,RZ(LCSUZSEEP),
+     &       RZ(LCOLDFLBT),NUMCELL,NUZROW,NUZCOL,RX(LCAVWAT),
+     &       RX(LCWAT1),NUMAVE,RX(LCAVDPT),RX(LCSFRUZBD),ISSFLG(KKPER),
+     &       IBUDFL,RX(IDSTRT))
+Cdep  End of change
 C--LAKES
             IF (IUNIT(22).GT.0)
      &          CALL GWF1LAK3BD(LKNODE,MXLKND,NODES,IR(ICLAKE),
-     &                  GZ(LCHNEW),IG(LCIBOU),NCOL,NROW,NLAY,NLAKES,
-     &                  DELT,NSS,NTRB,NDV,IR(INTRB),IR(INDV),RX(ISTRIN),
-     &                  RX(ISTROT),RX(ISTGLD),RX(ISTGNW),RX(LCCNDF),
-     &                  RX(LCLKPR),RX(LCLKEV),GX(LCDELR),GX(LCDELC),
-     &                  GX(LCBOTM),NBOTM,VBVL,VBNM,MSUM,KSTP,KPER,
-     &                  ILKCB,ICBCFL,GX(LCBUFF),IOUT,RX(LCSTAG),
-     &                  PERTIM,TOTIM,IR(IICS),IR(IISUB),RX(ISILL),
-     &                  ICMX,NCLS,RX(LCWTDR),LWRT,RX(LKACC1),
-     &                  RX(LKACC2),RX(LKACC3),RX(LKACC4),RX(LKACC5),
-     &                  RX(LKACC6),RX(LKACC7),RX(LKACC8),RX(LKACC9),
-     &                  RX(LKACC10),RX(LKACC11),IR(LKDRY),RX(IBTMS),
-     &                  IR(LKNCNT),IR(LKKSUB),RX(LKSADJ),RX(LKFLXI),
-     &                  IR(LKNCNS),RX(LKSVT),IR(LKJCLS),RX(LCRNF),
-     &                  THETA,RX(LKCNN),RX(LKCHN),RX(IAREN),
-     &                  IUNIT(15),KCNT,IR(IMSUB),IR(IMSUB1),
-     &                  IUNIT(46),NUMGAGE,IR(LSGAGE),RX(LSOVOL),
-     &                  RX(LSFLOB),ISSFLG(KPER),LAYHDT,
-     &                  IAUXSV,RX(LKVI),RX(ISTGLD2),RX(LKCUM1),
-     &                  RX(LKCUM2),RX(LKCUM3),
-     &                  RX(LKCUM4),RX(LKCUM5),RX(LKCUM6),
-     &                  RX(LKCUM7),RX(LKCUM8),RX(LKCUM9),HNOFLO)
+     &              GZ(LCHNEW),IG(LCIBOU),NCOL,NROW,NLAY,NLAKES,
+     &              DELT,NSSAR,NTRB,NDV,IR(INTRB),IR(INDV),RX(ISTRIN),
+     &              RX(ISTROT),RX(ISTGLD),RX(ISTGNW),RX(LCCNDF),
+     &              RX(LCLKPR),RX(LCLKEV),GX(LCDELR),GX(LCDELC),
+     &              GX(LCBOTM),NBOTM,VBVL,VBNM,MSUM,KSTP,KPER,
+     &              ILKCB,ICBCFL,GX(LCBUFF),IOUT,RX(LCSTAG),
+     &              PERTIM,TOTIM,IR(IICS),IR(IISUB),RX(ISILL),
+     &              ICMX,NCLS,RX(LCWTDR),LWRT,RZ(LKACC1),
+     &              RZ(LKACC2),RZ(LKACC3),RX(LKACC4),RX(LKACC5),
+     &              RX(LKACC6),RX(LKACC7),RX(LKACC8),RX(LKACC9),
+     &              RX(LKACC10),RX(LKACC11),IR(LKDRY),RX(IBTMS),
+     &              IR(LKNCNT),IR(LKKSUB),RX(LKSADJ),RX(LKFLXI),
+     &              IR(LKNCNS),RX(LKSVT),IR(LKJCLS),RX(LCRNF),
+     &              THETA,RX(LKCNN),RX(LKCHN),RX(IAREN),
+     &              IUNIT(15),KCNT,IR(IMSUB),IR(IMSUB1),
+     &              IUNIT(46),NUMGAGE,IR(LSGAGE),RX(LSOVOL),
+     &              RX(LSFLOB),ISSFLG(KPER),LAYHDT,
+     &              IAUXSV,RX(LKVI),RX(ISTGLD2),RX(LKCUM1),
+     &              RX(LKCUM2),RX(LKCUM3),RX(LKCUM4),RX(LKCUM5),
+     &              RX(LKCUM6),RX(LKCUM7),RX(LKCUM8),RX(LKCUM9),
+     &              HNOFLO,RX(IAREATAB),RX(IDPTHTAB),RX(IDSTRT),
+     *              RX(LCEVAPO),RX(LCFLWIN),RX(LCWITDW),RX(LCGWRAT),
+     *              NSSLK,RZ(IDLKSTAGE),RZ(ISLKOTFLW))
 C--EVAPOTRANSPIRATION WITH SEGMENTED RATE FUNCTION
             IF (IUNIT(39).GT.0)
      &          CALL GWF1ETS1BD(NETSOP,IR(LCIETS),RX(LCETSR),RX(LCETSX),
@@ -1301,20 +1551,27 @@ C--DRAINS WITH RETURN FLOW
 C--MULTINODE WELLS
             IF(IUNIT(50).GT.0)
      &          CALL GWF1MNW1BD(MNWSITE,NWELL2,MXWEL2,VBNM,VBVL,MSUM,
-     &                          DELT,RX(LCWEL2),IG(LCIBOU),GZ(LCHNEW),
+cgzh mnw dp
+     &                          DELT,RZ(LCWEL2),IG(LCIBOU),GZ(LCHNEW),
      &                          NCOL,NROW,NODES,NSTP(KKPER),KKSTP,KKPER,
      &                          IWL2CB,ICBCFL,GX(LCBUFF),IOUT,IOWELL2,
-     &                          TOTIM,PLOSSMNW,HDRY)
-C--GWM MANAGED FLOW VARIABLES
+     &                          TOTIM,HDRY,PERTIM)
+            IF (IUNIT(43).GT.0)
+     &          CALL GWF1HYD1OT(GZ,LENGZ,RX,LENRX,IG,LENIG,RX(LCHYDM),
+     &                        NUMH,IHYDMUN,TOTIM,HYDNOH,NROW,NCOL,
+     &                        ITMUNI,IOUT)
+C--GWM-MANAGED FLOW VARIABLES
             IF(IUNIT(55).GT.0)  
      &          CALL GWF1DCV1BD(VBNM,VBVL,MSUM,IG(LCIBOU),DELT,NCOL,
      &                          NROW,NLAY,KKSTP,KKPER,IWELCB,ICBCFL,
      &                          GX(LCBUFF),IOUT,PERTIM,TOTIM)
 C
-            IF (IUNIT(43).GT.0)
-     &          CALL GWF1HYD1OT(GZ,LENGZ,RX,LENRX,IG,LENIG,RX(LCHYDM),
-     &                        NUMH,IHYDMUN,TOTIM,HYDNOH,NROW,NCOL,
-     &                        ITMUNI,IOUT)
+CLMT
+CLMT----CALL LINK-MT3DMS SUBROUTINES TO SAVE FLOW-TRANSPORT LINK FILE
+CLMT----FOR USE BY MT3DMS FOR TRANSPORT SIMULATION
+CLMT
+            INCLUDE 'lmt6.inc'
+CLMT
 C
 C7C5---PRINT AND/OR SAVE HEAD AND DRAWDOWN MATRICES.
 C------PRINT OVERALL WATER BUDGET.
@@ -1355,6 +1612,11 @@ C-----------SHOW PROGRESS IF REQUESTED
             ENDIF
 C
 C
+   85       CONTINUE
+            CALL PLL1BR()
+            CALL PLL1EH(IERR,IERRU,IOUT,IOUTG,MINERR)
+C
+C
 C-----END OF TIME STEP (KSTP) AND STRESS PERIOD (KPER) LOOPS
    90     CONTINUE
 C
@@ -1363,12 +1625,12 @@ C---------GWM ASSIGNS SYSTEM STATE TO STATE ARRAY AT END OF STRESS PERIOD
             CALL GWM1RMS1OS(NCOL,NROW,NLAY,KPER,GZ(LCHNEW),
      &                       HDRY) ! CHECK MANAGED WELLS FOR DEWATER
             CALL GWM1HDC1OS(GZ(LCHNEW),NCOL,NROW,NLAY,KPER,HDRY)
-            IF(NSTREM.GT.0)
+            IF(IUNIT(18).GT.0)
      &      CALL GWM1STC1OS(NSTREM,RX(LCSTRM_),IR(ICSTRM_),MXSTRM,KPER)
           ENDIF
-
+C
   100   CONTINUE
-
+C
         IF(IUNIT(55).EQ.0)THEN ! GWM NOT ACTIVE
           IPERT = 2            ! INCREMENT IPERT TO TERMINATE PERTURBATION LOOP
         ELSEIF(IUNIT(55).GT.0)THEN ! ANALYZE SIMULATION RESPONSE FOR GWM
@@ -1399,7 +1661,6 @@ C-------IF GWM HAS COMPLETED ITS LAST SIMULATION OR GWM IS NOT ACTIVE
 C
 C-----END OF GWM ITERATION LOOP
   300 ENDDO
-
 C
 C-------SHOW PROGRESS IF REQUESTED
         IF(SHOWPROG)THEN
@@ -1407,13 +1668,27 @@ C-------SHOW PROGRESS IF REQUESTED
    57     FORMAT(A,77(' '))
         ENDIF
 C
+        CALL PLL1BR()
 C
 C       Post-processing of MNW list output --- Parses to time series for
 C       individual wells
-        IF (IUNIT(50).GT.0) CALL GWF1MNW1OT(MNWSITE,RX(LCWEL2),NWELL2,
+cgzh mnw dp
+        IF (IUNIT(50).GT.0) CALL GWF1MNW1OT(MNWSITE,RZ(LCWEL2),NWELL2,
      &                                      MXWEL2,IOWELL2,MNWNAME)
+        CALL PLL1CV(IFO)
+          CALL PLL1BR()
+          IF (NUMPROCS.GT.1) THEN
+            CALL PLL1CV(IFO)
+            CALL PLL1CV(ITERPF)
+            CALL PLL1CV(IND)
+            CALL PLL1BA(B,MXPAR)
+          ENDIF
+
+  103   CONTINUE
+        CALL PLL1BR()
+        CALL PLL1EH(IERR,IERRU,IOUT,IOUTG,MINERR)
 C
-C
+C  105 CONTINUE
 C
   110 CONTINUE
 C     WRITE ANY RECORDS TO BE USED IN RESTARTING FUTURE SIMULATIONS
@@ -1425,16 +1700,23 @@ C8------END OF SIMULATION
       IF (IBATCH.GT.0) THEN
 C       TO USE STATIC MEMORY ALLOCATION, COMMENT OUT THE FOLLOWING
 C       DEALLOCATE STATEMENTS
-        DEALLOCATE (GX,GZ,IG,X,Z,IX,RX,IR)
+        DEALLOCATE (GX,GZ,IG,X,Z,IX,RX,IR,RZ)
         IF(IUNIT(50).GT.0) DEALLOCATE(MNWSITE)
 C       DEALLOCATE (DA) PROCEDURE
         IF(IUNIT(54).GT.0) CALL GWF1SUB1DA()
+        IF(IUNIT(42).GT.0) CALL GMG1DA()
         GOTO 10
       ENDIF
 C
+C     HANDLE WARNINGS AND ERRORS
+      CALL PLL1BR()
+      CALL PLL1EH(IERR,IERRU,IOUT,IOUTG,MINERR)
+      IF (MINERR.LT.0) CALL PLL1SD(IERR,IERRU,IOUT,IOUTG)
+      CALL PLL1DE(IERRU,IOUT,IOUTG)
 C
   120 CONTINUE
 C
+      CALL PLL1CL()
       WRITE(*,121)
 121   FORMAT(1X,'Normal termination of MODFLOW-2000')
       CALL USTOP(' ')

@@ -270,7 +270,7 @@ C***********************************************************************
       SUBROUTINE GWM1STC1OS(NSTREM,STRM,ISTRM,MXSTRM,KPER)
 C***********************************************************************
 C  VERSION: 17AUG2006
-C  PURPOSE: ASSIGN COMPUTED STREAMFLOW VALUES TO MODOFC STATE ARRAY
+C  PURPOSE: ASSIGN COMPUTED STREAMFLOW VALUES TO STATE ARRAY
 C-----------------------------------------------------------------------
       INTEGER(I4B),INTENT(IN)::NSTREM,MXSTRM,KPER
       REAL(DP),INTENT(IN)::STRM(11,MXSTRM) ! GWM COMPILED WITH DP FORCED
@@ -417,9 +417,9 @@ C
 C
 C
 C***********************************************************************
-      SUBROUTINE GWM1STC1FPR(RSTRT,IREAD)
+      SUBROUTINE GWM1STC1FPR(RSTRT,IREAD,COL)
 C***********************************************************************
-C  VERSION: 20JAN2006
+C  VERSION: 25DEC2006
 C  PURPOSE - READ RESPONSE MATRIX AND AUGMENTED RIGHT HAND SIDE
 C-----------------------------------------------------------------------
       USE GWM1DCV1, ONLY : NFVAR,NEVAR,NBVAR,FVBASE
@@ -430,27 +430,25 @@ C-----AMAT HAS LOCAL NAME RESMAT
       USE GWM1RMS1, ONLY : RHS
       INTEGER(I4B),INTENT(INOUT)::RSTRT
       INTEGER(I4B),INTENT(IN)::IREAD
+      INTEGER(I4B),INTENT(IN)::COL
 C-----LOCAL VARIABLES
-      INTEGER(I4B)::ISTC,ROW,COL,I
+      INTEGER(I4B)::ISTC,ROW,I
 C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 C
-      IF(IREAD.EQ.-1)THEN                        ! READ THE REFERENCE STATE  
-        CALL SGWM1STC1FPR                   
-      ELSEIF(IREAD.EQ.0)THEN                     ! READ THE BASE STATE
+      IF(IREAD.EQ.0)THEN    
+        CALL SGWM1STC1FPR                        ! READ THE REFERENCE STATE                     
         ISTC = 0
         DO 100 ROW=RSTRT,RSTRT+STCNUM-1 
           ISTC = ISTC+1
-          READ(RMFILE)STCSTATE0(ISTC)            ! READ THE INITIAL STATE FROM A FILE
+          READ(RMFILE)STCSTATE0(ISTC)            ! READ THE BASE STATE FROM A FILE
           RHS(ROW) = STCRHS(ISTC) - STCSTATE0(ISTC)
           STCSTATE(ISTC) = STCSTATE0(ISTC)       ! ASSIGN BASE STATE FOR OUTPUT
   100   ENDDO
       ELSEIF(IREAD.EQ.1)THEN                     ! READ RESPONSE MATRIX
-        DO 210 COL=1,NFVAR
-          DO 200 ROW=RSTRT,RSTRT+STCNUM-1
-            READ(RMFILE)RESMAT(ROW,COL)          ! READ EACH RESPONSE COEFFICIENT
-            RHS(ROW) = RHS(ROW) + RESMAT(ROW,COL)*FVBASE(COL)
-  200     ENDDO
-  210   ENDDO
+        DO 200 ROW=RSTRT,RSTRT+STCNUM-1
+          READ(RMFILE)RESMAT(ROW,COL)            ! READ EACH RESPONSE COEFFICIENT
+          RHS(ROW) = RHS(ROW) + RESMAT(ROW,COL)*FVBASE(COL)
+  200   ENDDO
       ENDIF
       RSTRT = RSTRT+STCNUM                       ! SET NEXT STARTING LOCATION
 C

@@ -44,7 +44,7 @@ C     ------------------------------------------------------------------
       CHARACTER*(*) PTYP
       CHARACTER*200 LINE
       CHARACTER*10 PN,CTMP1,CTMP2,HGUNAM
-      COMMON /HUFCOMC/HGUNAM(200)
+      COMMON /HUFCOMC/HGUNAM(999)
 C     ------------------------------------------------------------------
 C
       ILFLG=1
@@ -170,10 +170,11 @@ c Parse multiplication and zone array information
    32 IF(ILFLG.NE.0) THEN
          WRITE(IOUT,36) IPCLST(1,I),LINE(IM1:IM2),LINE(IZ1:IZ2)
    36    FORMAT(1X,'               UNIT:',I3,'   MULTIPLIER:',A,
-     &      '   ZONE:',A)
+     &      '   ZONE ARRAY:',A)   ! Changed by ERB 2/5/07
       ELSE
          WRITE(IOUT,37) LINE(IM1:IM2),LINE(IZ1:IZ2)
-   37    FORMAT(1X,'               MULTIPLIER:',A,'   ZONE:',A)
+   37    FORMAT(1X,'               MULTIPLIER:',A,'   ZONE ARRAY:',A)
+         ! Changed by ERB 2/5/07
       END IF
 C
 C  Find the multiplier array number
@@ -267,7 +268,7 @@ C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
       INCLUDE 'param.inc'
       CHARACTER*4 PTYPE,PTEMP
-      DIMENSION HUFARRAY(200),HUFTHK(NCOL,NROW,NHUF,2),
+      DIMENSION HUFARRAY(999),HUFTHK(NCOL,NROW,NHUF,2),
      &    IZON(NCOL,NROW,NZONAR),RMLT(NCOL,NROW,NMLTAR)
 C
 C Loop through parameters
