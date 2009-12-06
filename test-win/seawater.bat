@@ -1,3 +1,3 @@
 @echo off
-..\bin\mf2k_gwm ..\data\seawater.nam
+..\bin\gwm2000 ..\data\seawater.nam
 pause

@@ -1,0 +1,54 @@
+release.txt
+
+                           GWM-2000 Release Notes
+
+     This file describes changes introduced into GWM-2000 with each
+official release.
+
+Version 1.1.3; 7 December 2009
+	MF2000-GWM is renamed GWM-2000. 
+
+
+============ Prior versions were named MF2000-GWM ==========================
+
+Version 1.1.2 2009/06
+        Bug fix that caused code failure when equality summation constraints 
+        were imposed on binary variables. Bug fix to correct output for SLP 
+        runs. 
+
+Version 1.1.1 2007/03
+        Reconstructed from MODFLOW-2000 Version 1.17.02 so that the GMG solver
+        can be used. Bug fixed that caused improper reading of response 
+        matrix when both head and stream constraints are present. 
+
+Version 1.1 2006/08
+        New features added to output the response coefficients in a 
+        formatted file, the optimal values of the flow variables in a file 
+        formatted similarly to a MODFLOW WEL file, the solution at each 
+        iteration of the SLP algorithm, the status of summation constraints 
+        and additional screen and file output reporting on algorithm 
+        progress. Additional controls on SLP algorithm added. Several minor
+        clean-ups and improvements. Many of these features are described in 
+        the online PDF called "GWM Addendum." 
+
+Version 1.0.3 2006/01/21
+        Correct a bug that caused incorrect reading of flow process files when 
+        certain combinations of variables are read using the parameter input 
+        structure.  Correct several bugs related to proper input when non-
+        zero base and/or reference flows are specified and when the response 
+        matrix file is written or read.  New features added to SLP to check 
+        for dry cells at wells and to better control iterations. 
+
+Version 1.0.2 2005/09/24 
+        Correct a compiler setting in the Version 1.0.1 executable that 
+        prevented opening of binary files.  Add ability to comment lines in 
+        GWM file.  Several minor improvements to output. 
+
+Version 1.0.1 2005/07/29 
+        Fix a bug that caused incomplete checking for feasibility of binary-
+        only summation constraints.  Fix an output bug that caused improper 
+        reporting of range analysis for stream depletion and drawdown 
+        constraints.  Several minor improvements to output appearance and 
+        input checking. 
+
+Version 1.0.0 2005/02 - Initial release, built from MODFLOW-2000 Version 1.13 

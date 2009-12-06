@@ -1,6 +1,6 @@
                                   MODFLOW-2000
       U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE GROUND-WATER FLOW MODEL
-                VERSION MF2K_GWM 1.1.1 031507,FROM MF2K V1.17.02
+                VERSION GWM-2000 1.1.3 120709,FROM MF2K V1.17.02
 
 
  This model run produced both GLOBAL and LIST files.  This is the GLOBAL file.
@@ -124,7 +124,7 @@
 
 
 
- GWM1 -- GROUND-WATER MANAGEMENT PROCESS, VERSION 1.1.1 031507
+ GWM1 -- GROUND-WATER MANAGEMENT PROCESS, VERSION 1.1.2 061609
  INPUT READ FROM UNIT  19
 
 
@@ -516,10 +516,10 @@
       Summation              p09l     Satisfied       8.4834E+03
       Summation              p10u     Near-Binding    0.0000E+00
       Summation              p10l     Satisfied       3.5000E+04
-      Summation              p11u     Satisfied       4.9615E+04
-      Summation              p11l     Not Met         1.4615E+04
-      Summation              p12u     Satisfied       4.1709E+04
-      Summation              p12l     Not Met         6.7086E+03
+      Summation              p11u     Satisfied       3.5000E+04
+      Summation              p11l     Near-Binding    0.0000E+00
+      Summation              p12u     Satisfied       3.5000E+04
+      Summation              p12l     Near-Binding    0.0000E+00
 
   Distance to RHS is the absolute value of the difference between the
     the right hand side of the constraint and the left side of the
@@ -580,10 +580,10 @@
       Summation              p09l     Satisfied       8.4833E+03
       Summation              p10u     Near-Binding    0.0000E+00
       Summation              p10l     Satisfied       3.5000E+04
-      Summation              p11u     Satisfied       4.9614E+04
-      Summation              p11l     Not Met         1.4614E+04
-      Summation              p12u     Satisfied       4.1709E+04
-      Summation              p12l     Not Met         6.7087E+03
+      Summation              p11u     Satisfied       3.5000E+04
+      Summation              p11l     Near-Binding    0.0000E+00
+      Summation              p12u     Satisfied       3.5000E+04
+      Summation              p12l     Near-Binding    0.0000E+00
 
   Distance to RHS is the absolute value of the difference between the
     the right hand side of the constraint and the left side of the
