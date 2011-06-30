@@ -350,7 +350,7 @@ C
 C***********************************************************************
       SUBROUTINE GWM1DCC1FM(RSTRT,NSLK)
 C***********************************************************************
-C     VERSION: 22JULY2005
+C     VERSION: 31MAY2011
 C     PURPOSE: PLACE CONSTRAINTS RELATED TO BINARY VARIABLES
 C-----------------------------------------------------------------------
       USE GWM1BAS1, ONLY : ZERO,ONE
@@ -405,7 +405,7 @@ C     THESE CONSTRAINTS MUST BE LOCATED AS THE LAST ROWS IN THE MATRIX
           IF(INI.LE.NFVAR)THEN                   ! THIS IS A FLOW VARIABLE
             BIGX = BIGX + FVMAX(INI)
           ELSE                                   ! THIS IS AN EXTERNAL VARIABLE
-            BIGX = BIGX + EVMAX(INI)             
+            BIGX = BIGX + EVMAX(INI-NFVAR)             
           ENDIF
   200   ENDDO
         BIGX = BIGX*2.0D0                        ! MAKE BIGX LARGER THAN SUM OF

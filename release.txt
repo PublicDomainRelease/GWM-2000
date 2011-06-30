@@ -5,6 +5,13 @@ release.txt
      This file describes changes introduced into GWM-2000 with each
 official release.
 
+Version 1.1.4; 31 May 2011
+	correct bug in GWM1DCC1FM that caused error in calculation of the 
+	sum of upper bounds of associated variables when one of the associated 
+	variables is an external variable.  This could have caused improper 
+	calculation of the constraint on binary variables that they take the 
+	value of one if any of their associated variables are active.
+
 Version 1.1.3; 7 December 2009
 	MF2000-GWM is renamed GWM-2000. 
 
